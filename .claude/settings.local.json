@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(init-project)",
+      "Skill(init-project:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

@@ -1,0 +1,914 @@
+{
+  "project": "GoAssist v3.0 Documentation Clarification",
+  "description": "RED-TEAM document review findings - 45 clarity issues across 7 documents",
+  "version": "3.0",
+  "last_updated": "2024-12-22",
+  "features": [
+    {
+      "id": "TMF-09",
+      "name": "Define context rollover threshold",
+      "category": "TMF v3.0",
+      "priority": "P0-BLOCKING",
+      "document": "docs/TMF-v3.0.md",
+      "line": 87,
+      "issue_type": "missing_operational_detail",
+      "description": "Context rollover trigger uses vague term 'approaching 8192 tokens' - needs exact threshold",
+      "current_text": "When approaching 8192 tokens: summarize older turns...",
+      "required_change": "Specify exact token threshold (e.g., 7500), who/what performs summarization, and failure handling",
+      "acceptance_criteria": [
+        "Exact token threshold specified (e.g., 'When context reaches 7500 tokens')",
+        "Component responsible for summarization identified (e.g., 'orchestrator')",
+        "Failure handling defined (e.g., 'If summarization fails, reject new turn')"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": ["IMP-04"]
+    },
+    {
+      "id": "TMF-05",
+      "name": "Clarify barge-in measurement point",
+      "category": "TMF v3.0",
+      "priority": "P0-BLOCKING",
+      "document": "docs/TMF-v3.0.md",
+      "line": 139,
+      "issue_type": "ambiguity",
+      "description": "Barge-in latency contract doesn't specify if measured at server or client (network adds 40-100ms)",
+      "current_text": "Barge-in cancel: ≤150ms from user speech detection to halted agent playback",
+      "required_change": "Specify measurement endpoint: server packet emission stop OR client audio output stop",
+      "acceptance_criteria": [
+        "Measurement point explicitly stated (server or client)",
+        "If end-to-end (client), network latency accounted for in contract",
+        "Testing methodology can be implemented based on definition"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "CD-02",
+      "name": "Define 24-hour soak test consistently",
+      "category": "Cross-document",
+      "priority": "P0-BLOCKING",
+      "document": "docs/TMF-v3.0.md, docs/PRD-v3.0.md, docs/Implementation-v3.0.md, docs/Parallel-Dev-v3.0.md, docs/Ops-Runbook-v3.0.md",
+      "line": "multiple",
+      "issue_type": "missing_operational_detail",
+      "description": "24-hour soak referenced 5+ times but never defined: continuous uptime? active conversation? mixed load?",
+      "current_text": "Referenced inconsistently: 'Continuous runtime target: 24 hours', '24h soak', 'extended soak'",
+      "required_change": "TMF defines once: '24 hours of [continuous uptime | active conversation | mixed load with X% active, Y% idle]'. All other docs reference TMF.",
+      "acceptance_criteria": [
+        "Single definition added to TMF v3.0 section 7.3",
+        "Definition specifies load profile (continuous active, mixed duty cycle, etc.)",
+        "All other documents reference TMF definition using standard format",
+        "ADD-02 updated to reference TMF definition"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": ["ADD-02", "IMP-03"]
+    },
+    {
+      "id": "OPS-06",
+      "name": "Document environment variable requirements",
+      "category": "Ops Runbook v3.0",
+      "priority": "P0-BLOCKING",
+      "document": "docs/Ops-Runbook-v3.0.md",
+      "line": 114,
+      "issue_type": "missing_operational_detail",
+      "description": "Environment variables shown but not specified: which are required vs optional? valid ranges? error behavior?",
+      "current_text": "Shows .env example without requirements table",
+      "required_change": "Add table with: Variable Name | Required/Optional | Valid Range | Default | Error Behavior",
+      "acceptance_criteria": [
+        "Table added to section 6.1 with all env vars from example",
+        "Each variable marked Required or Optional",
+        "Valid ranges specified where applicable",
+        "Error behavior defined (fail to start, log warning, use default, etc.)"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "PAR-03",
+      "name": "Define ownership boundary approval process",
+      "category": "Parallel Dev v3.0",
+      "priority": "P0-BLOCKING",
+      "document": "docs/Parallel-Dev-v3.0.md",
+      "line": 67,
+      "issue_type": "missing_operational_detail",
+      "description": "Cross-boundary changes require RFC and approval, but mechanism, dispute resolution, and timeout undefined",
+      "current_text": "Changes across ownership boundaries require: a small RFC in docs/rfcs/, explicit approval from both owners",
+      "required_change": "Specify: approval mechanism (PR review / sign-off doc), dispute escalation path, approval timeout",
+      "acceptance_criteria": [
+        "Approval mechanism specified (e.g., 'via PR review with both owners as required reviewers')",
+        "Dispute escalation path defined (e.g., 'escalate to engineering lead')",
+        "Approval timeout specified (e.g., '3 business days')",
+        "RFC template referenced or created"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "TMF-08",
+      "name": "Specify TTFA latency percentile",
+      "category": "TMF v3.0",
+      "priority": "P0-BLOCKING",
+      "document": "docs/TMF-v3.0.md",
+      "line": 33,
+      "issue_type": "internal_contradiction",
+      "description": "TTFA contract doesn't specify percentile (p50/p95/p99). Section 6 budget implies no variance but that's impossible.",
+      "current_text": "TTFA ≤ 250ms (steady-state target, not 'demo mode')",
+      "required_change": "Specify percentile (e.g., 'TTFA ≤ 250ms p95') and clarify if budget is ideal-case or includes variance",
+      "acceptance_criteria": [
+        "Percentile explicitly specified (p50, p95, or p99)",
+        "Section 6 latency budget table updated with percentile note",
+        "Clarification added on whether budget is ideal-case or accounts for variance"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": ["CD-01", "PRD-01"]
+    },
+    {
+      "id": "OPS-08",
+      "name": "Define recovery procedure authority",
+      "category": "Ops Runbook v3.0",
+      "priority": "P0-BLOCKING",
+      "document": "docs/Ops-Runbook-v3.0.md",
+      "line": "306-323",
+      "issue_type": "unclear_ownership",
+      "description": "Recovery procedures described but no authority defined: who executes? who approves? when to escalate?",
+      "current_text": "Section 11 describes procedures without ownership",
+      "required_change": "Add table: Procedure | Authorized Role | Approval Required (Y/N) | Escalation Contact",
+      "acceptance_criteria": [
+        "Table added to section 11 covering all recovery procedures",
+        "Each procedure has authorized role (on-call engineer, SRE, etc.)",
+        "Approval requirements specified",
+        "Escalation contacts defined"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "TMF-10",
+      "name": "Define latency budget overage behavior",
+      "category": "TMF v3.0",
+      "priority": "P0-BLOCKING",
+      "document": "docs/TMF-v3.0.md",
+      "line": "180-189 (section 6)",
+      "issue_type": "missing_operational_detail",
+      "description": "Component latency budgets specified but no overage behavior: fail? log? continue? timeout?",
+      "current_text": "Section 6 table shows budgets without overage handling",
+      "required_change": "Add: 'If any component exceeds its budget, [log degradation event and continue | trigger circuit breaker | other]'",
+      "acceptance_criteria": [
+        "Overage behavior specified for each stage or globally",
+        "Hard timeout policy defined if applicable",
+        "Observability requirements specified (logging, metrics, alerts)"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "TMF-11",
+      "name": "Specify animation heartbeat frame threshold",
+      "category": "TMF v3.0",
+      "priority": "P0-BLOCKING",
+      "document": "docs/TMF-v3.0.md",
+      "line": 142,
+      "issue_type": "missing_operational_detail",
+      "description": "Animation heartbeat policy says 'if missing persists' without defining how many frames trigger slow-freeze",
+      "current_text": "If animation frames are missing: 1. Hold last valid blendshape frame. 2. If missing persists, ease to neutral over 150ms.",
+      "required_change": "Specify: 'If more than [N] consecutive frames are missing (at expected [30] fps), trigger slow-freeze'",
+      "acceptance_criteria": [
+        "Consecutive frame count threshold specified (e.g., '3 consecutive frames')",
+        "Expected FPS stated (e.g., '30 fps' or '60 fps')",
+        "Behavior implementation can be coded without ambiguity"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "CD-04",
+      "name": "Clarify model substitution liability",
+      "category": "Cross-document",
+      "priority": "P0-BLOCKING",
+      "document": "docs/TMF-v3.0.md, docs/TMF-v3.0-Addendum-A.md",
+      "line": "96, 103 (TMF); A2 (Addendum)",
+      "issue_type": "ambiguity",
+      "description": "TMF allows model substitution but doesn't specify liability if substituted model fails contracts",
+      "current_text": "ASR model choice is an implementation decision / TTS engine choice is an implementation decision",
+      "required_change": "Add: 'Substituted components must be validated against contracts in section 1.2 before deployment. Failures due to substituted components are implementation failures, not TMF violations.'",
+      "acceptance_criteria": [
+        "Liability clause added to TMF section 3 or Addendum A",
+        "Validation requirement specified before deployment",
+        "Clear distinction: TMF defines contracts, Implementation owns component choice within contracts"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": ["TMF-04"]
+    },
+    {
+      "id": "DA-01",
+      "name": "Clarify behavior vs operation boundary",
+      "category": "Document Authority Map v3.0",
+      "priority": "P2",
+      "document": "docs/Document-Authority-Map-v3.0.md",
+      "line": 59,
+      "issue_type": "ambiguity",
+      "description": "Distinction between 'behavior' (Implementation) and 'operation' (Runbook) unclear for edge cases like restart procedures",
+      "current_text": "runbook beats implementation for behavior; runbook beats implementation for how it is operated.",
+      "required_change": "Define explicit examples or decision rule distinguishing behavior from operation",
+      "acceptance_criteria": [
+        "Examples added: 'Behavior = code-level error handling, state transitions, API responses'",
+        "Examples added: 'Operation = deployment steps, monitoring setup, manual recovery procedures'",
+        "Decision rule for ambiguous cases (e.g., 'if requires human operator action, it's operation')"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "DA-02",
+      "name": "Complete RFC conflict resolution process",
+      "category": "Document Authority Map v3.0",
+      "priority": "P2",
+      "document": "docs/Document-Authority-Map-v3.0.md",
+      "line": "section 3",
+      "issue_type": "missing_operational_detail",
+      "description": "RFC process mentioned but incomplete: who creates RFC? template? authority determination? escalation?",
+      "current_text": "Any conflict triggers: 1) create an RFC 2) resolve conflict at the highest relevant authority 3) update downstream documents",
+      "required_change": "Add: RFC owner assignment rule, template reference, authority determination process, escalation path",
+      "acceptance_criteria": [
+        "RFC owner rule specified (e.g., 'discovered by requests RFC, assigned to lowest common authority owner')",
+        "RFC template created or referenced in docs/rfcs/",
+        "Authority determination process defined",
+        "Escalation path specified for disagreements"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "TMF-01",
+      "name": "Define audio clock precisely",
+      "category": "TMF v3.0",
+      "priority": "P1",
+      "document": "docs/TMF-v3.0.md",
+      "line": "7, 58",
+      "issue_type": "ambiguity",
+      "description": "Audio clock mentioned as authoritative but not defined: system monotonic? audio-specific? distributed sync?",
+      "current_text": "Audio is authoritative / monotonic timestamp (audio clock)",
+      "required_change": "Explicitly state: 'The audio clock is [system monotonic time | separate audio timeline], and [is | is not] synchronized across distributed components'",
+      "acceptance_criteria": [
+        "Clock source specified (system monotonic vs audio-specific)",
+        "Distributed sync policy stated if applicable",
+        "Implementation can code timestamp generation without ambiguity"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "TMF-02",
+      "name": "Define steady-state condition",
+      "category": "TMF v3.0",
+      "priority": "P1",
+      "document": "docs/TMF-v3.0.md",
+      "line": 33,
+      "issue_type": "ambiguity",
+      "description": "TTFA contract references 'steady-state' without defining operational threshold",
+      "current_text": "TTFA ≤ 250ms (steady-state target, not 'demo mode')",
+      "required_change": "Define steady-state: e.g., 'after 10 minutes of continuous operation' or 'after the first 5 conversation turns'",
+      "acceptance_criteria": [
+        "Steady-state condition defined with measurable threshold",
+        "Testing methodology can determine when steady-state is reached",
+        "Clearly distinguishes from warm-up or demo scenarios"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "TMF-03",
+      "name": "Clarify VRAM cap scaling policy",
+      "category": "TMF v3.0",
+      "priority": "P1",
+      "document": "docs/TMF-v3.0.md",
+      "line": "40-42",
+      "issue_type": "ambiguity",
+      "description": "20GB VRAM cap on 24GB GPU unclear: absolute cap for all GPUs? proportional (83%)? fixed headroom (4GB)?",
+      "current_text": "Reference node: 2× RTX 4090 (24GB each) / Per-GPU hard working cap: 20GB VRAM",
+      "required_change": "Specify: '20GB absolute cap regardless of GPU' OR 'leave 4GB headroom regardless of GPU size' OR 'use 83% of available VRAM as working cap'",
+      "acceptance_criteria": [
+        "Scaling policy explicitly stated",
+        "Works predictably on different GPU sizes (e.g., A100 40GB, H100 80GB)",
+        "Implementation can calculate VRAM limit programmatically"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "TMF-04",
+      "name": "Clarify model choice authority",
+      "category": "TMF v3.0",
+      "priority": "P1",
+      "document": "docs/TMF-v3.0.md",
+      "line": "96, 103",
+      "issue_type": "ambiguity",
+      "description": "TMF is architecture truth but defers ASR/TTS model choice to implementation - creates authority ambiguity",
+      "current_text": "ASR model choice is an implementation decision / TTS engine choice is an implementation decision",
+      "required_change": "Either: (1) move model requirements into TMF as constraints, OR (2) explicitly state 'Implementation may choose any model that provably meets contracts in sections 1.2, 4.1, 4.2'",
+      "acceptance_criteria": [
+        "Authority boundary clarified",
+        "Contract validation requirement stated",
+        "No ambiguity about whether model failure is TMF or Implementation issue"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": ["CD-04"]
+    },
+    {
+      "id": "TMF-06",
+      "name": "Clarify verbosity policy authority",
+      "category": "TMF v3.0",
+      "priority": "P1",
+      "document": "docs/TMF-v3.0.md",
+      "line": 167,
+      "issue_type": "unclear_ownership",
+      "description": "Verbosity degradation labeled '(product policy)' but TMF should supersede PRD - authority conflict",
+      "current_text": "then degrade response length/verbosity (product policy)",
+      "required_change": "Either: remove '(product policy)' and specify rule in TMF, OR state 'PRD may define verbosity policy as long as it does not violate audio-first invariants'",
+      "acceptance_criteria": [
+        "Authority clarified (TMF owns rule or TMF delegates with constraints)",
+        "No possibility of PRD contradicting TMF on degradation order",
+        "Degradation sequence unambiguous for implementation"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "TMF-07",
+      "name": "Define 24-hour extended soak in TMF",
+      "category": "TMF v3.0",
+      "priority": "P0-BLOCKING",
+      "document": "docs/TMF-v3.0.md",
+      "line": 209,
+      "issue_type": "missing_operational_detail",
+      "description": "24-hour extended soak undefined: continuous uptime? active conversation? mixed load?",
+      "current_text": "8–24 hours (extended soak)",
+      "required_change": "Define: '24 hours of [continuous uptime | active conversation | mixed load with X% active, Y% idle]'",
+      "acceptance_criteria": [
+        "Load profile specified (continuous, mixed, duty cycle, etc.)",
+        "Test can be designed and executed without ambiguity",
+        "Definition matches CD-02 resolution"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": ["CD-02"]
+    },
+    {
+      "id": "ADD-01",
+      "name": "Define neutral facial expression",
+      "category": "TMF v3.0 Addendum A",
+      "priority": "P1",
+      "document": "docs/TMF-v3.0-Addendum-A.md",
+      "line": 56,
+      "issue_type": "ambiguity",
+      "description": "Neutral expression required but undefined operationally: zero weights? resting face? specific ARKit-52 values?",
+      "current_text": "the default must be neutral (speech articulation only)",
+      "required_change": "Define neutral: 'neutral means ARKit-52 blendshapes set to [resting baseline | zero except jaw/mouth | specific reference values in appendix]'",
+      "acceptance_criteria": [
+        "Neutral definition provides specific ARKit-52 configuration",
+        "Animation engineer can implement without guessing",
+        "Testable (can verify neutral state is correct)"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "ADD-02",
+      "name": "Reference TMF for 24h soak definition",
+      "category": "TMF v3.0 Addendum A",
+      "priority": "P1",
+      "document": "docs/TMF-v3.0-Addendum-A.md",
+      "line": 84,
+      "issue_type": "missing_operational_detail",
+      "description": "Addendum references 24h soak but doesn't clarify if same as TMF 7.3 - risk of divergence",
+      "current_text": "stable long-run behavior (24h soak)",
+      "required_change": "Add: '24h soak as defined in TMF v3.0 section 7.3'",
+      "acceptance_criteria": [
+        "Cross-reference added using standard format",
+        "No ambiguity about which definition applies",
+        "Automatically inherits TMF clarifications"
+      ],
+      "passes": false,
+      "blocked_by": ["TMF-07", "CD-02"],
+      "blocks": []
+    },
+    {
+      "id": "PRD-01",
+      "name": "Resolve TTFA percentile with TMF",
+      "category": "PRD v3.0",
+      "priority": "P1",
+      "document": "docs/PRD-v3.0.md",
+      "line": 145,
+      "issue_type": "internal_contradiction",
+      "description": "PRD specifies p50 but TMF doesn't specify percentile - authority conflict",
+      "current_text": "TTFA ≤ 250ms (target; measured p50 under normal load)",
+      "required_change": "Either: (1) remove 'p50' and defer to TMF, OR (2) add 'PRD interprets TMF's TTFA target as p50; stricter percentiles TBD'",
+      "acceptance_criteria": [
+        "No contradiction with TMF authority",
+        "Percentile alignment clarified",
+        "If PRD adds detail TMF lacks, explicitly noted as interpretation"
+      ],
+      "passes": false,
+      "blocked_by": ["TMF-08"],
+      "blocks": []
+    },
+    {
+      "id": "PRD-02",
+      "name": "Fix circular dependency language",
+      "category": "PRD v3.0",
+      "priority": "P2",
+      "document": "docs/PRD-v3.0.md",
+      "line": 224,
+      "issue_type": "internal_contradiction",
+      "description": "PRD says 'Dependencies: TMF' but subordinate docs conform to superiors, not depend on them",
+      "current_text": "Dependencies: TMF v3.0 (architecture truth)",
+      "required_change": "Change to: 'Conformance: PRD v3.0 conforms to TMF v3.0 constraints'",
+      "acceptance_criteria": [
+        "Language changed from 'Dependencies' to 'Conformance'",
+        "Correctly reflects document authority hierarchy",
+        "Maintains clear subordination relationship"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "PRD-03",
+      "name": "Define natural pause duration",
+      "category": "PRD v3.0",
+      "priority": "P1",
+      "document": "docs/PRD-v3.0.md",
+      "line": 101,
+      "issue_type": "ambiguity",
+      "description": "Natural short pauses required but duration undefined - critical for VAD/turn detection",
+      "current_text": "The system must support natural short pauses without cutting the user off",
+      "required_change": "Specify: 'natural short pauses of up to [X] milliseconds' or defer to Implementation/TMF for VAD policy",
+      "acceptance_criteria": [
+        "Duration specified or authority delegated",
+        "VAD implementation can be configured without guessing",
+        "User experience expectations clear"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "PRD-04",
+      "name": "Define user experience semantics",
+      "category": "PRD v3.0",
+      "priority": "P2",
+      "document": "docs/PRD-v3.0.md",
+      "line": 156,
+      "issue_type": "ambiguity",
+      "description": "Horizontal scaling must not change 'user experience semantics' but term undefined",
+      "current_text": "Capacity must scale horizontally without changing user experience semantics",
+      "required_change": "Define: 'user experience semantics means [API contracts remain unchanged | latency targets remain met | feature availability unchanged | all of the above]'",
+      "acceptance_criteria": [
+        "Semantics explicitly defined",
+        "Scaling tests can verify preservation",
+        "Clear what must remain invariant during scale-out"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "PRD-05",
+      "name": "Locate audio storage policy definition",
+      "category": "PRD v3.0",
+      "priority": "P2",
+      "document": "docs/PRD-v3.0.md",
+      "line": 159,
+      "issue_type": "ambiguity",
+      "description": "Audio storage policy mentioned but location undefined: in PRD? Implementation? separate doc?",
+      "current_text": "Clear policy for audio storage (off by default unless enabled)",
+      "required_change": "Specify: 'Audio storage policy defined in [section X.X of this PRD | Implementation v3.0 | separate Privacy Policy doc]'",
+      "acceptance_criteria": [
+        "Policy location specified with section reference",
+        "Cross-reference uses standard format",
+        "Implementation knows where to find authoritative policy"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "PRD-06",
+      "name": "Define RAG confidence threshold",
+      "category": "PRD v3.0",
+      "priority": "P1",
+      "document": "docs/PRD-v3.0.md",
+      "line": 123,
+      "issue_type": "missing_operational_detail",
+      "description": "Knowledge missing threshold undefined - what confidence score triggers refusal?",
+      "current_text": "Ability to refuse or defer when knowledge is missing (no confident fabrication)",
+      "required_change": "Add: 'Knowledge is considered missing when RAG confidence < [threshold defined in Implementation v3.0 section X]'",
+      "acceptance_criteria": [
+        "Threshold authority assigned (PRD or Implementation)",
+        "If delegated, cross-reference specified",
+        "RAG implementation can be coded without guessing"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "PRD-07",
+      "name": "Assign observability implementation ownership",
+      "category": "PRD v3.0",
+      "priority": "P1",
+      "document": "docs/PRD-v3.0.md",
+      "line": "167-173",
+      "issue_type": "unclear_ownership",
+      "description": "Metrics requirements listed but no implementation ownership or exposure method specified",
+      "current_text": "Section 8 lists metrics without implementation details",
+      "required_change": "Add: 'Metrics implementation and exposure defined in Implementation v3.0 section 9 and Ops Runbook v3.0 section 10'",
+      "acceptance_criteria": [
+        "Cross-references added to Implementation and Ops Runbook",
+        "Clear which docs own implementation details",
+        "No ambiguity about responsibility"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "IMP-01",
+      "name": "Clarify render separation optionality",
+      "category": "Implementation v3.0",
+      "priority": "P2",
+      "document": "docs/Implementation-v3.0.md",
+      "line": 62,
+      "issue_type": "ambiguity",
+      "description": "'May run separately' ambiguous - is it optional or permitted? What determines choice?",
+      "current_text": "May run separately from inference services",
+      "required_change": "Change to: '[Optionally runs | Is permitted to run | Must run] separately...' and specify decision criteria",
+      "acceptance_criteria": [
+        "Optionality clarified (optional vs permitted)",
+        "Decision criteria specified if optional",
+        "Deployment guide can make unambiguous choice"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "IMP-02",
+      "name": "Clarify SCOS usage constraints",
+      "category": "Implementation v3.0",
+      "priority": "P1",
+      "document": "docs/Implementation-v3.0.md",
+      "line": 318,
+      "issue_type": "ambiguity",
+      "description": "SCOS 'used only' unclear: hard constraint (no logging)? or functional scope? Debug logs allowed?",
+      "current_text": "SCOS outputs are used only to adjust: backchannel timing, verbosity, clarification strategy, when to ask confirmation questions",
+      "required_change": "Clarify: 'SCOS outputs are used exclusively for the listed adjustments and [must not be logged | may be logged for debugging | may be exported for analytics]'",
+      "acceptance_criteria": [
+        "Usage constraint clarified (functional vs privacy)",
+        "Logging/export policy specified",
+        "Privacy and debugging needs balanced"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": ["CD-03"]
+    },
+    {
+      "id": "IMP-03",
+      "name": "Cross-reference PRD for soak requirement",
+      "category": "Implementation v3.0",
+      "priority": "P1",
+      "document": "docs/Implementation-v3.0.md",
+      "line": 399,
+      "issue_type": "internal_contradiction",
+      "description": "24h soak test exists in both Implementation and PRD - risk of divergence without cross-reference",
+      "current_text": "Soak tests (24h)",
+      "required_change": "Add cross-reference: 'Soak tests verify PRD v3.0 section 7.2 continuous runtime target'",
+      "acceptance_criteria": [
+        "Cross-reference added using standard format",
+        "Clear test validates product requirement",
+        "Linked to CD-02 definition"
+      ],
+      "passes": false,
+      "blocked_by": ["CD-02"],
+      "blocks": []
+    },
+    {
+      "id": "IMP-04",
+      "name": "Specify context rollover threshold in Implementation",
+      "category": "Implementation v3.0",
+      "priority": "P1",
+      "document": "docs/Implementation-v3.0.md",
+      "line": 284,
+      "issue_type": "missing_operational_detail",
+      "description": "Implementation defers to TMF's undefined 'approaching' - should specify exact threshold",
+      "current_text": "References TMF 'approaching 8192 tokens'",
+      "required_change": "Add: 'Context rollover triggers at [7500] tokens (referenced in context_rollover.py configuration)'",
+      "acceptance_criteria": [
+        "Exact threshold specified",
+        "Matches TMF-09 resolution",
+        "Code configuration file referenced"
+      ],
+      "passes": false,
+      "blocked_by": ["TMF-09"],
+      "blocks": []
+    },
+    {
+      "id": "IMP-05",
+      "name": "Map metrics to responsible services",
+      "category": "Implementation v3.0",
+      "priority": "P1",
+      "document": "docs/Implementation-v3.0.md",
+      "line": "360-367",
+      "issue_type": "unclear_ownership",
+      "description": "Metrics listed but no service ownership - which service emits which metric? central aggregator?",
+      "current_text": "Section 9 lists metrics without ownership",
+      "required_change": "Add table mapping each metric to responsible service(s)",
+      "acceptance_criteria": [
+        "Table added: Metric | Responsible Service(s) | Aggregation Point",
+        "Each metric has clear owner",
+        "No ambiguity about emission responsibility"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "PAR-01",
+      "name": "Define emotion modeling scope",
+      "category": "Parallel Dev v3.0",
+      "priority": "P2",
+      "document": "docs/Parallel-Dev-v3.0.md",
+      "line": 46,
+      "issue_type": "ambiguity",
+      "description": "Emotion modeling forbidden but undefined - who decides? does sentiment analysis for debugging count?",
+      "current_text": "Hard rule: No track may introduce emotion modeling, identity training, or 'persuasion systems'",
+      "required_change": "Define: 'Emotion modeling means [any classification of user emotional state | any system output influenced by detected user emotion | specific prohibited techniques listed in appendix]'",
+      "acceptance_criteria": [
+        "Emotion modeling explicitly defined",
+        "Edge cases clarified (debugging use, internal metrics, etc.)",
+        "Enforcement criteria clear"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "PAR-02",
+      "name": "Clarify Phase 0 schema agreement",
+      "category": "Parallel Dev v3.0",
+      "priority": "P2",
+      "document": "docs/Parallel-Dev-v3.0.md",
+      "line": 97,
+      "issue_type": "ambiguity",
+      "description": "Phase 0 says 'agree on schemas' but TMF already defines them - validation or negotiation?",
+      "current_text": "agree on audio packet schema, cancel schema, blendshape schema",
+      "required_change": "Change to: 'Validate team understanding of TMF-defined schemas' to clarify no negotiation occurs",
+      "acceptance_criteria": [
+        "Language changed from 'agree on' to 'validate understanding'",
+        "TMF authority preserved",
+        "Phase 0 activity clarified as validation not design"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "PAR-04",
+      "name": "Define SCOS API contract",
+      "category": "Parallel Dev v3.0",
+      "priority": "P1",
+      "document": "docs/Parallel-Dev-v3.0.md",
+      "line": 139,
+      "issue_type": "missing_operational_detail",
+      "description": "SCOS signals listed but no API contract specified - format? transport? protocol?",
+      "current_text": "SCOS emits non-emotional control signals: verbosity level suggestion, backchannel allowed/blocked, clarification needed confidence",
+      "required_change": "Add: 'SCOS API contract defined in [docs/api-contracts/scos.json | Implementation v3.0 section X]'",
+      "acceptance_criteria": [
+        "API contract location specified",
+        "Contract covers format, transport, protocol",
+        "Different tracks can implement compatible interfaces"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "PAR-05",
+      "name": "Resolve T3/T6 veto conflict",
+      "category": "Parallel Dev v3.0",
+      "priority": "P2",
+      "document": "docs/Parallel-Dev-v3.0.md",
+      "line": "175-177",
+      "issue_type": "unclear_ownership",
+      "description": "T3 and T6 both have veto power - no arbitration if they disagree",
+      "current_text": "If latency contracts are threatened, T3 has veto power. If deploy stability is threatened, T6 has veto power",
+      "required_change": "Add: 'If T3 and T6 veto powers conflict, escalate to [engineering director | TMF authority | specific role]'",
+      "acceptance_criteria": [
+        "Arbitration authority specified",
+        "Escalation path defined",
+        "Deadlock resolution mechanism clear"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "OPS-01",
+      "name": "Map Ops profiles to PRD modes",
+      "category": "Ops Runbook v3.0",
+      "priority": "P2",
+      "document": "docs/Ops-Runbook-v3.0.md",
+      "line": "19-43",
+      "issue_type": "ambiguity",
+      "description": "Ops profiles (A/B/C) don't explicitly map to PRD modes (Voice/Avatar)",
+      "current_text": "Profile A — Voice-Only, Profile B — Avatar via Client Rendering, Profile C — Server-Rendered Avatar",
+      "required_change": "Add explicit mapping: 'Profile A implements PRD Voice Mode. Profiles B and C implement PRD Avatar Mode with different rendering strategies'",
+      "acceptance_criteria": [
+        "Explicit mapping added to section 1",
+        "PRD modes cross-referenced",
+        "No ambiguity about which profile implements which mode"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "OPS-02",
+      "name": "Standardize port documentation",
+      "category": "Ops Runbook v3.0",
+      "priority": "P2",
+      "document": "docs/Ops-Runbook-v3.0.md",
+      "line": 84,
+      "issue_type": "ambiguity",
+      "description": "Ports listed as 'adjust as needed' without source of truth for actual deployment",
+      "current_text": "Typical ports (adjust as needed)",
+      "required_change": "Specify: 'Default ports listed. If adjusted, document actual ports in [deployment manifest | config file | other]'",
+      "acceptance_criteria": [
+        "Source of truth specified for port customization",
+        "Documentation standard established",
+        "Support can find actual ports per deployment"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "OPS-03",
+      "name": "Specify crash loop alert threshold",
+      "category": "Ops Runbook v3.0",
+      "priority": "P1",
+      "document": "docs/Ops-Runbook-v3.0.md",
+      "line": 301,
+      "issue_type": "missing_operational_detail",
+      "description": "Alert threshold uses placeholder 'N' - must specify actual number",
+      "current_text": "crash loop (restart count > N per hour)",
+      "required_change": "Replace with: 'restart count > [3] per hour' or 'restart count > [threshold defined in monitoring config]'",
+      "acceptance_criteria": [
+        "Actual threshold specified or config reference given",
+        "Alert can be configured without guessing",
+        "Consistent with operational best practices"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "OPS-04",
+      "name": "Define avatar degradation verification",
+      "category": "Ops Runbook v3.0",
+      "priority": "P1",
+      "document": "docs/Ops-Runbook-v3.0.md",
+      "line": 364,
+      "issue_type": "missing_operational_detail",
+      "description": "Verification mentioned but method undefined: manual? automated? pass/fail criteria?",
+      "current_text": "Avatar degradation verified (voice continues)",
+      "required_change": "Specify: 'Avatar degradation verified via [automated test script | manual test procedure in section X] with pass criteria: [voice latency remains < 250ms when avatar drops]'",
+      "acceptance_criteria": [
+        "Verification method specified (automated vs manual)",
+        "Test procedure referenced",
+        "Pass/fail criteria defined"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "OPS-05",
+      "name": "Add concurrency tuning guidance",
+      "category": "Ops Runbook v3.0",
+      "priority": "P1",
+      "document": "docs/Ops-Runbook-v3.0.md",
+      "line": 74,
+      "issue_type": "missing_operational_detail",
+      "description": "Tuning guidance vague: what to measure? target metrics? parameters to tune?",
+      "current_text": "Voice sessions scale with shared LLM batching; measure and tune",
+      "required_change": "Add: 'Measure [TTFA p95, GPU utilization, queue depth]. Target [TTFA p95 < 300ms, GPU < 85%]. Tune [max_concurrent_sessions, batch_size, context_limit]'",
+      "acceptance_criteria": [
+        "Metrics to measure specified",
+        "Target values provided",
+        "Tunable parameters listed",
+        "Operator can tune without guessing"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "OPS-07",
+      "name": "Clarify container volume strategy",
+      "category": "Ops Runbook v3.0",
+      "priority": "P1",
+      "document": "docs/Ops-Runbook-v3.0.md",
+      "line": "242, section 7.3",
+      "issue_type": "missing_operational_detail",
+      "description": "Container deployment says avoid ephemeral layers but doesn't specify how to mount models",
+      "current_text": "Never download into ephemeral container layers. Always to the persistent volume",
+      "required_change": "Add: 'When using containers, mount /workspace/models as external volume. Container image must not include model weights'",
+      "acceptance_criteria": [
+        "Volume mount strategy specified",
+        "Container image composition clarified",
+        "Deployment procedure unambiguous"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    },
+    {
+      "id": "CD-01",
+      "name": "Resolve TTFA percentile cross-document",
+      "category": "Cross-document",
+      "priority": "P1",
+      "document": "docs/TMF-v3.0.md, docs/PRD-v3.0.md",
+      "line": "TMF 33, PRD 145",
+      "issue_type": "internal_contradiction",
+      "description": "TMF doesn't specify percentile, PRD says p50 - authority conflict",
+      "current_text": "TMF: 'TTFA ≤ 250ms' / PRD: 'TTFA ≤ 250ms (target; measured p50 under normal load)'",
+      "required_change": "TMF should specify percentile (as highest authority), or explicitly delegate percentile definition to PRD",
+      "acceptance_criteria": [
+        "TMF specifies percentile OR explicitly delegates to PRD",
+        "No contradiction between documents",
+        "Single source of truth for percentile contract"
+      ],
+      "passes": false,
+      "blocked_by": ["TMF-08"],
+      "blocks": []
+    },
+    {
+      "id": "CD-03",
+      "name": "Resolve SCOS scope across documents",
+      "category": "Cross-document",
+      "priority": "P2",
+      "document": "docs/Implementation-v3.0.md, docs/PRD-v3.0.md, docs/Parallel-Dev-v3.0.md",
+      "line": "IMP 318, PRD absent, PAR 139",
+      "issue_type": "unclear_ownership",
+      "description": "Implementation defines SCOS (user-visible via verbosity), but PRD doesn't mention it - product truth gap",
+      "current_text": "Implementation section 6 defines SCOS; PRD silent",
+      "required_change": "Either: (1) add SCOS to PRD as a product feature, OR (2) clarify in Implementation that SCOS is internal-only and does not affect product surface",
+      "acceptance_criteria": [
+        "SCOS scope clarified (product feature vs internal)",
+        "If product feature, added to PRD",
+        "If internal-only, Implementation explicitly states this"
+      ],
+      "passes": false,
+      "blocked_by": ["IMP-02"],
+      "blocks": []
+    },
+    {
+      "id": "CD-05",
+      "name": "Standardize cross-reference format",
+      "category": "Cross-document",
+      "priority": "P2",
+      "document": "All documents",
+      "line": "multiple",
+      "issue_type": "missing_operational_detail",
+      "description": "Inconsistent cross-reference format: some use section numbers, some names - breaks if sections renumbered",
+      "current_text": "Mix of 'TMF section 7.3', 'see Implementation', etc.",
+      "required_change": "Standardize: '[Document] v[Version] section [Number].[Number] ([Name])' e.g., 'TMF v3.0 section 7.3 (Extended Soak)'",
+      "acceptance_criteria": [
+        "Cross-reference format standard defined",
+        "All cross-references updated to use standard format",
+        "Robust against section renumbering"
+      ],
+      "passes": false,
+      "blocked_by": [],
+      "blocks": []
+    }
+  ]
+}
