@@ -11,12 +11,12 @@
 
 ## Status
 - Total features: 45
-- P0-BLOCKING: 7 remaining (3 complete)
+- P0-BLOCKING: 6 remaining (4 complete)
 - P1: 15
 - P2: 10
-- Completed: 3
+- Completed: 4
 - In Progress: 0
-- Blocked: 1 (IMP-04 unblocked, ADD-02 still blocked, CD-01 and PRD-01 now unblocked)
+- Blocked: 0 (CD-02 now unblocked by TMF-07, ADD-02 blocked only by CD-02)
 
 ## Session 2 (2024-12-22): First Resolution - TMF-09
 - ✅ Completed TMF-09: Define context rollover threshold
@@ -46,8 +46,18 @@
   - Resolved PRD-TMF percentile authority conflict
   - Unblocked CD-01 and PRD-01
 
+## Session 5 (2024-12-23): Fourth Resolution - TMF-07
+- ✅ Completed TMF-07: Define 24-hour extended soak in TMF
+  - Defined as mixed-load operation with 30% active duty cycle
+  - Active periods (30%): concurrent sessions at node capacity
+  - Idle periods (70%): system ready, no active sessions
+  - Pass criteria: no manual intervention, TTFA p95 ≤ 250ms, no OOM, no deadlocks
+  - Added canonical inheritance clause for all documents
+  - Updated TMF-v3.0.md section 7.3, lines 214-221
+  - Unblocked CD-02 (can now add cross-references to this definition)
+
 ## Next Steps
-1. Continue with remaining P0-BLOCKING issues (7 left)
-2. Priority candidates: TMF-07 (24h soak definition), CD-02 (24h soak consistency), TMF-11 (animation frames)
-3. Note: TMF-07 must be resolved before CD-02 (dependency)
+1. Continue with remaining P0-BLOCKING issues (6 left)
+2. Priority candidates: CD-02 (now unblocked), TMF-11 (animation frames), OPS-06 (env vars)
+3. CD-02 should be next to complete soak definition chain (TMF-07 → CD-02 → ADD-02)
 4. Validate all changes preserve TMF authority hierarchy
