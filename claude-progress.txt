@@ -11,10 +11,10 @@
 
 ## Status
 - Total features: 45
-- P0-BLOCKING: 9 remaining (1 complete)
+- P0-BLOCKING: 8 remaining (2 complete)
 - P1: 15
 - P2: 10
-- Completed: 1
+- Completed: 2
 - In Progress: 0
 - Blocked: 1 (IMP-04 unblocked, ADD-02 still blocked)
 
@@ -27,8 +27,17 @@
   - Updated TMF-v3.0.md section 3.2, line 85-89
   - Unblocked IMP-04 (Implementation can now reference this threshold)
 
+## Session 3 (2024-12-22): Second Resolution - TMF-05
+- ✅ Completed TMF-05: Clarify barge-in measurement point
+  - Specified measurement starts at server-side VAD detection event
+  - Specified measurement ends at client audible stop (end-to-end)
+  - Explicitly included server processing, network propagation, client buffer drain in 150ms budget
+  - Added testing methodology: log server VAD timestamp, measure client audio stop
+  - Updated TMF-v3.0.md section 4.2, lines 137-143
+  - Resolved operational testing ambiguity for implementation teams
+
 ## Next Steps
-1. Continue with remaining P0-BLOCKING issues (9 left)
-2. Priority candidates: TMF-05 (barge-in), CD-02 (24h soak), TMF-08 (TTFA percentile)
+1. Continue with remaining P0-BLOCKING issues (8 left)
+2. Priority candidates: TMF-08 (TTFA percentile), CD-02 (24h soak), TMF-11 (animation frames)
 3. Resolve cross-document dependencies
 4. Validate all changes preserve TMF authority hierarchy
