@@ -371,7 +371,9 @@
         "Test can be designed and executed without ambiguity",
         "Definition matches CD-02 resolution"
       ],
-      "passes": false,
+      "passes": true,
+      "verified_at": "2024-12-23",
+      "resolution": "Defined 24h soak as mixed-load operation with 30% active duty cycle. Active periods: concurrent sessions at capacity. Idle periods: system ready, no sessions. Pass criteria: no manual intervention, TTFA p95 ≤ 250ms, no OOM, no deadlocks. All docs inherit this definition.",
       "blocked_by": [],
       "blocks": ["CD-02"]
     },

@@ -212,8 +212,16 @@ Notes:
 **Mitigations:** pre-allocation pools, stable shapes, prefix caching + rollover enforcement, heartbeat slow-freeze
 
 ### 7.3 8–24 hours (extended soak)
-**Risks:** clock drift (audio vs render), rare deadlocks, thermal throttling  
-**Signals:** increased heartbeat relaxations, more frequent animation yields, sustained GPU clock drop  
+
+**Definition:** The 24-hour extended soak is 24 hours of mixed-load operation with a 30% active duty cycle:
+- **Active periods (30%):** Concurrent voice sessions at expected node capacity, with typical conversation patterns (user turns, agent responses, natural pauses)
+- **Idle periods (70%):** System ready and accepting connections, no active sessions
+- **Pass criteria:** No manual intervention required, all latency contracts maintained (TTFA p95 ≤ 250ms), no OOM events, no deadlocks
+
+> All documents referencing "24h soak" inherit this definition unless explicitly overridden.
+
+**Risks:** clock drift (audio vs render), rare deadlocks, thermal throttling
+**Signals:** increased heartbeat relaxations, more frequent animation yields, sustained GPU clock drop
 **Mitigations:** audio-clock authority resync, animation-only state reset allowed, degraded-mode policies
 
 ### 7.4 Always-on risks
