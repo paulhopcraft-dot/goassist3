@@ -127,7 +127,9 @@
         "Section 6 latency budget table updated with percentile note",
         "Clarification added on whether budget is ideal-case or accounts for variance"
       ],
-      "passes": false,
+      "passes": true,
+      "verified_at": "2024-12-23",
+      "resolution": "Specified p95 as operational contract in section 1.2. Added notes to section 6 clarifying budget is ideal-case (p50) allocation, actual p95 may vary. Both p50 and p95 should be tracked.",
       "blocked_by": [],
       "blocks": ["CD-01", "PRD-01"]
     },

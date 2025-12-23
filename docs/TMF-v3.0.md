@@ -30,7 +30,7 @@ This TMF is written to be engineer-trustworthy. No fictional SDKs. No hand-wavy 
 ### 1.2 Latency contracts
 - **Audio chunk size:** ≤ 20ms per packet
 - **Audio overlap:** 5ms sliding overlap (for decoder cross-fade)
-- **TTFA (time-to-first-audio):** ≤ 250ms (steady-state target, not “demo mode”)
+- **TTFA (time-to-first-audio):** ≤ 250ms p95 (steady-state operational target, not "demo mode"). p50 and p95 should both be tracked; the contract is satisfied when p95 ≤ 250ms under normal load.
 - **Barge-in cancel:** ≤ 150ms from user speech detection to halted agent playback
 - **Animation latency target:** < 25ms (best-effort; may be dropped under load)
 - **Animation yield rule:** if animation lag > 120ms, animation yields (drops/relaxes), audio continues.
@@ -192,8 +192,10 @@ This TMF does not claim a single universal number; it defines behavior under loa
 | Buffer | Client jitter buffer | 10 | **250** |
 
 Notes:
+- This budget represents ideal-case (p50) allocation. Actual p95 latency may exceed individual component budgets while still meeting the overall 250ms p95 contract.
 - Network budget is an operating target, not guaranteed.
 - Under worse network, audio remains continuous; visuals yield first.
+- Track both p50 and p95 metrics; section 1.2 defines the p95 contract, this table provides p50 baseline for capacity planning.
 
 ---
 
