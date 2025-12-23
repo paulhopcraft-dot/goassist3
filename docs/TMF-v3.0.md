@@ -82,10 +82,11 @@ Problem: fixed context windows create latency spikes when history is rebuilt.
   - canonical persona/role definition
   - the minimal “session grounding” turns
 - Maintain a **Rolling Window** for active turns.
-- When approaching 8192 tokens:
+- When context reaches 7500 tokens (93.75% of the 8192 hard cap), the orchestrator triggers summarization:
   - summarize older turns into a compact **Session State Block**
   - keep pinned prefix intact
   - continue without full context rebuild spikes
+  - If summarization fails or exceeds 5 seconds, reject the new turn with an error indicating context limit reached
 - Enable prefix caching so pinned prefix reuse is cheap across turns.
 
 ### 3.3 ASR (streaming)

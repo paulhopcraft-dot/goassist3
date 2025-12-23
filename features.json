@@ -10,7 +10,7 @@
       "category": "TMF v3.0",
       "priority": "P0-BLOCKING",
       "document": "docs/TMF-v3.0.md",
-      "line": 87,
+      "line": 85,
       "issue_type": "missing_operational_detail",
       "description": "Context rollover trigger uses vague term 'approaching 8192 tokens' - needs exact threshold",
       "current_text": "When approaching 8192 tokens: summarize older turns...",
@@ -20,7 +20,9 @@
         "Component responsible for summarization identified (e.g., 'orchestrator')",
         "Failure handling defined (e.g., 'If summarization fails, reject new turn')"
       ],
-      "passes": false,
+      "passes": true,
+      "verified_at": "2024-12-22",
+      "resolution": "Specified 7500 token threshold (93.75% of 8192), orchestrator ownership, 5-second timeout, and failure handling (reject new turn with error)",
       "blocked_by": [],
       "blocks": ["IMP-04"]
     },
