@@ -32,7 +32,7 @@
       "category": "TMF v3.0",
       "priority": "P0-BLOCKING",
       "document": "docs/TMF-v3.0.md",
-      "line": 139,
+      "line": 137,
       "issue_type": "ambiguity",
       "description": "Barge-in latency contract doesn't specify if measured at server or client (network adds 40-100ms)",
       "current_text": "Barge-in cancel: ≤150ms from user speech detection to halted agent playback",
@@ -42,7 +42,9 @@
         "If end-to-end (client), network latency accounted for in contract",
         "Testing methodology can be implemented based on definition"
       ],
-      "passes": false,
+      "passes": true,
+      "verified_at": "2024-12-22",
+      "resolution": "Clarified as end-to-end measurement: server VAD detection event to client audible stop. Budget explicitly includes server processing, network propagation, and client buffer drain. Testing methodology specified.",
       "blocked_by": [],
       "blocks": []
     },

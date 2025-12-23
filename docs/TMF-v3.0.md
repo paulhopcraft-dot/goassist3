@@ -135,9 +135,12 @@ Problem: fixed context windows create latency spikes when history is rebuilt.
 - Overlap must **not** advance the audio clock.
 
 ### 4.2 Barge-in contract
-- Trigger: user speech detection (VAD/turn detector)
-- Action: stop TTS + stop audio playout + stop animation emission
-- Deadline: ≤150ms to audible stop at the client.
+- Trigger: user speech detection (server-side VAD/turn detector emits barge-in event)
+- Action: stop TTS generation + stop audio packet emission + stop animation emission
+- Deadline: ≤150ms from server VAD detection event to client audible stop
+  - Measured end-to-end: server detection → client audio output halts
+  - Budget includes: server processing, network propagation, client buffer drain
+  - Testing: log server VAD event timestamp; measure client-side audio output stop
 
 ### 4.3 Animation heartbeat + slow-freeze
 If animation frames are missing:
