@@ -11,12 +11,12 @@
 
 ## Status
 - Total features: 45
-- P0-BLOCKING: 8 remaining (2 complete)
+- P0-BLOCKING: 7 remaining (3 complete)
 - P1: 15
 - P2: 10
-- Completed: 2
+- Completed: 3
 - In Progress: 0
-- Blocked: 1 (IMP-04 unblocked, ADD-02 still blocked)
+- Blocked: 1 (IMP-04 unblocked, ADD-02 still blocked, CD-01 and PRD-01 now unblocked)
 
 ## Session 2 (2024-12-22): First Resolution - TMF-09
 - ✅ Completed TMF-09: Define context rollover threshold
@@ -36,8 +36,18 @@
   - Updated TMF-v3.0.md section 4.2, lines 137-143
   - Resolved operational testing ambiguity for implementation teams
 
+## Session 4 (2024-12-23): Third Resolution - TMF-08
+- ✅ Completed TMF-08: Specify TTFA latency percentile
+  - Specified p95 as operational contract in section 1.2
+  - Clarified section 6 budget is ideal-case (p50) allocation
+  - Added note that actual p95 may exceed individual component budgets
+  - Both p50 and p95 should be tracked; contract is p95 ≤ 250ms
+  - Updated TMF-v3.0.md section 1.2 line 33, section 6 notes lines 194-198
+  - Resolved PRD-TMF percentile authority conflict
+  - Unblocked CD-01 and PRD-01
+
 ## Next Steps
-1. Continue with remaining P0-BLOCKING issues (8 left)
-2. Priority candidates: TMF-08 (TTFA percentile), CD-02 (24h soak), TMF-11 (animation frames)
-3. Resolve cross-document dependencies
+1. Continue with remaining P0-BLOCKING issues (7 left)
+2. Priority candidates: TMF-07 (24h soak definition), CD-02 (24h soak consistency), TMF-11 (animation frames)
+3. Note: TMF-07 must be resolved before CD-02 (dependency)
 4. Validate all changes preserve TMF authority hierarchy
