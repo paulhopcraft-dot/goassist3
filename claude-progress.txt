@@ -12,9 +12,9 @@
 ## Status
 - Total features: 45
 - P0-BLOCKING: 0 remaining (11 complete) ✅ ALL P0 RESOLVED
-- P1: 5 remaining (10 complete)
+- P1: 4 remaining (11 complete)
 - P2: 10
-- Completed: 21
+- Completed: 22
 - In Progress: 0
 - Blocked: 0
 
@@ -164,7 +164,7 @@ The GoAssist v3.0 documentation set is now operationally deployable.
   - Set threshold to "> 3 per hour" with configurable env var
   - Standard operational practice
 
-## Session 15 (2024-12-25): P1 Continuation - TMF-01, TMF-02
+## Session 15 (2024-12-25): P1 Continuation - TMF-01, TMF-02, TMF-03
 - Completed TMF-01: Define audio clock precisely
   - Added "Audio clock definition" subsection to section 2.2
   - Clock source: system monotonic time (CLOCK_MONOTONIC, QueryPerformanceCounter)
@@ -176,8 +176,14 @@ The GoAssist v3.0 documentation set is now operationally deployable.
   - Threshold: 3 conversation turns OR 60 seconds since session start
   - Warmup latency tracked separately from contract metrics
   - Updated TMF-v3.0.md section 1.2, line 34
+- Completed TMF-03: Clarify VRAM cap scaling policy
+  - Added VRAM scaling policy to section 1.3
+  - Policy: 4GB fixed headroom regardless of GPU size
+  - Formula: working_cap = total_vram - 4GB
+  - Examples: 24GB→20GB, 40GB→36GB, 80GB→76GB
+  - Updated TMF-v3.0.md section 1.3, line 42
 
 ## Next Steps
-1. Continue P1 issues (5 remaining)
+1. Continue P1 issues (4 remaining)
 2. Consider CD-03 (now unblocked by IMP-02)
 3. Validate all changes preserve TMF authority hierarchy
