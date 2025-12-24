@@ -65,8 +65,24 @@ If a lower doc conflicts with a higher doc, the lower doc is wrong.
 | `deploy/*` | T6 | Docker/compose templates |
 
 Changes across ownership boundaries require:
-- a small RFC in `docs/rfcs/`
+- a small RFC in `docs/rfcs/` (use template: `docs/rfcs/TEMPLATE.md`)
 - explicit approval from both owners
+
+### Cross-Boundary Approval Process
+
+| Step | Action | Timeout |
+|------|--------|---------|
+| 1 | Author creates RFC in `docs/rfcs/` | — |
+| 2 | Author opens PR with RFC, adds both track owners as **required reviewers** | — |
+| 3 | Both owners review and approve PR | 3 business days |
+| 4 | If blocked or disputed, escalate to engineering lead | 2 business days |
+| 5 | Engineering lead makes final decision (documented in PR) | 1 business day |
+
+**Rules:**
+- Approval mechanism: PR review with both track owners as required reviewers
+- Silence ≠ approval; explicit sign-off required from both parties
+- If an owner is unavailable for >3 days, their designated backup may approve
+- Dispute resolution: engineering lead has final authority; decision is binding
 
 ---
 
