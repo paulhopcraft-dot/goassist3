@@ -12,9 +12,9 @@
 ## Status
 - Total features: 45
 - P0-BLOCKING: 0 remaining (11 complete) ✅ ALL P0 RESOLVED
-- P1: 15
+- P1: 10 remaining (5 complete)
 - P2: 10
-- Completed: 11
+- Completed: 16
 - In Progress: 0
 - Blocked: 0
 
@@ -136,7 +136,22 @@
 All 11 P0-BLOCKING documentation issues have been resolved.
 The GoAssist v3.0 documentation set is now operationally deployable.
 
+## Session 13 (2024-12-24): P1 Batch Resolution (5 issues)
+- Completed ADD-02: Reference TMF for 24h soak definition
+  - Already resolved during CD-02, verified line 97 has cross-reference
+- Completed IMP-03: Cross-reference PRD for soak requirement
+  - Already resolved during CD-02, verified line 400 has cross-reference
+- Completed IMP-04: Specify context rollover threshold in Implementation
+  - Added "context rollover threshold: 7500 tokens (per TMF v3.0 section 3.2)"
+  - Updated Implementation-v3.0.md section 5.2, line 288
+- Completed PRD-01: Resolve TTFA percentile with TMF
+  - Updated PRD to "≤ 250ms p95 (per TMF v3.0 section 1.2; p50 tracked for optimization)"
+  - Aligns with TMF authority, cross-reference added
+- Completed CD-01: Resolve TTFA percentile cross-document
+  - Resolved by TMF-08 (TMF specifies p95) and PRD-01 alignment
+  - Single source of truth established
+
 ## Next Steps
-1. Begin P1 issues (15 remaining)
+1. Continue P1 issues (10 remaining)
 2. Priority order by impact and dependencies
 3. Validate all changes preserve TMF authority hierarchy

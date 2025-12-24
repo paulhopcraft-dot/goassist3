@@ -142,8 +142,8 @@ Everything in Voice Mode, plus:
 ## 7. Non-Functional Requirements (Acceptance Criteria)
 
 ### 7.1 Latency & responsiveness
-- **TTFA (time to first audible response):** ≤ 250ms (target; measured p50 under normal load)
-- **Barge-in cancel:** ≤ 150ms (audible stop at client)
+- **TTFA (time to first audible response):** ≤ 250ms p95 (per TMF v3.0 section 1.2; p50 tracked for optimization)
+- **Barge-in cancel:** ≤ 150ms (audible stop at client, per TMF v3.0 section 4.2)
 - The agent must start speaking before full response completion (streaming)
 
 ### 7.2 Reliability

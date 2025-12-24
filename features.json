@@ -427,7 +427,9 @@
         "No ambiguity about which definition applies",
         "Automatically inherits TMF clarifications"
       ],
-      "passes": false,
+      "passes": true,
+      "verified_at": "2024-12-24",
+      "resolution": "Cross-reference already added during CD-02 resolution. Line 97 now reads 'stable long-run behavior (24h soak as defined in TMF v3.0 section 7.3)'. Uses standard format and inherits TMF definition.",
       "blocked_by": ["TMF-07", "CD-02"],
       "blocks": []
     },
@@ -447,7 +449,9 @@
         "Percentile alignment clarified",
         "If PRD adds detail TMF lacks, explicitly noted as interpretation"
       ],
-      "passes": false,
+      "passes": true,
+      "verified_at": "2024-12-24",
+      "resolution": "Updated PRD section 7.1 to align with TMF p95 contract. Now reads 'TTFA ≤ 250ms p95 (per TMF v3.0 section 1.2; p50 tracked for optimization)'. TMF authority preserved, percentile aligned, cross-reference added.",
       "blocked_by": ["TMF-08"],
       "blocks": []
     },
@@ -627,7 +631,9 @@
         "Clear test validates product requirement",
         "Linked to CD-02 definition"
       ],
-      "passes": false,
+      "passes": true,
+      "verified_at": "2024-12-24",
+      "resolution": "Cross-reference already added during CD-02 resolution. Line 400 now reads 'Soak test definition per TMF v3.0 section 7.3 (30% active duty cycle, mixed load)'. Links to canonical TMF definition which also satisfies PRD 7.2.",
       "blocked_by": ["CD-02"],
       "blocks": []
     },
@@ -647,7 +653,9 @@
         "Matches TMF-09 resolution",
         "Code configuration file referenced"
       ],
-      "passes": false,
+      "passes": true,
+      "verified_at": "2024-12-24",
+      "resolution": "Added explicit 7500 token threshold to section 5.2 context management. Now reads 'context rollover threshold: 7500 tokens (per TMF v3.0 section 3.2)'. Matches TMF-09 resolution and references context_rollover.py implementation.",
       "blocked_by": ["TMF-09"],
       "blocks": []
     },
@@ -888,7 +896,9 @@
         "No contradiction between documents",
         "Single source of truth for percentile contract"
       ],
-      "passes": false,
+      "passes": true,
+      "verified_at": "2024-12-24",
+      "resolution": "Resolved by TMF-08 (TMF now specifies p95) and PRD-01 (PRD updated to align). TMF is source of truth for p95 contract, PRD references TMF section 1.2 and notes p50 tracked for optimization. No contradiction remains.",
       "blocked_by": ["TMF-08"],
       "blocks": []
     },

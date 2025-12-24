@@ -285,6 +285,7 @@ Implement **context_rollover.py**:
 - pinned prefix (system + safety + canonical persona)
 - rolling window turns
 - summary state block on rollover
+- **context rollover threshold: 7500 tokens** (per TMF v3.0 section 3.2)
 - strict 8192 cap (reject or summarize; never silently overflow)
 
 ### 5.3 Backpressure policy (multi-session)
