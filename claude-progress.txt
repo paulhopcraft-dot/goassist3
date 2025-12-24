@@ -11,10 +11,10 @@
 
 ## Status
 - Total features: 45
-- P0-BLOCKING: 0 remaining (10 complete) ✅ ALL P0 RESOLVED
+- P0-BLOCKING: 0 remaining (11 complete) ✅ ALL P0 RESOLVED
 - P1: 15
 - P2: 10
-- Completed: 10
+- Completed: 11
 - In Progress: 0
 - Blocked: 0
 
@@ -122,8 +122,18 @@
   - Updated TMF-v3.0-Addendum-A.md lines 23-34
   - Unblocked TMF-04
 
+## Session 12 (2024-12-24): Eleventh Resolution - OPS-08 (missed P0)
+- Completed OPS-08: Define recovery procedure authority
+  - Added Recovery Authority Matrix table to section 11 (lines 348-364)
+  - 7 procedures covered: safe restart, animation disable, LLM restart, force session termination, full node restart, rollback deployment, data recovery
+  - Authorized roles: on-call engineer, SRE lead, engineering lead
+  - Approval requirements specified (Yes/No with approver identity)
+  - Escalation contacts defined for each procedure
+  - Added operational rules: autonomous execution during incidents, 15-min approval timeout, logging requirements, post-incident review triggers
+  - Updated Ops-Runbook-v3.0.md lines 348-364
+
 ## MILESTONE: ALL P0-BLOCKING ISSUES RESOLVED
-All 10 P0-BLOCKING documentation issues have been resolved.
+All 11 P0-BLOCKING documentation issues have been resolved.
 The GoAssist v3.0 documentation set is now operationally deployable.
 
 ## Next Steps

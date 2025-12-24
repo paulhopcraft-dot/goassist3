@@ -345,6 +345,24 @@ systemctl status goassist-inference
 
 ## 11. Recovery Procedures
 
+### Recovery Authority Matrix
+
+| Procedure | Authorized Role | Approval Required | Escalation Contact |
+|-----------|-----------------|-------------------|-------------------|
+| Safe restart (11.1) | On-call engineer | No | SRE lead if >2 restarts/hour |
+| Animation disable (11.2) | On-call engineer | No | Engineering lead if >1 hour |
+| LLM service restart (11.3) | On-call engineer | No | SRE lead if auto-restart fails |
+| Force session termination | On-call engineer | Yes (SRE lead) | Engineering director |
+| Full node restart | SRE lead | Yes (Engineering lead) | Engineering director |
+| Rollback deployment | SRE lead | No | Engineering director if >30 min |
+| Data recovery | Engineering lead | Yes (Engineering director) | CTO |
+
+**Rules:**
+- On-call engineer may execute "No approval" procedures autonomously during incidents
+- Procedures requiring approval: contact approver via PagerDuty; if no response in 15 minutes, escalate
+- All recovery actions must be logged in incident channel with timestamp and outcome
+- Post-incident review required for any procedure executed more than twice in 24 hours
+
 ### 11.1 Safe restart (Inference)
 - stop accepting new sessions
 - allow active sessions to end or force cancel
