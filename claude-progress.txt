@@ -11,12 +11,12 @@
 
 ## Status
 - Total features: 45
-- P0-BLOCKING: 6 remaining (4 complete)
+- P0-BLOCKING: 5 remaining (5 complete)
 - P1: 15
 - P2: 10
-- Completed: 4
+- Completed: 5
 - In Progress: 0
-- Blocked: 0 (CD-02 now unblocked by TMF-07, ADD-02 blocked only by CD-02)
+- Blocked: 0 (ADD-02 and IMP-03 now unblocked by CD-02)
 
 ## Session 2 (2024-12-22): First Resolution - TMF-09
 - ✅ Completed TMF-09: Define context rollover threshold
@@ -56,8 +56,19 @@
   - Updated TMF-v3.0.md section 7.3, lines 214-221
   - Unblocked CD-02 (can now add cross-references to this definition)
 
+## Session 6 (2024-12-23): Fifth Resolution - CD-02
+- ✅ Completed CD-02: Define 24-hour soak test consistently (cross-document)
+  - Added cross-references to TMF v3.0 section 7.3 in all 5 documents
+  - PRD-v3.0.md: lines 150, 194, 212 (3 references)
+  - Implementation-v3.0.md: line 400
+  - Ops-Runbook-v3.0.md: line 367
+  - Parallel-Dev-v3.0.md: lines 43, 121 (2 references)
+  - TMF-v3.0-Addendum-A.md: line 84
+  - Used standard format: "(per TMF v3.0 section 7.3)"
+  - Completed soak definition chain: TMF-07 → CD-02 → (ADD-02, IMP-03 unblocked)
+
 ## Next Steps
-1. Continue with remaining P0-BLOCKING issues (6 left)
-2. Priority candidates: CD-02 (now unblocked), TMF-11 (animation frames), OPS-06 (env vars)
-3. CD-02 should be next to complete soak definition chain (TMF-07 → CD-02 → ADD-02)
+1. Continue with remaining P0-BLOCKING issues (5 left)
+2. Priority candidates: TMF-11 (animation frames), OPS-06 (env vars), TMF-10 (latency overage)
+3. OPS-08 (recovery authority), CD-04 (model substitution liability) also available
 4. Validate all changes preserve TMF authority hierarchy
