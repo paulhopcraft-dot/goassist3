@@ -1,0 +1,48 @@
+{
+  "recommendations": [
+    // Claude Code extension
+    "anthropic.claude-code",
+
+    // Python
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "charliermarsh.ruff",
+
+    // TypeScript/JavaScript
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+
+    // Go
+    "golang.go",
+
+    // Rust
+    "rust-lang.rust-analyzer",
+
+    // General development
+    "editorconfig.editorconfig",
+    "eamodio.gitlens",
+    "github.vscode-pull-request-github",
+    "ms-azuretools.vscode-docker",
+
+    // Markdown
+    "yzhang.markdown-all-in-one",
+    "davidanson.vscode-markdownlint",
+
+    // Code quality
+    "streetsidesoftware.code-spell-checker",
+    "aaron-bond.better-comments",
+    "gruntfuggly.todo-tree",
+
+    // Testing
+    "hbenl.vscode-test-explorer",
+    "littlefoxteam.vscode-python-test-adapter",
+
+    // Utilities
+    "christian-kohler.path-intellisense",
+    "visualstudioexptteam.vscodeintellicode",
+    "formulahendry.auto-rename-tag",
+    "wayou.vscode-todo-highlight"
+  ],
+
+  "unwantedRecommendations": []
+}

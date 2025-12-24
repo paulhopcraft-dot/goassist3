@@ -1,0 +1,69 @@
+// Prisma schema for TypeScript/Node.js projects
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Example models - customize for your application
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  posts     Post[]
+
+  @@map("users")
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  authorId  String   @map("author_id")
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([authorId])
+  @@map("posts")
+}
+
+// Common patterns:
+
+// Enum example
+enum Role {
+  USER
+  ADMIN
+  MODERATOR
+
+  @@map("role")
+}
+
+// JSON field example
+// metadata Json?
+
+// Many-to-many relationship example
+// model Category {
+//   id    String @id @default(cuid())
+//   name  String
+//   posts PostCategory[]
+// }
+
+// model PostCategory {
+//   postId     String
+//   categoryId String
+//   post       Post     @relation(fields: [postId], references: [id])
+//   category   Category @relation(fields: [categoryId], references: [id])
+
+//   @@id([postId, categoryId])
+// }
