@@ -345,7 +345,9 @@
         "Contract validation requirement stated",
         "No ambiguity about whether model failure is TMF or Implementation issue"
       ],
-      "passes": false,
+      "passes": true,
+      "verified_at": "2024-12-24",
+      "resolution": "Updated ASR (line 97) and TTS (line 104) notes to explicitly state any model meeting behavioral requirements and section 1.2 contracts is permitted. Added cross-reference to Addendum A section A1.1 for validation and liability. Clear: TMF owns contracts, Implementation owns model choice within contracts.",
       "blocked_by": [],
       "blocks": ["CD-04"]
     },
@@ -611,7 +613,9 @@
         "Logging/export policy specified",
         "Privacy and debugging needs balanced"
       ],
-      "passes": false,
+      "passes": true,
+      "verified_at": "2024-12-24",
+      "resolution": "Added 'Logging & export policy' subsection to SCOS section 6 (lines 319-323). Clarifies: MAY log for debugging (internal only), MUST NOT export to external systems, debug logs auto-expire 7 days, production metrics may aggregate but not store individual signals. Balances debugging needs with privacy.",
       "blocked_by": [],
       "blocks": ["CD-03"]
     },
@@ -815,7 +819,9 @@
         "Alert can be configured without guessing",
         "Consistent with operational best practices"
       ],
-      "passes": false,
+      "passes": true,
+      "verified_at": "2024-12-24",
+      "resolution": "Specified threshold as '> 3 per hour' with configurable env var 'ALERT_CRASH_LOOP_THRESHOLD'. Default of 3 is standard operational practice. Updated section 10.2, line 342.",
       "blocked_by": [],
       "blocks": []
     },

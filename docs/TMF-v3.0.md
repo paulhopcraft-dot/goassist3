@@ -94,14 +94,14 @@ Problem: fixed context windows create latency spikes when history is rebuilt.
 - Must emit word/segment timestamps sufficient for barge-in timing.
 - Licensing must permit commercial use.
 
-> ASR model choice is an implementation decision, but streaming behavior is mandatory.
+> ASR model choice is an implementation decision; any model that meets the above behavioral requirements and satisfies contracts in section 1.2 is permitted. Validation and liability per Addendum A section A1.1.
 
 ### 3.4 TTS (streaming + interruptible)
 - Must support streaming synthesis (audio can start before full text completion).
 - Must support hard stop/cancel without long tail buffering.
 - Licensing must permit commercial use.
 
-> TTS engine choice is an implementation decision; only behavior is locked here.
+> TTS engine choice is an implementation decision; any engine that meets the above behavioral requirements and satisfies contracts in section 1.2 is permitted. Validation and liability per Addendum A section A1.1.
 
 ### 3.5 Facial animation (audio-driven, pluggable)
 - Engine consumes the same audio stream that is emitted to the user (or a time-aligned copy).

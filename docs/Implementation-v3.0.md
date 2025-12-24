@@ -316,7 +316,13 @@ SCOS outputs are used only to adjust:
 - clarification strategy
 - when to ask confirmation questions
 
-SCOS must not label emotions (“angry”, “sad”, etc.) and must not attempt persuasion.
+**Logging & export policy:**
+- SCOS signals MAY be logged for debugging and system tuning (internal use only)
+- SCOS signals MUST NOT be exported to external analytics, third-party systems, or stored in user-facing logs
+- Debug logs containing SCOS data should be treated as ephemeral (auto-expire within 7 days)
+- Production metrics may aggregate SCOS-derived statistics (e.g., "avg clarification rate") but not individual session signals
+
+SCOS must not label emotions ("angry", "sad", etc.) and must not attempt persuasion.
 
 ---
 

@@ -12,9 +12,9 @@
 ## Status
 - Total features: 45
 - P0-BLOCKING: 0 remaining (11 complete) ✅ ALL P0 RESOLVED
-- P1: 10 remaining (5 complete)
+- P1: 7 remaining (8 complete)
 - P2: 10
-- Completed: 16
+- Completed: 19
 - In Progress: 0
 - Blocked: 0
 
@@ -151,7 +151,20 @@ The GoAssist v3.0 documentation set is now operationally deployable.
   - Resolved by TMF-08 (TMF specifies p95) and PRD-01 alignment
   - Single source of truth established
 
+## Session 14 (2024-12-24): P1 Batch #2 (3 issues)
+- Completed IMP-02: Clarify SCOS usage constraints
+  - Added logging & export policy subsection to SCOS section
+  - MAY log for debugging (internal), MUST NOT export externally
+  - Debug logs auto-expire 7 days, production metrics aggregate only
+  - Unblocked CD-03
+- Completed TMF-04: Clarify model choice authority
+  - Updated ASR/TTS notes to explicitly permit any compliant model
+  - Added cross-reference to Addendum A section A1.1 for validation/liability
+- Completed OPS-03: Specify crash loop alert threshold
+  - Set threshold to "> 3 per hour" with configurable env var
+  - Standard operational practice
+
 ## Next Steps
-1. Continue P1 issues (10 remaining)
-2. Priority order by impact and dependencies
+1. Continue P1 issues (7 remaining)
+2. Consider CD-03 (now unblocked by IMP-02)
 3. Validate all changes preserve TMF authority hierarchy

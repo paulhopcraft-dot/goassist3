@@ -339,7 +339,7 @@ systemctl status goassist-inference
 - TTFA p95 > 400ms for >5 minutes
 - barge-in p95 > 250ms for >2 minutes
 - VRAM usage within 1GB of cap
-- crash loop (restart count > N per hour)
+- crash loop (restart count > 3 per hour, configurable via `ALERT_CRASH_LOOP_THRESHOLD`)
 
 ---
 
