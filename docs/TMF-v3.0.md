@@ -39,6 +39,7 @@ This TMF is written to be engineer-trustworthy. No fictional SDKs. No hand-wavy 
 ### 1.3 Single-node reference hardware
 - **Reference node:** 2× RTX 4090 (24GB each)
 - **Per-GPU hard working cap:** 20GB VRAM (leave headroom for fragmentation, drivers, spikes)
+- **VRAM scaling policy:** Leave **4GB headroom** regardless of GPU total VRAM. This headroom accommodates driver overhead, memory fragmentation, and transient spikes. Examples: 24GB GPU → 20GB cap; 40GB GPU → 36GB cap; 80GB GPU → 76GB cap. Implementation: `working_cap = total_vram - 4GB`.
 
 > Note: This TMF is not locked to a single GPU SKU forever. It defines *contracts*. The reference hardware is the current baseline for a predictable production build.
 

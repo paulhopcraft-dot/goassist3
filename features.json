@@ -329,7 +329,9 @@
         "Works predictably on different GPU sizes (e.g., A100 40GB, H100 80GB)",
         "Implementation can calculate VRAM limit programmatically"
       ],
-      "passes": false,
+      "passes": true,
+      "verified_at": "2024-12-25",
+      "resolution": "Added VRAM scaling policy to section 1.3. Fixed 4GB headroom regardless of GPU size. Formula: working_cap = total_vram - 4GB. Examples: 24GB→20GB, 40GB→36GB, 80GB→76GB.",
       "blocked_by": [],
       "blocks": []
     },
