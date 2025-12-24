@@ -11,12 +11,12 @@
 
 ## Status
 - Total features: 45
-- P0-BLOCKING: 5 remaining (5 complete)
+- P0-BLOCKING: 4 remaining (6 complete)
 - P1: 15
 - P2: 10
-- Completed: 5
+- Completed: 6
 - In Progress: 0
-- Blocked: 0 (ADD-02 and IMP-03 now unblocked by CD-02)
+- Blocked: 0
 
 ## Session 2 (2024-12-22): First Resolution - TMF-09
 - ✅ Completed TMF-09: Define context rollover threshold
@@ -67,8 +67,17 @@
   - Used standard format: "(per TMF v3.0 section 7.3)"
   - Completed soak definition chain: TMF-07 → CD-02 → (ADD-02, IMP-03 unblocked)
 
+## Session 7 (2024-12-23): Sixth Resolution - TMF-11
+- ✅ Completed TMF-11: Specify animation heartbeat frame threshold
+  - Specified 100ms time-based threshold for slow-freeze trigger
+  - Approximately 3 frames at 30fps, 6 frames at 60fps
+  - Referenced 30-60Hz animation cadence from section 3.1
+  - Added implementation note: use monotonic timer, not frame count
+  - Time-based approach is FPS-agnostic and robust
+  - Updated TMF-v3.0.md section 4.3, lines 145-151
+
 ## Next Steps
-1. Continue with remaining P0-BLOCKING issues (5 left)
-2. Priority candidates: TMF-11 (animation frames), OPS-06 (env vars), TMF-10 (latency overage)
-3. OPS-08 (recovery authority), CD-04 (model substitution liability) also available
+1. Continue with remaining P0-BLOCKING issues (4 left)
+2. Priority candidates: TMF-10 (latency overage), OPS-06 (env vars), OPS-08 (recovery authority)
+3. CD-04 (model substitution liability) also available
 4. Validate all changes preserve TMF authority hierarchy
