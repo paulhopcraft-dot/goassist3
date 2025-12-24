@@ -364,6 +364,7 @@ A conservative budgeting model:
 - [ ] Avatar degradation verified (voice continues)
 
 ### 14.2 24h soak checklist
+Per TMF v3.0 section 7.3: 24h mixed-load operation, 30% active duty cycle.
 - [ ] 24h soak run recorded
 - [ ] No VRAM creep beyond threshold
 - [ ] No increasing TTFA drift

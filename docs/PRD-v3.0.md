@@ -147,7 +147,7 @@ Everything in Voice Mode, plus:
 - The agent must start speaking before full response completion (streaming)
 
 ### 7.2 Reliability
-- Continuous runtime target: **24 hours** without manual intervention
+- Continuous runtime target: **24 hours** without manual intervention (soak test defined in TMF v3.0 section 7.3)
 - Automatic recovery from transient failures (network jitter, dropped animation frames)
 - If Avatar Mode fails, Voice Mode must continue.
 
@@ -191,7 +191,7 @@ The product must expose:
 - User-rated “responsiveness” score
 
 ### 10.2 Operational metrics
-- 24h soak pass rate
+- 24h soak pass rate (per TMF v3.0 section 7.3)
 - Mean time between restarts
 - Degradation frequency (Avatar Mode drop/relax) under normal conditions
 
@@ -209,7 +209,7 @@ The product must expose:
 - Avatar Mode (optional) with graceful degradation
 - Admin controls for config + diagnostics
 - Basic knowledge grounding (RAG)
-- 24h soak operational readiness
+- 24h soak operational readiness (per TMF v3.0 section 7.3)
 
 ### v3.x (post v3.0) candidates:
 - More agent personas / templates

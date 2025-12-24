@@ -81,7 +81,7 @@ TMF v3.0 names **vLLM** as the reference serving runtime.
 Alternative serving stacks are permitted if they provide:
 - equivalent streaming
 - equivalent cancel/abort semantics
-- stable long-run behavior (24h soak)
+- stable long-run behavior (24h soak as defined in TMF v3.0 section 7.3)
 - no hidden buffering that breaks TTFA or barge-in targets
 
 This addendum does not recommend switching runtimes by default. It only permits it.

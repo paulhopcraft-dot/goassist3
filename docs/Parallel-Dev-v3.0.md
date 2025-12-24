@@ -40,7 +40,7 @@ If a lower doc conflicts with a higher doc, the lower doc is wrong.
 | **T3 Audio Pipeline** | Realtime | WebRTC audio in/out, packetization, barge-in | Speech-first loop |
 | **T4 Control Signals (SCOS)** | Product Eng | Conversation adaptation signals (non-emotional) | Verbosity/backchannel policy |
 | **T5 RAG/Tools** | Backend | Retrieval + tool calling | Grounded responses |
-| **T6 Infra/Observability** | Infra/SRE | Metrics, logging, soak tooling | 24h survivability |
+| **T6 Infra/Observability** | Infra/SRE | Metrics, logging, soak tooling | 24h survivability (TMF 7.3) |
 | **T7 Admin/UI** | Full-stack | Admin config + diagnostics | Operator control plane |
 
 **Hard rule:** No track may introduce emotion modeling, identity training, or “persuasion systems.”
@@ -118,7 +118,7 @@ Deliverables:
 ### Phase 3 — Hardening (Weeks 13–16)
 **Goal:** production survivability.
 
-- 8h soak, then 24h soak
+- 8h soak, then 24h soak (per TMF v3.0 section 7.3)
 - chaos tests (drop animation service, degrade network)
 - confirm graceful degradation rules
 

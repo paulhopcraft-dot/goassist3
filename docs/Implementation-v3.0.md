@@ -397,6 +397,7 @@ Each service exposes:
 - enforce backpressure policy
 
 ### 10.3 Soak tests (24h)
+Soak test definition per TMF v3.0 section 7.3 (30% active duty cycle, mixed load).
 - run continuous sessions (scripted) + idle periods
 - monitor:
   - VRAM creep
