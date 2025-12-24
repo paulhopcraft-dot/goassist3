@@ -172,7 +172,9 @@
         "Hard timeout policy defined if applicable",
         "Observability requirements specified (logging, metrics, alerts)"
       ],
-      "passes": false,
+      "passes": true,
+      "verified_at": "2024-12-23",
+      "resolution": "Added section 6.1 with global overage policy: log degradation, continue processing, apply degradation order (animation→verbosity, audio never). Hard timeout: 500ms before first audio byte triggers turn reset. Metrics: ttfa_overage_count{component}, ttfa_actual_ms{component}.",
       "blocked_by": [],
       "blocks": []
     },

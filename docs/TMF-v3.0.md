@@ -199,6 +199,17 @@ Notes:
 - Under worse network, audio remains continuous; visuals yield first.
 - Track both p50 and p95 metrics; section 1.2 defines the p95 contract, this table provides p50 baseline for capacity planning.
 
+### 6.1 Overage behavior
+When any component exceeds its budget:
+1. **Log degradation event** with component name, actual latency, and budget.
+2. **Continue processing** — never fail a turn due to latency overage alone.
+3. **Apply degradation order** (per section 1.1): animation yields first, then verbosity, audio never yields.
+4. **Emit metrics**: `ttfa_overage_count{component}`, `ttfa_actual_ms{component}`.
+
+**Hard timeout policy:**
+- If cumulative latency exceeds 500ms before first audio byte, log a `turn_timeout` event and reset the turn state.
+- The client receives a brief acknowledgment tone or silence; no partial response is emitted.
+
 ---
 
 ## 7. Failure-Mode Matrix (2h / 8h / 24h)
