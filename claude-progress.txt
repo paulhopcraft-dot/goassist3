@@ -11,10 +11,10 @@
 
 ## Status
 - Total features: 45
-- P0-BLOCKING: 3 remaining (7 complete)
+- P0-BLOCKING: 2 remaining (8 complete)
 - P1: 15
 - P2: 10
-- Completed: 7
+- Completed: 8
 - In Progress: 0
 - Blocked: 0
 
@@ -85,8 +85,24 @@
   - Preserves audio-first philosophy with observability
   - Updated TMF-v3.0.md section 6, lines 202-211
 
+## Session 9 (2024-12-24): Eighth Resolution - OPS-06
+- Completed OPS-06: Document environment variable requirements
+  - Added comprehensive requirements table after .env example in section 6.1
+  - 22 variables across 7 categories: API, Session, LLM, ASR, TTS, Animation, WebRTC
+  - Each variable marked Required/Optional/Conditional
+  - Valid ranges specified (ports, timeouts, GPU memory, etc.)
+  - Default values documented where applicable
+  - Error behaviors defined (fail startup, use default, warn)
+  - TMF cross-references for context tokens, audio packets, animation timing
+  - Updated Ops-Runbook-v3.0.md lines 156-195
+
+## Status Update
+- Total features: 45
+- P0-BLOCKING: 2 remaining (8 complete)
+- Completed: 8
+
 ## Next Steps
-1. Continue with remaining P0-BLOCKING issues (3 left)
-2. Remaining: OPS-06 (env vars), OPS-08 (recovery authority), CD-04 (model substitution)
-3. All 3 have no blockers - can resolve in any order
+1. Continue with remaining P0-BLOCKING issues (2 left)
+2. Remaining: PAR-03 (ownership boundary approval), CD-04 (model substitution)
+3. Both have no blockers - can resolve in either order
 4. Validate all changes preserve TMF authority hierarchy

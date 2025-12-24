@@ -153,6 +153,47 @@ WEBRTC_TURN_USERNAME=<user>
 WEBRTC_TURN_PASSWORD=<pass>
 ```
 
+#### Environment Variable Requirements
+
+| Variable | Required | Valid Range | Default | Error Behavior |
+|----------|----------|-------------|---------|----------------|
+| **API** |||||
+| `API_HOST` | Optional | Valid IP or `0.0.0.0` | `0.0.0.0` | Use default |
+| `API_PORT` | Optional | 1024–65535 | `8081` | Use default |
+| `LOG_LEVEL` | Optional | `DEBUG`, `INFO`, `WARN`, `ERROR` | `INFO` | Use default |
+| **Session** |||||
+| `MAX_CONCURRENT_SESSIONS` | Required | 1–100 (GPU-dependent) | — | Fail startup with config error |
+| `SESSION_IDLE_TIMEOUT_S` | Optional | 60–3600 | `300` | Use default |
+| **LLM** |||||
+| `LLM_MODEL_PATH` | Required | Valid file path | — | Fail startup: "LLM model not found" |
+| `LLM_MAX_CONTEXT_TOKENS` | Optional | 1024–8192 | `8192` | Use default (per TMF v3.0 section 3.2) |
+| `LLM_PREFIX_CACHING` | Optional | `true`, `false` | `true` | Use default |
+| `LLM_VRAM_CAP_GB` | Optional | 8–80 (GPU-dependent) | `20` | Use default; warn if exceeds available |
+| **ASR** |||||
+| `ASR_MODEL_PATH` | Required | Valid file path | — | Fail startup: "ASR model not found" |
+| `VAD_ENGINE` | Optional | `silero`, `webrtc` | `silero` | Use default |
+| **TTS** |||||
+| `TTS_ENGINE` | Required | Engine identifier | — | Fail startup: "TTS engine not specified" |
+| `TTS_MODEL_PATH` | Required | Valid file path | — | Fail startup: "TTS model not found" |
+| `AUDIO_PACKET_MS` | Optional | 10–40 | `20` | Use default (per TMF v3.0 section 3.1) |
+| `AUDIO_OVERLAP_MS` | Optional | 0–20 | `5` | Use default |
+| **Animation** |||||
+| `ANIMATION_ENABLED` | Optional | `true`, `false` | `true` | Use default |
+| `ANIMATION_ENGINE` | Conditional | `audio2face`, `lam` | `audio2face` | Required if `ANIMATION_ENABLED=true` |
+| `ANIMATION_FALLBACK` | Optional | `lam`, `none` | `lam` | Use default |
+| `ANIMATION_DROP_IF_LAG_MS` | Optional | 50–200 | `120` | Use default |
+| `ANIMATION_SLOW_FREEZE_MS` | Optional | 100–300 | `150` | Use default (per TMF v3.0 section 4.3) |
+| **WebRTC** |||||
+| `WEBRTC_STUN_SERVER` | Optional | Valid STUN URI | `stun:stun.l.google.com:19302` | Use default |
+| `WEBRTC_TURN_SERVER` | Optional | Valid TURN URI | — | Skip TURN if unset |
+| `WEBRTC_TURN_USERNAME` | Conditional | Non-empty string | — | Required if `WEBRTC_TURN_SERVER` set; fail startup if missing |
+| `WEBRTC_TURN_PASSWORD` | Conditional | Non-empty string | — | Required if `WEBRTC_TURN_SERVER` set; fail startup if missing |
+
+**Notes:**
+- "Required" variables must be set or startup fails with a clear error message.
+- "Conditional" variables are required only when their parent feature is enabled.
+- All paths are validated at startup; missing files cause immediate failure with actionable error.
+
 ### 6.2 Render Pod env (Profile C)
 - UE project path
 - resolution / fps targets
