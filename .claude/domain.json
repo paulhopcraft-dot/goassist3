@@ -1,0 +1,31 @@
+{
+  "domain": "general",
+  "agents": {
+    "enabled": ["test-specialist", "code-reviewer"],
+    "auto_trigger": {
+      "test-specialist": ["tdd", "verify"],
+      "code-reviewer": ["review", "verify"]
+    }
+  },
+  "quality_gates": {
+    "min_test_coverage": 80,
+    "max_complexity": 10,
+    "security_scan": "enabled"
+  },
+  "code_standards": {
+    "style_guide": "airbnb",
+    "linting": "enabled",
+    "formatting": "prettier",
+    "type_checking": "strict"
+  },
+  "testing": {
+    "frameworks": ["jest", "vitest"],
+    "patterns": ["AAA", "arrange-act-assert"],
+    "coverage_targets": {
+      "statements": 80,
+      "branches": 75,
+      "functions": 80,
+      "lines": 80
+    }
+  }
+}
