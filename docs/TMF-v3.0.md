@@ -31,6 +31,7 @@ This TMF is written to be engineer-trustworthy. No fictional SDKs. No hand-wavy 
 - **Audio chunk size:** ≤ 20ms per packet
 - **Audio overlap:** 5ms sliding overlap (for decoder cross-fade)
 - **TTFA (time-to-first-audio):** ≤ 250ms p95 (steady-state operational target, not "demo mode"). p50 and p95 should both be tracked; the contract is satisfied when p95 ≤ 250ms under normal load.
+  - **Steady-state definition:** A session reaches steady-state after the first 3 conversation turns, OR after 60 seconds of system operation since session start, whichever comes first. Measurements taken before steady-state (e.g., cold-start, first turn) are excluded from contract compliance metrics but should be tracked separately as "warmup" latency.
 - **Barge-in cancel:** ≤ 150ms from user speech detection to halted agent playback
 - **Animation latency target:** < 25ms (best-effort; may be dropped under load)
 - **Animation yield rule:** if animation lag > 120ms, animation yields (drops/relaxes), audio continues.

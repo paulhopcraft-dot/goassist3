@@ -307,7 +307,9 @@
         "Testing methodology can determine when steady-state is reached",
         "Clearly distinguishes from warm-up or demo scenarios"
       ],
-      "passes": false,
+      "passes": true,
+      "verified_at": "2024-12-25",
+      "resolution": "Added steady-state definition to section 1.2 under TTFA. Threshold: 3 conversation turns OR 60 seconds since session start, whichever first. Warmup latency tracked separately from contract metrics.",
       "blocked_by": [],
       "blocks": []
     },
