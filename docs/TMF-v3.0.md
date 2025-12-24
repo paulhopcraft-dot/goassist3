@@ -177,7 +177,7 @@ A “session” is an independent conversational state machine with:
   - fair scheduling across sessions
 - Backpressure must be explicit:
   - if overloaded, degrade visuals first
-  - then degrade response length/verbosity (product policy)
+  - then degrade response length/verbosity (TMF owns degradation order; PRD may configure verbosity thresholds within this constraint)
   - audio continuity always preserved
 
 ### 5.3 Capacity planning note

@@ -373,7 +373,9 @@
         "No possibility of PRD contradicting TMF on degradation order",
         "Degradation sequence unambiguous for implementation"
       ],
-      "passes": false,
+      "passes": true,
+      "verified_at": "2024-12-25",
+      "resolution": "Replaced '(product policy)' with '(TMF owns degradation order; PRD may configure verbosity thresholds within this constraint)'. TMF owns the order (visuals→verbosity→audio never), PRD can tune thresholds.",
       "blocked_by": [],
       "blocks": []
     },
