@@ -2,25 +2,31 @@
 description: Run security analysis on codebase
 ---
 
-Run comprehensive security scan:
+<instructions>
+Run comprehensive security scan covering secrets detection, dependency vulnerabilities, code security issues, authentication/authorization, and data handling.
+</instructions>
 
-## 1. Secrets Detection
-
-Check for hardcoded secrets:
+<scan_categories>
+<category name="Secrets Detection">
+<description>Check for hardcoded secrets:</description>
+<items>
 - API keys
 - Passwords
 - Tokens
 - Connection strings
 - Private keys
-
+</items>
+<command>
 ```bash
 # Files to check
 grep -rn "password\|secret\|api_key\|token\|private_key" --include="*.py" --include="*.ts" --include="*.js" --include="*.env*" .
 ```
+</command>
+</category>
 
-## 2. Dependency Vulnerabilities
-
-Check for known vulnerabilities:
+<category name="Dependency Vulnerabilities">
+<description>Check for known vulnerabilities:</description>
+<commands>
 ```bash
 # Python
 pip-audit
@@ -31,10 +37,11 @@ npm audit
 # Rust
 cargo audit
 ```
+</commands>
+</category>
 
-## 3. Code Security Issues
-
-Check for:
+<category name="Code Security Issues">
+<checklist>
 - [ ] SQL injection (raw queries without parameterization)
 - [ ] XSS vulnerabilities (unsanitized user input in HTML)
 - [ ] CSRF protection missing
@@ -42,24 +49,30 @@ Check for:
 - [ ] Path traversal
 - [ ] Command injection
 - [ ] Insecure file uploads
+</checklist>
+</category>
 
-## 4. Authentication & Authorization
-
+<category name="Authentication & Authorization">
+<checklist>
 - [ ] Auth required on all sensitive endpoints
 - [ ] Password hashing (bcrypt/argon2)
 - [ ] Session management secure
 - [ ] CORS configured correctly
 - [ ] Rate limiting present
+</checklist>
+</category>
 
-## 5. Data Handling
-
+<category name="Data Handling">
+<checklist>
 - [ ] PII/sensitive data encrypted at rest
 - [ ] HTTPS enforced
 - [ ] Logging doesn't include secrets
 - [ ] Input validation on all endpoints
+</checklist>
+</category>
+</scan_categories>
 
-## Output Format
-
+<output_format>
 ```
 Security Scan Results
 =====================
@@ -78,3 +91,4 @@ Security Scan Results
 
 Summary: [X critical, Y high, Z medium issues]
 ```
+</output_format>

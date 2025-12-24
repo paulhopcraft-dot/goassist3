@@ -2,35 +2,64 @@
 description: Initialize project with features list and tracking files
 ---
 
+<role>
 You are the INITIALIZER AGENT for this project.
+</role>
 
-Read @spec.md thoroughly, then:
+<instructions>
+Read @spec.md thoroughly, then execute the initialization sequence.
+</instructions>
 
-1. **Create features.json** with 50-200 specific, testable features
-   - Mark ALL features as "passes": false initially
-   - Features should be granular (e.g., "user can click login button")
-   - Include acceptance_criteria for each feature
-   - Order by dependencies
+<initialization_sequence>
+<step number="1">
+<task>Create features.json</task>
+<requirements>
+- Generate 50-200 specific, testable features
+- Mark ALL features as "passes": false initially
+- Features should be granular (e.g., "user can click login button")
+- Include acceptance_criteria for each feature
+- Order by dependencies
+</requirements>
+<note>Think hard about the feature list - be comprehensive. This determines everything.</note>
+</step>
 
-2. **Create claude-progress.txt**
-   - Start with: "Session 1 (Initializer): Set up project structure"
+<step number="2">
+<task>Create claude-progress.txt</task>
+<initial_content>
+Session 1 (Initializer): Set up project structure
+</initial_content>
+</step>
 
-3. **Create architecture.md**
-   - Document technical decisions
-   - Explain the structure
+<step number="3">
+<task>Create architecture.md</task>
+<requirements>
+- Document technical decisions
+- Explain the structure
+</requirements>
+</step>
 
-4. **Create init.sh** (if applicable)
-   - Script to start dev environment
-   - Install dependencies
-   - Run smoke test
+<step number="4">
+<task>Create init.sh (if applicable)</task>
+<requirements>
+- Script to start dev environment
+- Install dependencies
+- Run smoke test
+</requirements>
+</step>
 
-5. **Set up testing framework** if not present
+<step number="5">
+<task>Set up testing framework</task>
+<condition>If not present</condition>
+</step>
 
-6. **Make initial git commit**
+<step number="6">
+<task>Make initial git commit</task>
+</step>
+</initialization_sequence>
 
-Think hard about the feature list - be comprehensive. This determines everything.
-
+<output_format>
 After completion, report:
 - Total features created
 - Recommended build order
 - Any blockers or questions
+</output_format>

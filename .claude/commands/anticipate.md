@@ -2,28 +2,26 @@
 description: Devil's Advocate - Anticipatory Reflection before execution (from LLM Agents paper)
 ---
 
-# /anticipate - Anticipatory Reflection (Devil's Advocate)
-
+<instructions>
 **Based on:** "Building Autonomous LLM Agents" paper, Section 4.3 (DEVIL'S ADVOCATE)
 
 **Use this when:** Before implementing any feature, especially complex or risky ones.
 
 **Purpose:** Proactively identify potential failures and plan mitigation strategies BEFORE writing code.
 
----
-
-## Instructions
-
 think hard about potential failures for this task:
 
 **Task/Feature:** $ARGUMENTS
+</instructions>
 
----
-
-## Step 1: Challenge Your Assumptions
-
+<workflow>
+<step number="1">
+<title>Challenge Your Assumptions</title>
+<task>
 Play Devil's Advocate - what assumptions am I making that could be wrong?
+</task>
 
+<template>
 **List every assumption:**
 1. [Assumption 1]
    - Why I believe this: [reasoning]
@@ -36,20 +34,25 @@ Play Devil's Advocate - what assumptions am I making that could be wrong?
    - 📊 Validation: [how to verify before implementing]
 
 [Continue for all assumptions]
+</template>
 
+<red_flags>
 **Red flags:**
 - Assumptions about external APIs (they always work, they're fast, etc.)
 - Assumptions about data format/quality
 - Assumptions about user behavior
 - Assumptions about system resources (memory, CPU, network)
 - Assumptions about third-party libraries
+</red_flags>
+</step>
 
----
-
-## Step 2: Enumerate Failure Modes
-
+<step number="2">
+<title>Enumerate Failure Modes</title>
+<task>
 What can go wrong during implementation or execution?
+</task>
 
+<technical_failures>
 **Technical Failures:**
 1. **Failure:** [specific failure mode]
    - Likelihood: [high/medium/low]
@@ -69,7 +72,9 @@ What can go wrong during implementation or execution?
 - Dependency unavailable
 - Rate limit exceeded
 - Authentication failure
+</technical_failures>
 
+<logical_failures>
 **Logical Failures:**
 1. **Failure:** [logic error]
    - How it manifests: [symptoms]
@@ -83,7 +88,9 @@ What can go wrong during implementation or execution?
 - Type mismatches
 - Incorrect algorithms
 - Missing edge case handling
+</logical_failures>
 
+<integration_failures>
 **Integration Failures:**
 1. **Failure:** [integration issue]
    - Between: [component A] and [component B]
@@ -97,43 +104,57 @@ What can go wrong during implementation or execution?
 - Version conflicts
 - Timing/race conditions
 - State synchronization issues
+</integration_failures>
+</step>
 
----
-
-## Step 3: Stress Test Your Plan
-
+<step number="3">
+<title>Stress Test Your Plan</title>
+<task>
 Challenge the implementation strategy:
+</task>
 
+<stress_tests>
+<performance>
 **Performance:**
 - 🔥 What if 100x more load than expected?
 - ⏱️ What if latency spikes to 10x normal?
 - 💾 What if we run out of memory?
 - 🌐 What if network is slow/unstable?
+</performance>
 
+<reliability>
 **Reliability:**
 - What if the service crashes mid-operation?
 - What if we need to rollback?
 - What if data gets corrupted?
 - What if dependencies are down?
+</reliability>
 
+<security>
 **Security:**
 - What if input is malicious?
 - What if someone tries to exploit this?
 - What if credentials leak?
 - What if there's an injection attack vector?
+</security>
 
+<maintainability>
 **Maintainability:**
 - Can someone else understand this in 6 months?
 - Is this testable?
 - Is this debuggable when it breaks?
 - Will this code rot quickly?
+</maintainability>
+</stress_tests>
+</step>
 
----
-
-## Step 4: Generate Alternative Approaches
-
+<step number="4">
+<title>Generate Alternative Approaches</title>
+<task>
 For each major risk, propose an alternative approach:
+</task>
 
+<template>
 **Risk 1:** [high-impact failure]
 - **Original approach:** [Plan A]
 - **Alternative 1:** [Plan B - safer but maybe slower/more complex]
@@ -143,11 +164,12 @@ For each major risk, propose an alternative approach:
   - Pros: [advantages]
   - Cons: [trade-offs]
 - **Recommendation:** [which to use and why]
+</template>
+</step>
 
----
-
-## Step 5: Pre-Implementation Checklist
-
+<step number="5">
+<title>Pre-Implementation Checklist</title>
+<verify>
 Before writing any code, validate:
 
 **Environment:**
@@ -173,15 +195,18 @@ Before writing any code, validate:
 - [ ] Graceful degradation is possible
 - [ ] Error messages are actionable
 - [ ] Can detect and alert on failures
+</verify>
 
-**If any checkbox is unchecked, address it before implementing.**
+<note>**If any checkbox is unchecked, address it before implementing.**</note>
+</step>
 
----
-
-## Step 6: Output Risk Assessment
-
+<step number="6">
+<title>Output Risk Assessment</title>
+<present>
 Present the final risk assessment:
+</present>
 
+<template>
 ```
 =================================================
 ANTICIPATORY REFLECTION - RISK ASSESSMENT
@@ -216,13 +241,16 @@ CONFIDENCE LEVEL: [high/medium/low]
   Reasoning: [why this confidence level]
 =================================================
 ```
+</template>
+</step>
 
----
-
-## Step 7: Update Planning Docs
-
+<step number="7">
+<title>Update Planning Docs</title>
+<document>
 Document this analysis:
+</document>
 
+<project_index>
 **Add to PROJECT_INDEX.json:**
 ```json
 {
@@ -239,7 +267,9 @@ Document this analysis:
   }
 }
 ```
+</project_index>
 
+<features_json>
 **Add to features.json (for the feature):**
 ```json
 {
@@ -249,11 +279,11 @@ Document this analysis:
   "confidence": "medium"
 }
 ```
+</features_json>
+</step>
+</workflow>
 
----
-
-## Usage Pattern
-
+<usage_pattern>
 **Recommended workflow:**
 
 ```bash
@@ -270,11 +300,9 @@ Document this analysis:
 /think:parallel "Revised approach addressing risks..."
 /anticipate "Revised audio streaming plan"
 ```
+</usage_pattern>
 
----
-
-## Example
-
+<example>
 **Task:** Implement WebSocket audio streaming
 
 **Assumptions challenged:**
@@ -312,3 +340,4 @@ Document this analysis:
 4. Create reconnection test suite
 
 **Confidence: Medium** - Network reliability is outside our control, but mitigations are solid.
+</example>

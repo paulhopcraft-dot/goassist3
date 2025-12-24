@@ -2,34 +2,40 @@
 description: Manage feature branches
 ---
 
-## Branch Operations
-
-### Create Branch
+<branch_operations>
+<create_branch>
 ```bash
 git checkout -b feature/[feature-id]-[short-name]
 ```
+</create_branch>
 
-### Branch Naming Convention
+<naming_convention>
 - `feature/F001-user-auth` - New features
 - `fix/F001-login-bug` - Bug fixes
 - `refactor/F001-cleanup` - Refactoring
 - `docs/F001-api-docs` - Documentation
+</naming_convention>
+</branch_operations>
 
-## When to Branch
-
+<branching_strategy>
+<when_to_branch>
 Create a new branch when:
 - Starting a feature that touches >5 files
 - Work might take >2 hours
 - Changes are risky/experimental
 - Multiple features in parallel
+</when_to_branch>
 
+<stay_on_main>
 Stay on main when:
 - Quick fix (<30 min)
 - Single file change
 - Documentation only
+</stay_on_main>
+</branching_strategy>
 
-## Merge Workflow
-
+<merge_workflow>
+<steps>
 1. Ensure all tests pass
 2. Update features.json
 3. Commit with conventional message
@@ -39,11 +45,13 @@ Stay on main when:
    git merge feature/[branch-name]
    git branch -d feature/[branch-name]
    ```
+</steps>
+</merge_workflow>
 
-## Current Branches
-
+<current_branches>
 ```bash
 git branch -a
 ```
+</current_branches>
 
-$ARGUMENTS
+<arguments>$ARGUMENTS</arguments>

@@ -2,52 +2,65 @@
 description: Spawn sub-agents for isolated tasks
 ---
 
+<instructions>
 Delegate specific tasks to specialized sub-agents for parallel execution and focused expertise.
+</instructions>
 
-## Available Agent Types
+<available_agent_types>
+<agent type="Research" alias="Explore">
+<use_for>Code exploration, pattern analysis, dependency mapping</use_for>
+<example>Find all error handling patterns in the codebase</example>
+</agent>
 
-### 1. Research Agent (Explore)
-**Use for**: Code exploration, pattern analysis, dependency mapping
-**Example**: "Find all error handling patterns in the codebase"
+<agent type="Review">
+<use_for>Code review, security analysis, best practices</use_for>
+<example>Review authentication implementation for security issues</example>
+</agent>
 
-### 2. Review Agent  
-**Use for**: Code review, security analysis, best practices
-**Example**: "Review authentication implementation for security issues"
+<agent type="Validator">
+<use_for>Independent testing, verification</use_for>
+<example>Run full test suite and report results</example>
+</agent>
 
-### 3. Validator Agent
-**Use for**: Independent testing, verification  
-**Example**: "Run full test suite and report results"
+<agent type="Debug">
+<use_for>Issue investigation, root cause analysis</use_for>
+<example>Investigate why TTS fallback isn't triggering</example>
+</agent>
 
-### 4. Debug Agent
-**Use for**: Issue investigation, root cause analysis
-**Example**: "Investigate why TTS fallback isn't triggering"
+<agent type="Plan">
+<use_for>Architecture design, implementation planning</use_for>
+<example>Design implementation for real-time streaming</example>
+</agent>
+</available_agent_types>
 
-### 5. Plan Agent
-**Use for**: Architecture design, implementation planning
-**Example**: "Design implementation for real-time streaming"
-
-## Delegation Strategy
-
-**When to delegate:**
+<delegation_strategy>
+<when_to_delegate>
 - Task is independent and self-contained
 - Need specialized focus (testing, review, research)
 - Can parallelize work (spawn multiple agents)
 - Want unbiased perspective (validation, review)
+</when_to_delegate>
 
-**How to delegate:**
-1. Identify task type
-2. Choose appropriate agent
-3. Provide clear, focused prompt
-4. Receive summary results
-5. Integrate findings
+<how_to_delegate>
+<step number="1">Identify task type</step>
+<step number="2">Choose appropriate agent</step>
+<step number="3">Provide clear, focused prompt</step>
+<step number="4">Receive summary results</step>
+<step number="5">Integrate findings</step>
+</how_to_delegate>
+</delegation_strategy>
 
-## Execute Delegation
-
+<execution>
+<analysis>
 **Current task**: [Analyze user request]
 
 **Recommended delegation**:
 - Agent type: [Research/Review/Validator/Debug/Plan]
 - Reason: [Why this agent is appropriate]
 - Prompt: [Clear, focused instruction]
+</analysis>
 
+<result>
 Spawn agent and report: "✅ Delegated to [agent type]. Results: [summary]"
+</result>
+</execution>

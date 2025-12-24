@@ -2,8 +2,11 @@
 description: Show current project progress and status
 ---
 
-Read @features.json and @claude-progress.txt, then report:
+<instructions>
+Read @features.json and @claude-progress.txt, then report current project status.
+</instructions>
 
+<output_format>
 ## Progress Summary
 ```
 Total Features: X
@@ -29,3 +32,4 @@ Remaining: B
 - [ ] Tests passing
 - [ ] No uncommitted changes (or list them)
 - [ ] No merge conflicts
+</output_format>

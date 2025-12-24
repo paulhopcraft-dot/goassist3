@@ -2,40 +2,43 @@
 description: Post-Feature Reflection - Learn from implementation (from LLM Agents paper)
 ---
 
-# /reflect - Reflection System (Post-Implementation Learning)
-
+<instructions>
 **Based on:** "Building Autonomous LLM Agents" paper, Section 4.3 (Reflection)
 
 **Use this when:** After completing any feature, especially after failures or unexpected challenges.
 
 **Purpose:** Critically evaluate performance, identify patterns, and improve future implementations.
 
----
-
-## Instructions
-
 think about what just happened and learn from it:
 
 **Feature/Task completed:** $ARGUMENTS
+</instructions>
 
----
-
-## Step 1: Self-Evaluation (Expected vs Actual)
-
+<workflow>
+<step number="1">
+<title>Self-Evaluation (Expected vs Actual)</title>
+<task>
 Compare what you expected vs what actually happened:
+</task>
 
+<comparison>
+<expected>
 **Expected Outcome:**
 - What was supposed to happen: [describe]
 - Estimated effort: [time/complexity]
 - Expected challenges: [list]
 - Success criteria: [from acceptance criteria]
+</expected>
 
+<actual>
 **Actual Outcome:**
 - What actually happened: [describe]
 - Actual effort: [time/complexity]
 - Actual challenges: [list]
 - Success criteria met: [✓ or ✗ for each]
+</actual>
 
+<variance>
 **Variance Analysis:**
 - ✅ What went better than expected? [list]
   - Why? [root cause analysis]
@@ -43,13 +46,17 @@ Compare what you expected vs what actually happened:
   - Why? [root cause analysis]
 - 🎯 What was accurate? [list]
   - Why did estimation work here?
+</variance>
+</comparison>
+</step>
 
----
-
-## Step 2: Error Detection and Analysis
-
+<step number="2">
+<title>Error Detection and Analysis</title>
+<task>
 Identify and analyze all errors, even if you fixed them:
+</task>
 
+<template>
 **For each error/problem encountered:**
 
 **Error 1:**
@@ -62,7 +69,9 @@ Identify and analyze all errors, even if you fixed them:
 - **Pattern?** [is this a repeated mistake?]
 
 [Repeat for all errors]
+</template>
 
+<error_categories>
 **Error categories to check:**
 - Syntax/type errors (should be caught early)
 - Logic errors (algorithm flaws)
@@ -70,100 +79,136 @@ Identify and analyze all errors, even if you fixed them:
 - Performance issues (too slow, too much memory)
 - Security vulnerabilities (missed validation)
 - Test coverage gaps (edge cases not tested)
+</error_categories>
+</step>
 
----
-
-## Step 3: Pattern Recognition
-
+<step number="3">
+<title>Pattern Recognition</title>
+<task>
 Look for patterns across recent work:
+</task>
 
+<patterns>
+<repeated_successes>
 **Repeated Successes (keep doing these):**
 1. [Pattern] - Seen in: [F00X, F00Y, F00Z]
    - Why it works: [analysis]
    - When to apply: [conditions]
    - Example: [concrete instance]
+</repeated_successes>
 
+<repeated_failures>
 **Repeated Failures (stop doing these):**
 1. [Pattern] - Seen in: [F00X, F00Y, F00Z]
    - Why it fails: [analysis]
    - Alternative approach: [what to do instead]
    - Example: [concrete instance]
+</repeated_failures>
 
+<emerging_patterns>
 **Emerging Patterns (watch these):**
 1. [Pattern] - Seen in: [F00X, F00Y]
    - Could become problem if: [conditions]
    - Monitor for: [signals]
+</emerging_patterns>
 
+<common_patterns>
 **Check these common patterns:**
 - Do I always underestimate [X type of task]?
 - Do I repeatedly make [X type of error]?
 - Do certain tools/libraries always cause problems?
 - Are integration points consistently problematic?
 - Do performance issues always appear in [X component]?
+</common_patterns>
+</patterns>
+</step>
 
----
-
-## Step 4: Correction and Improvement
-
+<step number="4">
+<title>Correction and Improvement</title>
+<task>
 Generate actionable improvements:
+</task>
 
+<improvements>
+<immediate_fixes>
 **Immediate Fixes (do now):**
 1. [Action] - Fixes: [problem]
    - Effort: [time estimate]
    - Priority: [high/medium/low]
    - Do it now? [yes/no + reasoning]
+</immediate_fixes>
 
+<process_improvements>
 **Process Improvements (update workflow):**
 1. [Change to development process]
    - Prevents: [problem]
    - Adds to: [which command/rule]
    - Example: "Always run security scan before commit"
+</process_improvements>
 
+<knowledge_updates>
 **Knowledge Updates (add to memory):**
 1. [New knowledge gained]
    - Store in: [PROJECT_INDEX.json / features.json / engineering rules]
    - Applies to: [which future features]
+</knowledge_updates>
 
+<tool_changes>
 **Tool/Library Changes:**
 1. [Library/tool to add or remove]
    - Reason: [why]
    - Replaces: [current approach]
    - Migration effort: [estimate]
+</tool_changes>
+</improvements>
+</step>
 
----
-
-## Step 5: Wisdom Extraction
-
+<step number="5">
+<title>Wisdom Extraction</title>
+<task>
 Distill learnings into reusable wisdom:
+</task>
 
+<learnings>
 **What I learned:**
 
+<technical>
 **Technical:**
 - [Specific technical insight]
   - Context: [when this applies]
   - Example: [concrete case]
-  
+</technical>
+
+<process>
 **Process:**
 - [Process improvement]
   - Why it matters: [impact]
   - How to implement: [steps]
+</process>
 
+<architecture>
 **Architecture:**
 - [Architectural principle]
   - Trade-offs: [pros/cons]
   - When to apply: [conditions]
+</architecture>
 
+<cognitive>
 **Human/Cognitive:**
 - [Meta-learning about how you work]
   - Example: "I code better in morning" or "Complex tasks need more upfront planning"
+</cognitive>
+</learnings>
+</step>
 
----
-
-## Step 6: Update Memory Systems
-
+<step number="6">
+<title>Update Memory Systems</title>
+<task>
 Store learnings for future reference:
+</task>
 
-### 6.1 Update PROJECT_INDEX.json
+<project_index>
+**6.1 Update PROJECT_INDEX.json**
 
 ```json
 {
@@ -192,8 +237,10 @@ Store learnings for future reference:
   }
 }
 ```
+</project_index>
 
-### 6.2 Update features.json
+<features_json>
+**6.2 Update features.json**
 
 Mark feature as truly complete only after reflection:
 
@@ -207,8 +254,10 @@ Mark feature as truly complete only after reflection:
   "pattern_tags": ["tag1", "tag2"]
 }
 ```
+</features_json>
 
-### 6.3 Update Engineering Rules (if needed)
+<engineering_rules>
+**6.3 Update Engineering Rules (if needed)**
 
 If reflection reveals a systematic issue, add to `.claude/rules/engineering-v2.md`:
 
@@ -223,14 +272,17 @@ If reflection reveals a systematic issue, add to `.claude/rules/engineering-v2.m
 
 **Applies to:** [which features/components]
 ```
+</engineering_rules>
+</step>
 
----
-
-## Step 7: Commit Reflection
-
+<step number="7">
+<title>Commit Reflection</title>
+<task>
 Update session state:
+</task>
 
-### Update claude-progress.txt
+<progress_update>
+**Update claude-progress.txt**
 
 ```markdown
 ## Session X - [Date]
@@ -253,13 +305,16 @@ Update session state:
 ### Next Steps
 - [What to work on next, informed by reflection]
 ```
+</progress_update>
+</step>
 
----
-
-## Step 8: Generate Reflection Summary
-
+<step number="8">
+<title>Generate Reflection Summary</title>
+<present>
 Present the complete reflection:
+</present>
 
+<template>
 ```
 =================================================
 REFLECTION SUMMARY - F00X
@@ -290,7 +345,7 @@ KEY LEARNINGS:
 IMPROVEMENTS APPLIED:
   ✓ [Immediate fix 1]
   ✓ [Immediate fix 2]
-  
+
 IMPROVEMENTS DEFERRED:
   - [Process change] - Added to backlog
   - [Refactoring] - Low priority
@@ -305,13 +360,16 @@ MEMORY UPDATED: [yes - where: PROJECT_INDEX, features.json, rules]
 
 =================================================
 ```
+</template>
+</step>
 
----
-
-## Step 9: Share Learnings (Optional)
-
+<step number="9">
+<title>Share Learnings (Optional)</title>
+<task>
 If working in a team or documenting publicly:
+</task>
 
+<lessons_md>
 **Create LESSONS.md entry:**
 
 ```markdown
@@ -337,11 +395,11 @@ If working in a team or documenting publicly:
 - Tests: [link to test file]
 - Discussion: [link if applicable]
 ```
+</lessons_md>
+</step>
+</workflow>
 
----
-
-## Usage Pattern
-
+<usage_pattern>
 **Recommended workflow:**
 
 ```bash
@@ -363,11 +421,9 @@ If working in a team or documenting publicly:
 - ✅ After unexpected difficulty (mandatory)
 - ✅ After major milestone (mandatory)
 - ⚠️ At minimum: weekly reflection session
+</usage_pattern>
 
----
-
-## Example
-
+<example>
 **Feature:** F007 - VAD/XTTS/Turn Manager integration
 
 **Expected vs Actual:**
@@ -401,7 +457,7 @@ If working in a team or documenting publicly:
 - ✓ Created performance profiling checklist
 - Deferred: Refactor other components for thread safety (low priority)
 
-**Memory updated:** 
+**Memory updated:**
 - PROJECT_INDEX.json: Added experience with concurrency lessons
 - features.json: F007 marked reflected=true
 - engineering-v2.md: Added "Concurrent Code Rule"
@@ -409,3 +465,4 @@ If working in a team or documenting publicly:
 **Confidence for next concurrent task:** Medium → High (learned the patterns)
 
 **Reusable wisdom:** "Concurrent code complexity grows exponentially - design for it upfront, don't retrofit."
+</example>

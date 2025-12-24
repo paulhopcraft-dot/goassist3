@@ -2,35 +2,40 @@
 description: Code review current work and suggest improvements
 ---
 
+<instructions>
 Review the code changes since last commit (or specified files).
+</instructions>
 
-## Review Checklist
-
-### Correctness
+<review_checklist>
+<category name="Correctness">
 - [ ] Logic is correct
 - [ ] Edge cases handled
 - [ ] Error handling appropriate
 - [ ] No obvious bugs
+</category>
 
-### Security
+<category name="Security">
 - [ ] No hardcoded secrets
 - [ ] Input validation present
 - [ ] SQL injection prevented
 - [ ] Auth/authz correct
+</category>
 
-### Quality
+<category name="Quality">
 - [ ] Code is readable
 - [ ] Functions are focused (single responsibility)
 - [ ] No unnecessary complexity
 - [ ] Tests cover the changes
+</category>
 
-### Performance
+<category name="Performance">
 - [ ] No obvious N+1 queries
 - [ ] No blocking calls in async code
 - [ ] Appropriate caching considered
+</category>
+</review_checklist>
 
-## Output Format
-
+<output_format>
 ```
 Code Review: [files reviewed]
 ================================
@@ -46,5 +51,6 @@ Code Review: [files reviewed]
 
 Overall: [APPROVE / NEEDS CHANGES]
 ```
+</output_format>
 
-$ARGUMENTS
+<arguments>$ARGUMENTS</arguments>

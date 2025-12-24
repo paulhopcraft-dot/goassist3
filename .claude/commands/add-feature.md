@@ -2,18 +2,19 @@
 description: Add a new feature to features.json
 ---
 
+<instructions>
 Add a new feature to the project backlog.
+</instructions>
 
-## Required Information
-
+<required_information>
 1. **Feature Name**: Short descriptive name
 2. **Description**: What this feature does
 3. **Acceptance Criteria**: Specific, testable conditions
 4. **Dependencies**: Which features must be done first
 5. **Priority**: high / medium / low
+</required_information>
 
-## Feature Template
-
+<feature_template>
 ```json
 {
   "id": "F[NNN]",
@@ -31,9 +32,9 @@ Add a new feature to the project backlog.
   "last_updated": "[timestamp]"
 }
 ```
+</feature_template>
 
-## Process
-
+<steps>
 1. Read current features.json
 2. Determine next ID (F001, F002, etc.)
 3. Add feature with all fields
@@ -41,5 +42,6 @@ Add a new feature to the project backlog.
 5. Update metadata.total_features
 6. Save features.json
 7. Report what was added
+</steps>
 
-$ARGUMENTS
+<arguments>$ARGUMENTS</arguments>
