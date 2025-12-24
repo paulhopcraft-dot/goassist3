@@ -20,6 +20,19 @@ Substitution must not require changes to:
 - the audio clocking scheme
 - the cancellation/barged-in control plane
 
+### A1.1 Validation & Liability
+
+**Pre-deployment validation:** Substituted components MUST be validated against TMF v3.0 section 1.2 contracts before deployment:
+- TTFA ≤ 250ms p95
+- Barge-in response ≤ 150ms end-to-end
+- Audio chunking per section 3.1
+
+**Liability:**
+- **TMF defines contracts.** Implementation owns component selection within those contracts.
+- Failures due to substituted components that violate TMF contracts are **implementation failures**, not TMF violations.
+- The implementation team bears responsibility for regression testing when substituting any engine.
+- "The model was different" is not a valid defense for contract violations.
+
 ---
 
 ## A2. Reference LLM Clarification
