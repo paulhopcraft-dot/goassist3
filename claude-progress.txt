@@ -12,9 +12,9 @@
 ## Status
 - Total features: 45
 - P0-BLOCKING: 0 remaining (11 complete) ✅ ALL P0 RESOLVED
-- P1: 6 remaining (9 complete)
+- P1: 5 remaining (10 complete)
 - P2: 10
-- Completed: 20
+- Completed: 21
 - In Progress: 0
 - Blocked: 0
 
@@ -164,15 +164,20 @@ The GoAssist v3.0 documentation set is now operationally deployable.
   - Set threshold to "> 3 per hour" with configurable env var
   - Standard operational practice
 
-## Session 15 (2024-12-25): P1 Continuation - TMF-01
+## Session 15 (2024-12-25): P1 Continuation - TMF-01, TMF-02
 - Completed TMF-01: Define audio clock precisely
   - Added "Audio clock definition" subsection to section 2.2
   - Clock source: system monotonic time (CLOCK_MONOTONIC, QueryPerformanceCounter)
   - Single-node: shared memory, no explicit sync needed
   - Multi-node: ±1ms tolerance, sync mechanism is implementation concern
   - Updated TMF-v3.0.md section 2.2, lines 61-65
+- Completed TMF-02: Define steady-state condition
+  - Added steady-state definition under TTFA in section 1.2
+  - Threshold: 3 conversation turns OR 60 seconds since session start
+  - Warmup latency tracked separately from contract metrics
+  - Updated TMF-v3.0.md section 1.2, line 34
 
 ## Next Steps
-1. Continue P1 issues (6 remaining)
+1. Continue P1 issues (5 remaining)
 2. Consider CD-03 (now unblocked by IMP-02)
 3. Validate all changes preserve TMF authority hierarchy
