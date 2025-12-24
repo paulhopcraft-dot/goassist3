@@ -143,10 +143,12 @@ Problem: fixed context windows create latency spikes when history is rebuilt.
   - Testing: log server VAD event timestamp; measure client-side audio output stop
 
 ### 4.3 Animation heartbeat + slow-freeze
-If animation frames are missing:
+Animation frames are expected at 30-60Hz (per section 3.1). If animation frames are missing:
 1. Hold last valid blendshape frame.
-2. If missing persists, ease to neutral over 150ms (“slow-freeze”).
+2. If more than 100ms pass without a valid frame (approximately 3 frames at 30fps or 6 frames at 60fps), trigger slow-freeze: ease to neutral over 150ms.
 3. Never snap to neutral instantly.
+
+> **Implementation note:** Use a monotonic timer, not frame count, to detect missing frames. This ensures consistent behavior regardless of actual animation cadence.
 
 ---
 
