@@ -11,10 +11,10 @@
 
 ## Status
 - Total features: 45
-- P0-BLOCKING: 4 remaining (6 complete)
+- P0-BLOCKING: 3 remaining (7 complete)
 - P1: 15
 - P2: 10
-- Completed: 6
+- Completed: 7
 - In Progress: 0
 - Blocked: 0
 
@@ -76,8 +76,17 @@
   - Time-based approach is FPS-agnostic and robust
   - Updated TMF-v3.0.md section 4.3, lines 145-151
 
+## Session 8 (2024-12-23): Seventh Resolution - TMF-10
+- ✅ Completed TMF-10: Define latency budget overage behavior
+  - Added section 6.1 with global overage policy
+  - Log degradation events, continue processing, apply degradation order
+  - Hard timeout: 500ms before first audio byte triggers turn reset
+  - Metrics: ttfa_overage_count{component}, ttfa_actual_ms{component}
+  - Preserves audio-first philosophy with observability
+  - Updated TMF-v3.0.md section 6, lines 202-211
+
 ## Next Steps
-1. Continue with remaining P0-BLOCKING issues (4 left)
-2. Priority candidates: TMF-10 (latency overage), OPS-06 (env vars), OPS-08 (recovery authority)
-3. CD-04 (model substitution liability) also available
+1. Continue with remaining P0-BLOCKING issues (3 left)
+2. Remaining: OPS-06 (env vars), OPS-08 (recovery authority), CD-04 (model substitution)
+3. All 3 have no blockers - can resolve in any order
 4. Validate all changes preserve TMF authority hierarchy
