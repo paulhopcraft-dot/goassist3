@@ -58,6 +58,12 @@ In parallel: **agent audio out** → facial animation engine → ARKit-52 blends
   - duration (20ms)
 - Animation frames must reference (or be derived from) the same audio clock.
 
+**Audio clock definition:**
+- The audio clock is **system monotonic time** (e.g., `CLOCK_MONOTONIC` on Linux, `QueryPerformanceCounter` on Windows).
+- It is NOT wall-clock time; it is immune to NTP adjustments and daylight saving.
+- On the single-node reference architecture, all components share the same monotonic clock via shared memory; no explicit synchronization is required.
+- For multi-node deployments: synchronization (e.g., PTP or GPS-disciplined clocks) is an implementation concern outside this TMF scope. The TMF contract requires that all components referencing the audio clock agree to within ±1ms.
+
 ---
 
 ## 3. Core Components (Reference Build)
