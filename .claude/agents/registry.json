@@ -1,13 +1,6 @@
 {
-  "version": "1.0.0",
+  "version": "3.0.0",
   "agents": {
-    "healthcare-validator": {
-      "file": "healthcare-validator.md",
-      "domain": "healthcare",
-      "triggers": ["prd-check", "build-prd", "verify"],
-      "capabilities": ["phi-detection", "hipaa-validation", "evidence-chain"],
-      "enabled_for": ["C:\\Dev\\gpnet3"]
-    },
     "code-reviewer": {
       "file": "code-reviewer.md",
       "domain": "general",
@@ -21,6 +14,20 @@
       "triggers": ["tdd", "verify"],
       "capabilities": ["test-generation", "coverage-analysis", "edge-cases"],
       "enabled_for": ["all"]
+    },
+    "autonomy-agent": {
+      "file": "autonomy-agent.md",
+      "domain": "general",
+      "triggers": ["auto", "continue"],
+      "capabilities": ["task-discovery", "auto-implement", "learning", "parallel-execution"],
+      "enabled_for": ["all"]
+    },
+    "learning-agent": {
+      "file": "learning-agent.md",
+      "domain": "general",
+      "triggers": ["learn", "suggest"],
+      "capabilities": ["outcome-tracking", "pattern-learning", "recommendation"],
+      "enabled_for": ["all"]
     }
   },
   "chains": {
@@ -28,9 +35,26 @@
       "description": "Complete feature verification with multiple specialist agents",
       "steps": [
         {"agent": "test-specialist", "phase": "test-validation"},
-        {"agent": "code-reviewer", "phase": "quality-check"},
-        {"agent": "healthcare-validator", "phase": "compliance-check", "if": "domain === 'healthcare'"}
+        {"agent": "code-reviewer", "phase": "quality-check"}
+      ]
+    },
+    "autonomous-implementation": {
+      "description": "Autonomous feature implementation with learning",
+      "steps": [
+        {"agent": "autonomy-agent", "phase": "task-discovery"},
+        {"agent": "test-specialist", "phase": "test-first", "if": "config.tdd"},
+        {"agent": "code-reviewer", "phase": "pre-commit-review"},
+        {"agent": "learning-agent", "phase": "outcome-recording"}
       ]
     }
+  },
+  "autonomy": {
+    "enabled": true,
+    "default_level": "autonomous",
+    "learning_enabled": true,
+    "parallel_agents": true,
+    "max_consecutive_errors": 3,
+    "auto_verify": true,
+    "auto_commit": false
   }
 }
