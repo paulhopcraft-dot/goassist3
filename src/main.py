@@ -20,7 +20,9 @@ from fastapi.responses import JSONResponse
 
 from src import __version__
 from src.api.routes import health
+from src.api.routes import sessions
 from src.config.settings import Settings, get_settings
+from src.observability.logging import init_logging
 
 # Configure structured logging
 structlog.configure(
@@ -60,19 +62,28 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Startup: Initialize components
     try:
-        # Mark components as initializing
-        # In production, each component would set its own health status
-        # For now, we mark VAD as ready since it's CPU-based and fast
-        health.set_component_health("vad", True)
+        # Initialize structured logging
+        init_logging(json_format=settings.environment == "production")
 
-        # TODO: Initialize actual components in Phase 1 tasks 6-14
+        # Mark components as initializing
+        health.set_component_health("vad", True)
+        health.set_component_health("session_manager", True)
+        health.set_component_health("webrtc_gateway", True)
+
+        # Initialize session manager
+        session_manager = sessions.get_session_manager()
+        logger.info("session_manager_initialized", max_sessions=session_manager._max_sessions)
+
+        # Initialize WebRTC gateway
+        webrtc_gateway = sessions.get_webrtc_gateway()
+        logger.info("webrtc_gateway_initialized")
+
+        # TODO: Initialize remaining components
         # - ASR (deepgram/faster-whisper)
         # - TTS (streaming)
         # - LLM (vLLM client)
-        # - WebRTC gateway
 
-        # For development, mark as ready after a brief delay
-        # This will be replaced with actual component initialization
+        # Brief delay for any async initialization
         await asyncio.sleep(0.1)
 
         # Mark service as ready
@@ -89,10 +100,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("goassist_shutting_down")
     health.set_ready(False)
 
-    # TODO: Graceful shutdown of components
-    # - Stop accepting new sessions
-    # - Wait for active sessions to complete or timeout
-    # - Close connections
+    # End all active sessions
+    session_manager = sessions.get_session_manager()
+    ended_count = await session_manager.end_all_sessions(reason="shutdown")
+    logger.info("sessions_ended", count=ended_count)
+
+    # Close WebRTC connections
+    webrtc_gateway = sessions.get_webrtc_gateway()
+    await webrtc_gateway.close_all()
+    logger.info("webrtc_connections_closed")
 
     logger.info("goassist_shutdown_complete")
 
@@ -121,6 +137,7 @@ def create_app() -> FastAPI:
 
     # Include routers
     app.include_router(health.router)
+    app.include_router(sessions.router)
 
     # Global exception handler
     @app.exception_handler(Exception)
