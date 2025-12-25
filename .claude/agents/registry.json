@@ -1,0 +1,36 @@
+{
+  "version": "1.0.0",
+  "agents": {
+    "healthcare-validator": {
+      "file": "healthcare-validator.md",
+      "domain": "healthcare",
+      "triggers": ["prd-check", "build-prd", "verify"],
+      "capabilities": ["phi-detection", "hipaa-validation", "evidence-chain"],
+      "enabled_for": ["C:\\Dev\\gpnet3"]
+    },
+    "code-reviewer": {
+      "file": "code-reviewer.md",
+      "domain": "general",
+      "triggers": ["review", "verify"],
+      "capabilities": ["security-scan", "pattern-detection", "best-practices"],
+      "enabled_for": ["all"]
+    },
+    "test-specialist": {
+      "file": "test-specialist.md",
+      "domain": "general",
+      "triggers": ["tdd", "verify"],
+      "capabilities": ["test-generation", "coverage-analysis", "edge-cases"],
+      "enabled_for": ["all"]
+    }
+  },
+  "chains": {
+    "full-verification": {
+      "description": "Complete feature verification with multiple specialist agents",
+      "steps": [
+        {"agent": "test-specialist", "phase": "test-validation"},
+        {"agent": "code-reviewer", "phase": "quality-check"},
+        {"agent": "healthcare-validator", "phase": "compliance-check", "if": "domain === 'healthcare'"}
+      ]
+    }
+  }
+}
