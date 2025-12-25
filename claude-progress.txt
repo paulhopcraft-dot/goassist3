@@ -332,17 +332,119 @@ src/
 - ✅ Session-relative timing for t_audio_ms
 - ✅ All threshold constants from TMF v3.0
 
-### Next: Phase 1 Tasks 6-14
+### Phase 1 Tasks 6-14: COMPLETED
 
-1. Audio packetizer (20ms + 5ms overlap)
-2. VAD (Silero)
-3. Turn detector (15ms endpoint budget)
-4. ASR interface + Deepgram
-5. TTS interface + streaming
-6. vLLM client
-7. CANCEL propagation
-8. Orchestrator + state machine
-9. Context rollover
-10. WebRTC gateway + TURN
+**Commit:** `e735410` - feat: implement Phase 1 core modules (Tasks 6-13)
+
+1. ✅ Audio packetizer (20ms + 5ms overlap)
+2. ✅ VAD (Silero)
+3. ✅ Turn detector (15ms endpoint budget)
+4. ✅ ASR interface + Deepgram
+5. ✅ TTS interface + streaming
+6. ✅ vLLM client
+7. ✅ CANCEL propagation
+8. ✅ Orchestrator + state machine
+9. ✅ Context rollover
+10. ✅ WebRTC gateway + TURN
+
+---
+
+## Session 18 (2025-12-25): Phase 2 Implementation - Multi-Session & Observability
+
+**Commit:** `91f3c07` - feat: implement Phase 2 - multi-session, observability, learning toolkit
+
+### Phase 2 Complete
+
+**Observability (src/observability/):**
+1. `metrics.py` - Prometheus metrics: TTFA, barge-in, yields, session counts, VRAM
+2. `logging.py` - Structured JSON logging with session correlation, event-specific loggers
+
+**Session Management (src/orchestrator/):**
+3. `session.py` - Session container with lifecycle, metrics, state machine integration
+4. `scos.py` - Session Control & Optimization Signals (TMF §6 compliant, non-emotional)
+
+**Backpressure (src/llm/):**
+5. `backpressure.py` - Explicit degradation order: animation→verbosity→never audio
+
+**WebRTC & Networking (src/api/):**
+6. `webrtc/gateway.py` - aiortc gateway with STUN/TURN, data channel for blendshapes
+7. `websocket/blendshapes.py` - Fallback WebSocket transport when data channel unavailable
+8. `routes/sessions.py` - Session CRUD, WebRTC signaling, blendshapes WS endpoint
+
+**Updated main.py:**
+- Added sessions router
+- Session manager initialization
+- WebRTC gateway initialization
+- Graceful shutdown for all sessions/connections
+
+### Learning Toolkit Enhancement
+
+**New Feature:** XGBoost-based self-improving toolkit
+- `.claude/toolkit/learning.py` - ToolkitLearner class
+- `.claude/commands/learn.md` - /learn command
+
+**Capabilities:**
+- Record command outcomes (success/failure/partial)
+- Learn optimal command selection patterns
+- Predict success likelihood
+- Provide smart suggestions based on context
+- Falls back to heuristics if XGBoost unavailable
+
+### TMF v3.0 Contracts Implemented
+
+- ✅ Session state machine (5-state FSM)
+- ✅ Context rollover (7500 token threshold)
+- ✅ CANCEL propagation (150ms budget)
+- ✅ Animation yield (>120ms lag → yield)
+- ✅ Backpressure order enforcement
+- ✅ SCOS non-emotional signals
+- ✅ Prometheus metrics (TTFA p50/p95, barge-in latency)
+- ✅ WebRTC data channel for blendshapes (TMF §3.7)
+
+### Files Created (12 files, 3180 insertions)
+
+```
+src/observability/metrics.py        # Prometheus metrics
+src/observability/logging.py        # Structured logging
+src/orchestrator/session.py         # Session container
+src/orchestrator/scos.py            # Non-emotional signals
+src/llm/backpressure.py             # Degradation policy
+src/api/webrtc/gateway.py           # WebRTC gateway
+src/api/websocket/__init__.py       # WebSocket package
+src/api/websocket/blendshapes.py    # Blendshape fallback
+src/api/routes/sessions.py          # Session API routes
+src/main.py                         # Updated with routes
+.claude/commands/learn.md           # Learning command
+.claude/toolkit/learning.py         # XGBoost learning
+```
+
+### API Endpoints Added
+
+```
+POST   /sessions                 # Create session
+GET    /sessions                 # List sessions
+GET    /sessions/{id}            # Get session status
+DELETE /sessions/{id}            # End session
+POST   /sessions/{id}/offer      # WebRTC SDP offer
+POST   /sessions/{id}/ice-candidate  # ICE candidate
+WS     /sessions/{id}/blendshapes    # Blendshape WebSocket
+```
+
+### Slash Commands Available
+
+The toolkit has 33+ slash commands for development workflow automation:
+
+**Development:** /continue, /status, /verify, /review, /tdd, /learn
+**Planning:** /think, /think-parallel, /constraints, /decide, /perspectives
+**Implementation:** /build-prd, /expert, /delegate, /frontend-design
+
+### Next: Phase 3 - Avatar Pipeline
+
+1. Animation interface (`src/animation/base.py`)
+2. Audio2Face integration (NEUTRAL config, no emotion)
+3. LAM fallback engine
+4. Yield controller (>120ms → yield)
+5. Heartbeat + slow-freeze (100ms → 150ms ease to neutral)
+6. WebRTC Data Channel emitter
 
 ---
