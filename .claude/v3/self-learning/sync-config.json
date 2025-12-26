@@ -1,0 +1,262 @@
+{
+  "$schema": "./sync-config.schema.json",
+  "version": "1.0.0",
+  "enabled": true,
+
+  "sync_modes": {
+    "automatic": {
+      "enabled": true,
+      "description": "Toolkit syncs improvements automatically without asking",
+      "recommended_for": "Set it and forget it users"
+    },
+    "semi_automatic": {
+      "enabled": false,
+      "description": "Toolkit proposes syncs, user approves",
+      "recommended_for": "Users who want control"
+    },
+    "manual": {
+      "enabled": false,
+      "description": "User manually runs /toolkit:sync-all",
+      "recommended_for": "Maximum control users"
+    }
+  },
+
+  "active_mode": "automatic",
+
+  "sync_triggers": {
+    "on_improvement": {
+      "enabled": true,
+      "description": "Sync immediately after toolkit creates an improvement",
+      "delay_seconds": 5,
+      "batch_improvements": true
+    },
+    "on_project_open": {
+      "enabled": true,
+      "description": "Sync when user opens a project",
+      "background": true,
+      "notify_after": true
+    },
+    "scheduled": {
+      "enabled": true,
+      "description": "Sync on a schedule",
+      "interval_hours": 24,
+      "time_of_day": "00:00"
+    },
+    "manual": {
+      "enabled": true,
+      "command": "/toolkit:sync-all",
+      "description": "User-triggered sync"
+    }
+  },
+
+  "sync_rules": {
+    "commands": {
+      "universal": {
+        "action": "sync_to_all",
+        "examples": ["/verify", "/review", "/tdd"],
+        "reason": "These work the same in all domains"
+      },
+      "domain_specific": {
+        "action": "sync_to_compatible",
+        "examples": ["/build-payment", "/build-api"],
+        "reason": "Only sync to projects that can use them"
+      },
+      "user_specific": {
+        "action": "sync_to_all",
+        "examples": ["TDD workflow preference", "Commit style"],
+        "reason": "User behavior is consistent across projects"
+      }
+    },
+
+    "skills": {
+      "universal": {
+        "action": "sync_to_all",
+        "examples": ["engineering-mode", "frontend-design"]
+      },
+      "domain_specific": {
+        "action": "sync_to_compatible",
+        "examples": ["gpnet-healthcare", "payment-expert"]
+      }
+    },
+
+    "patterns": {
+      "coding_style": {
+        "action": "sync_to_all",
+        "examples": ["Error handling patterns", "Test structure"]
+      },
+      "security": {
+        "action": "sync_to_all",
+        "examples": ["SQL injection prevention", "XSS protection"]
+      },
+      "compliance": {
+        "action": "sync_to_compatible",
+        "examples": ["HIPAA audit logging", "SOX decimal precision"]
+      }
+    }
+  },
+
+  "filtering": {
+    "domain_compatibility_check": {
+      "enabled": true,
+      "strict_mode": false,
+      "allow_user_override": true
+    },
+    "feature_similarity_check": {
+      "enabled": true,
+      "threshold": 0.7,
+      "description": "Only sync if target project has similar features"
+    },
+    "quality_gate": {
+      "enabled": true,
+      "min_success_rate": 0.8,
+      "description": "Only sync improvements with 80%+ success rate"
+    }
+  },
+
+  "conflict_resolution": {
+    "strategy": "create_variants",
+    "options": {
+      "create_variants": {
+        "description": "Create domain-specific variants",
+        "example": "/build-payment-stripe vs /build-payment-paypal",
+        "active": true
+      },
+      "prefer_source": {
+        "description": "Source project's version wins",
+        "active": false
+      },
+      "prefer_target": {
+        "description": "Target project keeps its version",
+        "active": false
+      },
+      "merge": {
+        "description": "Combine both versions (advanced)",
+        "active": false
+      }
+    }
+  },
+
+  "notifications": {
+    "enabled": true,
+    "verbosity": "summary",
+    "options": {
+      "silent": {
+        "description": "No notifications, check /toolkit:learnings manually",
+        "show_count_only": false
+      },
+      "summary": {
+        "description": "Brief notification on project open",
+        "show_count_only": true,
+        "example": "💡 Synced 3 improvements from govertical"
+      },
+      "detailed": {
+        "description": "Full list of synced improvements",
+        "show_count_only": false,
+        "show_diff": true
+      }
+    },
+    "frequency": "on_project_open",
+    "notify_on_sync_failure": true
+  },
+
+  "git_integration": {
+    "auto_commit": {
+      "enabled": true,
+      "commit_message_template": "sync: {improvement_type} '{improvement_name}' from {source_project}",
+      "examples": [
+        "sync: command '/build-payment' from govertical",
+        "sync: skill 'payment-expert' from govertical",
+        "sync: pattern 'audit logging' from gpnet3"
+      ]
+    },
+    "auto_push": {
+      "enabled": false,
+      "description": "Auto-push syncs to GitHub (disabled by default for safety)",
+      "require_remote": true
+    },
+    "tag_syncs": {
+      "enabled": true,
+      "tag_format": "sync-{date}",
+      "description": "Tag each sync for easy rollback"
+    }
+  },
+
+  "rollback": {
+    "enabled": true,
+    "keep_history_days": 30,
+    "commands": {
+      "/toolkit:rollback-sync": "Undo last sync",
+      "/toolkit:rollback-sync [id]": "Undo specific sync",
+      "/toolkit:sync-history": "View sync history"
+    }
+  },
+
+  "performance": {
+    "max_concurrent_syncs": 3,
+    "batch_size": 10,
+    "timeout_seconds": 30,
+    "retry_failed_syncs": true,
+    "max_retries": 3
+  },
+
+  "privacy": {
+    "what_syncs": [
+      "Command templates",
+      "Skill definitions",
+      "Pattern libraries",
+      "Success/failure insights"
+    ],
+    "what_never_syncs": [
+      "Actual code content",
+      "Business logic",
+      "Secrets/credentials",
+      "Project-specific data",
+      "Customer data"
+    ],
+    "local_only": true,
+    "no_external_servers": true
+  },
+
+  "advanced": {
+    "cross_project_learning": {
+      "enabled": true,
+      "description": "Projects teach each other (bi-directional sync)",
+      "aggregate_patterns": true,
+      "combine_learnings": true
+    },
+    "pattern_evolution": {
+      "enabled": true,
+      "description": "Patterns improve as they spread across projects",
+      "collect_feedback": true,
+      "improve_based_on_usage": true
+    },
+    "success_tracking": {
+      "enabled": true,
+      "track_sync_success_rate": true,
+      "track_improvement_impact": true,
+      "generate_reports": true
+    }
+  },
+
+  "recommendations": {
+    "for_beginners": {
+      "active_mode": "automatic",
+      "notifications": "summary",
+      "auto_commit": true
+    },
+    "for_power_users": {
+      "active_mode": "semi_automatic",
+      "notifications": "detailed",
+      "auto_commit": true,
+      "git_tag_syncs": true
+    },
+    "for_maximum_control": {
+      "active_mode": "manual",
+      "notifications": "detailed",
+      "auto_commit": false,
+      "require_approval": true
+    }
+  },
+
+  "current_profile": "for_beginners"
+}

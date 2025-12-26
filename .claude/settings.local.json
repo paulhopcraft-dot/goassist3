@@ -3,7 +3,17 @@
     "allow": [
       "Skill(init-project)",
       "Skill(init-project:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\ninit: GoAssist v3.0 documentation clarification project\n\nInitialize project tracking for RED-TEAM document review findings:\n- Create features.json with all 45 clarity issues tracked\n- Add architecture.md explaining documentation structure\n- Add README.md with project overview and status\n- Add claude-progress.txt session log\n- Remove placeholder PRD.md and TMF.md \\(actual docs in docs/ folder\\)\n\nReview Summary:\n- Total findings: 45\n- P0-BLOCKING: 10\n- P1: 15  \n- P2: 10\n- Categories: 18 ambiguity, 4 contradictions, 12 missing detail, \n  6 unclear ownership, 5 cross-document\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfix\\(TMF\\): TMF-09 define context rollover at 7500 tokens\n\nClarify context rollover threshold from vague \"approaching 8192\" to specific operational definition:\n- Threshold: 7500 tokens \\(93.75% of 8192 hard cap\\)\n- Owner: Orchestrator component\n- Timeout: 5 seconds for summarization\n- Failure: Reject new turn with error if summarization fails/times out\n\nThis resolves P0-BLOCKING issue preventing implementation.\nUnblocks IMP-04 \\(Implementation can now reference exact threshold\\).\n\nAcceptance criteria met:\n✅ Exact token threshold specified\n✅ Component responsible identified\n✅ Failure handling defined\n\nUpdated:\n- docs/TMF-v3.0.md section 3.2, lines 85-89\n- features.json: TMF-09 marked passes=true\n- claude-progress.txt: Session 2 logged\n\nProgress: 1/45 complete \\(9 P0-BLOCKING remaining\\)\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Skill(continue)",
+      "Skill(continue:*)",
+      "Bash(git commit:*)",
+      "Bash(cat:*)",
+      "Bash(python -m py_compile:*)",
+      "Skill(status)",
+      "Skill(status:*)",
+      "Bash(pip install:*)"
     ]
   }
 }

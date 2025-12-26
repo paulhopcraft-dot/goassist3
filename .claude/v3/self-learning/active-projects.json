@@ -1,0 +1,119 @@
+{
+  "$schema": "./active-projects.schema.json",
+  "version": "1.0.0",
+  "sync_enabled": true,
+  "last_updated": "2025-12-25",
+
+  "projects": [
+    {
+      "name": "gpnet3",
+      "path": "C:/Dev/gpnet3",
+      "domain": "healthcare",
+      "compliance": ["HIPAA", "PHI"],
+      "active": true,
+      "toolkit_version": "v3.1",
+      "last_sync": "2025-12-25T00:00:00Z",
+      "features_built": 0,
+      "learnings_contributed": 0
+    },
+    {
+      "name": "govertical",
+      "path": "C:/Dev/govertical",
+      "domain": "revenue",
+      "compliance": ["SOX", "GAAP"],
+      "active": true,
+      "toolkit_version": "v3.1",
+      "last_sync": "2025-12-25T00:00:00Z",
+      "features_built": 14,
+      "learnings_contributed": 0
+    },
+    {
+      "name": "goassist3",
+      "path": "C:/Dev/goassist3",
+      "domain": "general",
+      "compliance": [],
+      "active": true,
+      "toolkit_version": "v3.1",
+      "last_sync": "2025-12-25T00:00:00Z",
+      "features_built": 0,
+      "learnings_contributed": 0
+    }
+  ],
+
+  "sync_rules": {
+    "commands": {
+      "strategy": "domain_compatible",
+      "universal_commands": ["verify", "review", "tdd", "status"],
+      "domain_specific_commands": ["build-prd", "security-scan"],
+      "sync_universal_to": "all_projects",
+      "sync_domain_specific_to": "compatible_domains"
+    },
+
+    "skills": {
+      "strategy": "domain_compatible",
+      "universal_skills": ["engineering-mode"],
+      "domain_specific_skills": ["gpnet-healthcare", "payment-expert"],
+      "sync_universal_to": "all_projects",
+      "sync_domain_specific_to": "compatible_domains"
+    },
+
+    "patterns": {
+      "strategy": "all_projects",
+      "pattern_types": ["cot", "tot", "rag", "meta-prompting"],
+      "sync_to": "all_projects"
+    },
+
+    "learnings": {
+      "strategy": "smart_filter",
+      "user_preferences": "sync_to_all",
+      "code_patterns": "sync_to_compatible",
+      "mistakes_to_prevent": "sync_to_all"
+    }
+  },
+
+  "domain_compatibility": {
+    "healthcare": {
+      "compatible_with": ["healthcare", "general"],
+      "incompatible_with": ["revenue", "finance"],
+      "note": "HIPAA patterns only relevant to healthcare"
+    },
+    "revenue": {
+      "compatible_with": ["revenue", "finance", "general"],
+      "incompatible_with": ["healthcare"],
+      "note": "Financial patterns applicable to revenue/finance/general"
+    },
+    "general": {
+      "compatible_with": ["all"],
+      "note": "General patterns apply everywhere"
+    }
+  },
+
+  "sync_triggers": {
+    "on_improvement_created": true,
+    "on_project_open": true,
+    "scheduled_interval_hours": 24,
+    "manual_command": "/toolkit:sync-all"
+  },
+
+  "conflict_resolution": {
+    "strategy": "create_variants",
+    "prefer_source_project": true,
+    "create_domain_variants": true,
+    "example": "/build-payment-stripe (from govertical) vs /build-payment-paypal (from goassist3)"
+  },
+
+  "notifications": {
+    "enabled": true,
+    "style": "summary",
+    "frequency": "on_project_open",
+    "message_template": "💡 Synced {improvement_count} improvements from {source_project}"
+  },
+
+  "metrics": {
+    "total_syncs": 0,
+    "successful_syncs": 0,
+    "failed_syncs": 0,
+    "learnings_shared": 0,
+    "cross_project_improvements": 0
+  }
+}

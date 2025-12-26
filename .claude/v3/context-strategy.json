@@ -1,0 +1,111 @@
+{
+  "$schema": "./context-strategy.schema.json",
+  "version": "3.0.0",
+  "description": "Context loading strategy for efficient token usage",
+
+  "budget": {
+    "max_upfront_tokens": 1500,
+    "current_session_limit": 200000,
+    "warning_threshold": 150000
+  },
+
+  "always_load": {
+    "description": "Critical files loaded at session start",
+    "files": [
+      "CLAUDE.md",
+      "domain.json",
+      ".claude/v3/context-strategy.json",
+      ".claude/progress/summary.md"
+    ],
+    "estimated_tokens": 800
+  },
+
+  "lazy_load": {
+    "description": "Load on-demand based on triggers",
+
+    "commands": {
+      "strategy": "template_based",
+      "trigger": "on_command_use",
+      "templates_dir": ".claude/v3/templates/commands",
+      "cache_dir": ".claude/v3/cache/commands",
+      "estimated_tokens_per_template": 200,
+      "note": "Commands generated from templates via meta-prompting"
+    },
+
+    "agents": {
+      "strategy": "lazy_with_rag",
+      "trigger": "when_agent_invoked",
+      "definitions_dir": ".claude/v3/agents",
+      "format": "yaml",
+      "estimated_tokens_per_agent": 300,
+      "note": "Compact YAML definitions, examples loaded on-demand"
+    },
+
+    "progress_history": {
+      "strategy": "summary_first",
+      "summary_file": ".claude/progress/summary.md",
+      "detailed_sessions": ".claude/progress/sessions/",
+      "load_detailed": "on_explicit_request",
+      "estimated_summary_tokens": 200,
+      "estimated_session_tokens": 1000
+    },
+
+    "documentation": {
+      "strategy": "reference_only",
+      "shared_patterns": ".claude/v3/shared/patterns/",
+      "load": "when_referenced_by_command",
+      "estimated_tokens_per_pattern": 300
+    }
+  },
+
+  "dynamic_generation": {
+    "description": "Generate specialized versions on-the-fly",
+
+    "commands": {
+      "method": "meta_prompting",
+      "base_templates": 8,
+      "specialization_triggers": [
+        "domain_context",
+        "similar_feature_patterns",
+        "prd_requirements"
+      ],
+      "cache_generated": true,
+      "cache_ttl": "session"
+    },
+
+    "agents": {
+      "method": "rag_injection",
+      "base_definitions": 3,
+      "context_sources": [
+        "domain.json",
+        "features.json",
+        "code_patterns"
+      ],
+      "cache_specialized": true
+    }
+  },
+
+  "context_tracking": {
+    "description": "Monitor and optimize context usage",
+    "log_file": ".claude/v3/logs/context-usage.log",
+    "optimization_triggers": {
+      "tokens_exceed_threshold": 150000,
+      "session_duration_minutes": 30,
+      "frequent_reloads": 5
+    },
+    "auto_summarize": {
+      "enabled": true,
+      "trigger_sessions": 5,
+      "method": "meta_prompt_summarization"
+    }
+  },
+
+  "comparison_to_v2": {
+    "v2_upfront_tokens": 10000,
+    "v3_upfront_tokens": 800,
+    "reduction_percentage": 92,
+    "v2_command_count": 34,
+    "v3_template_count": 8,
+    "template_reduction_percentage": 76
+  }
+}

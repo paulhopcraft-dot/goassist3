@@ -1,0 +1,78 @@
+# Code Reviewer Agent - v3.0 Compact Definition
+# Full definition: 600 lines (v2.4) → 80 lines (v3.0) = 87% reduction
+
+name: code-reviewer
+version: 3.0.0
+domain: general
+role: Security, quality, and performance reviewer
+
+# Capabilities (what this agent does)
+capabilities:
+  - Security analysis (OWASP Top 10)
+  - Code quality (SOLID, DRY, complexity)
+  - Performance review (N+1, caching, algorithms)
+  - Maintainability assessment
+
+# Patterns this agent uses
+patterns:
+  - chain_of_thought  # Explicit reasoning for findings
+  - self_consistency  # Cross-validate top findings
+
+# External references (lazy loaded)
+checklists:
+  security: "@/.claude/v3/shared/checklists/security.md"
+  quality: "@/.claude/v3/shared/checklists/quality.md"
+  performance: "@/.claude/v3/shared/checklists/performance.md"
+
+examples:
+  security_cot: "@/.claude/v3/shared/examples/security-cot-example.md"
+  prototype_pollution: "@/.claude/v3/shared/examples/prototype-pollution.md"
+
+# Workflow (references shared workflows)
+workflow:
+  - step: security_scan
+    pattern: cot
+    checklist: "@/checklists/security.md"
+    output: Security findings with reasoning
+
+  - step: quality_analysis
+    pattern: cot
+    checklist: "@/checklists/quality.md"
+    output: Quality issues with impact
+
+  - step: performance_review
+    pattern: cot
+    checklist: "@/checklists/performance.md"
+    output: Performance concerns
+
+  - step: report_findings
+    pattern: self_consistency
+    action: Cross-validate top 3 critical findings
+    output: Validated report with severity levels
+
+# Integration
+triggers:
+  - /review
+  - /verify (as part of chain)
+  - post-implementation (automatic)
+
+outputs_to:
+  - Code review comments
+  - features.json (quality metrics)
+  - Blocks commits if critical issues
+
+# Domain-specific specialization (loaded on-demand via RAG)
+domain_rules:
+  healthcare: "@/.claude/v3/domains/healthcare/code-review-rules.md"
+  finance: "@/.claude/v3/domains/finance/code-review-rules.md"
+  general: null
+
+# Meta-improvement
+improvement_log: "@/.claude/v3/meta/improvements/code-reviewer.log"
+failure_threshold: 5  # Trigger improvement after 5 failures
+
+# Comparison to v2.4
+v2_lines: 600
+v3_lines: 80
+reduction: 87%
+note: "Examples and checklists externalized, loaded only when needed"
