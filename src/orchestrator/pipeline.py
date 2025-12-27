@@ -15,7 +15,7 @@ from typing import AsyncIterator, Callable
 
 from src.audio.transport.audio_clock import get_audio_clock
 from src.audio.vad.silero_vad import SileroVAD
-from src.audio.asr.base import ASREngine, MockASREngine
+from src.audio.asr import ASREngine, create_asr_engine
 from src.audio.tts import TTSEngine, create_tts_engine, text_to_stream
 from src.animation.base import AnimationEngine, BlendshapeFrame, MockAnimationEngine
 from src.animation.livelink import LiveLinkSender, create_livelink_sender
@@ -37,6 +37,10 @@ class PipelineConfig:
     enable_tts: bool = True
     enable_animation: bool = True
     enable_livelink: bool = True
+
+    # ASR configuration
+    asr_engine: str = "mock"  # "mock", "deepgram"
+    deepgram_api_key: str = ""  # Required for "deepgram" engine
 
     # TTS configuration
     tts_engine: str = "mock"  # "mock", "kyutai"
@@ -119,7 +123,10 @@ class ConversationPipeline:
 
         # Initialize ASR
         if self._config.enable_asr:
-            self._asr = MockASREngine()  # TODO: Use real ASR
+            self._asr = create_asr_engine(
+                self._config.asr_engine,
+                api_key=self._config.deepgram_api_key,
+            )
             await self._asr.start(session_id)
             self._asr.on_final(self._handle_asr_final)
             self._asr.on_endpoint(self._handle_asr_endpoint)
