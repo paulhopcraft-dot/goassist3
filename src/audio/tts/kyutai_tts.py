@@ -26,6 +26,7 @@ from src.audio.tts.base import BaseTTSEngine, TTSChunk
 from src.audio.transport.audio_clock import AudioClock
 from src.config.constants import TMF
 from src.observability.logging import get_logger
+from src.utils.websocket_retry import RetryConfig, with_retry, RetryExhausted
 
 logger = get_logger(__name__)
 
@@ -64,6 +65,11 @@ class KyutaiTTSConfig:
     # Timeout settings
     connect_timeout_s: float = 5.0
     cancel_timeout_ms: int = TMF.BARGE_IN_MS  # 150ms max
+
+    # Retry settings
+    max_retries: int = 3
+    retry_delay_s: float = 0.5
+    retry_max_delay_s: float = 5.0
 
 
 @dataclass
@@ -161,15 +167,31 @@ class KyutaiTTSEngine(BaseTTSEngine):
             running=True,
         )
 
-        try:
-            # Connect to Kyutai TTS server
-            self._state.ws = await asyncio.wait_for(
+        # Build retry config from settings
+        retry_config = RetryConfig(
+            max_retries=self._config.max_retries,
+            initial_delay_s=self._config.retry_delay_s,
+            max_delay_s=self._config.retry_max_delay_s,
+        )
+
+        async def connect() -> ClientConnection:
+            """Connect to Kyutai TTS server with timeout."""
+            return await asyncio.wait_for(
                 websockets.connect(
                     self._config.server_url,
                     ping_interval=20,
                     ping_timeout=10,
                 ),
                 timeout=self._config.connect_timeout_s,
+            )
+
+        try:
+            # Connect with retry
+            self._state.ws = await with_retry(
+                connect,
+                config=retry_config,
+                operation_name="kyutai_tts_connect",
+                session_id=session_id,
             )
 
             # Send initial configuration
@@ -182,14 +204,15 @@ class KyutaiTTSEngine(BaseTTSEngine):
                 voice_id=self._config.voice_id,
             )
 
-        except asyncio.TimeoutError:
+        except RetryExhausted as e:
             logger.error(
-                "kyutai_tts_connect_timeout",
+                "kyutai_tts_connect_exhausted",
                 session_id=session_id,
-                timeout_s=self._config.connect_timeout_s,
+                attempts=e.attempts,
+                last_error=str(e.last_error),
             )
             raise ConnectionError(
-                f"Kyutai TTS connection timeout after {self._config.connect_timeout_s}s"
+                f"Kyutai TTS connection failed after {e.attempts} attempts: {e.last_error}"
             )
         except Exception as e:
             logger.error(
