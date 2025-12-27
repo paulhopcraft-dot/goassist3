@@ -1,0 +1,17 @@
+{
+  "_readme": "Architecture and design decisions - persisted across sessions",
+  "_version": "1.0.0",
+
+  "decisions": [],
+
+  "schema": {
+    "id": "string (d_XXX)",
+    "content": "string (the decision)",
+    "rationale": "string (why this decision)",
+    "applies_to": ["project names"],
+    "tags": ["optional tags"],
+    "created": "ISO timestamp",
+    "session": "session ID",
+    "status": "active | superseded | deprecated"
+  }
+}

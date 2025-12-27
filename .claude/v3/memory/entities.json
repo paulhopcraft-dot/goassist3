@@ -1,0 +1,17 @@
+{
+  "_readme": "Code entity tracking - functions, classes, patterns",
+  "_version": "1.0.0",
+
+  "entities": [],
+
+  "schema": {
+    "id": "string (e_XXX)",
+    "type": "function | class | module | pattern",
+    "name": "string",
+    "file": "file path",
+    "notes": ["array of notes"],
+    "relationships": ["uses:e_XXX", "called_by:e_YYY"],
+    "last_modified": "date",
+    "tags": ["optional tags"]
+  }
+}

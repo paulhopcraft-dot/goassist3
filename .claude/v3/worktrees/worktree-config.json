@@ -1,0 +1,20 @@
+{
+  "_readme": "Git Worktree Configuration - Tracks isolated feature workspaces",
+  "_version": "1.0.0",
+
+  "worktrees": {},
+
+  "settings": {
+    "worktree_root": "../worktrees",
+    "branch_prefix": "feature/",
+    "auto_push_on_create": true,
+    "cleanup_on_merge": true,
+    "require_tests_before_merge": true
+  },
+
+  "stats": {
+    "total_created": 0,
+    "total_merged": 0,
+    "total_abandoned": 0
+  }
+}

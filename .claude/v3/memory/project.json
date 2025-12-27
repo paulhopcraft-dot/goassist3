@@ -1,0 +1,28 @@
+{
+  "_readme": "Project-level memory - cross-session understanding of this codebase",
+  "_version": "1.0.0",
+
+  "project": {
+    "name": "",
+    "domain": "",
+    "compliance": [],
+    "tech_stack": [],
+    "key_patterns": []
+  },
+
+  "architecture": {
+    "overview": "",
+    "key_decisions": [],
+    "constraints": []
+  },
+
+  "technical_debt": [],
+
+  "context_history": [],
+
+  "stats": {
+    "sessions": 0,
+    "features_built": 0,
+    "learnings_captured": 0
+  }
+}

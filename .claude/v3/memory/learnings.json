@@ -1,0 +1,16 @@
+{
+  "_readme": "Patterns learned from experience - what works and what doesn't",
+  "_version": "1.0.0",
+
+  "learnings": [],
+
+  "schema": {
+    "id": "string (l_XXX)",
+    "pattern": "string (the learning)",
+    "source": "string (where learned - session, failure, etc)",
+    "success_rate": "number or null",
+    "created": "date",
+    "tags": ["optional tags"],
+    "verified": "boolean"
+  }
+}
