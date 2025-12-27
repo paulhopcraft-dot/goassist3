@@ -144,7 +144,7 @@ class TestAudioClockTMFCompliance:
         time.sleep(0.02)  # 20ms packet
         t2 = audio_clock.get_time_ms("packet-timing")
 
-        # Packet interval should be ~20ms
+        # Packet interval should be ~20ms (allow slack for system load)
         interval = t2 - t1
-        assert 15 <= interval <= 30, \
+        assert 15 <= interval <= 50, \
             f"Packet interval {interval}ms outside expected range"

@@ -199,7 +199,7 @@ class Session:
 
         # Register audio clock
         clock = get_audio_clock()
-        clock.register_session(self._session_id)
+        clock.start_session(self._session_id)
 
         # Record metrics
         self._metrics.start_time_ms = clock.get_absolute_ms()
@@ -233,7 +233,7 @@ class Session:
         # Unregister from audio clock
         clock = get_audio_clock()
         try:
-            clock.unregister_session(self._session_id)
+            clock.end_session(self._session_id)
         except KeyError:
             pass
 
