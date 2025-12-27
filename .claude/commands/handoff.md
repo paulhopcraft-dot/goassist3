@@ -2,38 +2,61 @@
 description: Prepare for session end, save state for next session
 ---
 
-<instructions>
-Prepare handoff for next session. The next session should be able to pick up immediately from claude-progress.txt.
-</instructions>
+Prepare handoff for next session:
 
-<steps>
-1. **Commit any uncommitted work**
-   - Use conventional commit message
-   - Don't leave work in progress uncommitted
+## 1. Commit any uncommitted work
+- Use conventional commit message
+- Don't leave work in progress uncommitted
 
-2. **Update features.json**
-   - Ensure all "passes" values are accurate
-   - Update "last_updated" timestamps
+## 2. Update features.json
+- Ensure all "passes" values are accurate
+- Update "last_updated" timestamps
 
-3. **Write to claude-progress.txt**
-   ```
-   ## Session [N] - [DATE]
+## 3. Save to Structured Memory (v3.4)
 
-   ### Completed
-   - [What was accomplished]
+Store important context using /remember:
 
-   ### In Progress
-   - [What's partially done]
+```
+/remember decision: [Any architectural decisions made this session]
+/remember learning: [What worked well, what didn't]
+/remember context: [Current focus and state]
+```
 
-   ### Next Steps
-   - [What to work on next]
+Auto-save these to memory files:
+- `.claude/v3/memory/decisions.json` - Architectural choices
+- `.claude/v3/memory/learnings.json` - Patterns discovered
+- `.claude/v3/memory/project.json` - Project context
 
-   ### Blockers
-   - [Any issues preventing progress]
+## 4. Write to claude-progress.txt
 
-   ### Notes
-   - [Important observations for next session]
-   ```
+```
+## Session [N] - [DATE]
 
-4. **Push to remote** (if configured)
-</steps>
+### Completed
+- [What was accomplished]
+
+### In Progress
+- [What's partially done]
+
+### Next Steps
+- [What to work on next]
+
+### Blockers
+- [Any issues preventing progress]
+
+### Notes
+- [Important observations for next session]
+```
+
+## 5. Check Active Worktrees (v3.4)
+
+If using git worktrees:
+```bash
+git worktree list
+```
+
+Note any active worktrees in progress log for next session.
+
+## 6. Push to remote (if configured)
+
+The next session should be able to pick up immediately using /reload.

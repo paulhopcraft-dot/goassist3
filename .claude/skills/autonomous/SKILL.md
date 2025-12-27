@@ -41,7 +41,15 @@ Check: Any critical issues?
 Run: git status
 Result: Uncommitted changes?
 
-# 5. Learning Data
+# 5. Worktrees (v3.4)
+Run: git worktree list
+Result: Active worktrees?
+
+# 6. Memory (v3.4)
+Check: .claude/v3/memory/*.json
+Load: Project context, decisions, learnings
+
+# 7. Learning Data
 Check: .claude/v3/self-learning/execution-log.jsonl
 Count: Features built (>5 = ready to learn)
 ```
@@ -53,6 +61,8 @@ Features: X/Y complete (Z incomplete)
 Tests: N passing, M failing
 Quality: Issues (Critical/High/Medium/Low)
 Git: Clean/Dirty
+Worktrees: N active
+Memory: Loaded (X decisions, Y learnings)
 Learning: Ready/Not Ready
 ```
 
@@ -248,12 +258,47 @@ PHASE 5: Continue
 
 ---
 
+## v3.4 Integrations
+
+### Use Worktrees for Risky Features
+When building complex features, use isolated worktrees:
+```
+1. /worktree create F001-risky-feature
+2. Build in isolation (main stays safe)
+3. Test thoroughly in worktree
+4. /worktree merge F001-risky-feature
+5. If conflicts: /resolve
+```
+
+### Use Structured Memory
+At session start:
+```
+/recall project    # Load project context
+/recall decisions  # Load key decisions
+```
+
+At session end:
+```
+/remember decision: [key decisions made]
+/remember learning: [what worked/didn't work]
+```
+
+### Use /resolve for Merge Conflicts
+When merging worktrees with conflicts:
+```
+/resolve --preview  # See AI-proposed fixes
+/resolve            # Auto-fix with confirmation
+```
+
+---
+
 ## Safety & Limits
 
 - **Max iterations**: 10 per session
 - **Failure limit**: 3 per action type (then stop)
 - **Test gate**: Won't build if tests failing
 - **Git safety**: Never force, never skip hooks
+- **Worktree safety**: Build risky features in isolation
 - **User can stop**: Anytime
 
 ---
