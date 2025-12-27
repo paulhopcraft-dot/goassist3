@@ -17,6 +17,9 @@ from typing import Any
 
 from src.audio.asr.base import BaseASREngine
 from src.config.settings import get_settings
+from src.observability.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -129,16 +132,24 @@ class DeepgramStreamingASR(BaseASREngine):
         try:
             # Send audio chunk
             await self._websocket.send(audio)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(
+                "deepgram_send_error",
+                session_id=self._session_id,
+                error=str(e),
+            )
 
     async def stop(self) -> None:
         """Close Deepgram connection and cleanup."""
         if self._websocket:
             try:
                 await self._websocket.finish()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(
+                    "deepgram_close_error",
+                    session_id=self._session_id,
+                    error=str(e),
+                )
             self._websocket = None
 
         await super().stop()
@@ -182,8 +193,12 @@ class DeepgramStreamingASR(BaseASREngine):
                     asyncio.create_task(self._emit_partial(transcript, t_ms))
                     self._last_partial = transcript
 
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(
+                "deepgram_transcript_error",
+                session_id=self._session_id,
+                error=str(e),
+            )
 
     def _on_speech_started(self, *args, **kwargs) -> None:
         """Handle speech start events from Deepgram."""
@@ -202,8 +217,12 @@ class DeepgramStreamingASR(BaseASREngine):
             t_ms = int(result.last_word_end * 1000) if hasattr(result, "last_word_end") else 0
             asyncio.create_task(self._emit_endpoint(t_ms))
 
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(
+                "deepgram_utterance_end_error",
+                session_id=self._session_id,
+                error=str(e),
+            )
 
 
 def create_deepgram_asr(api_key: str | None = None, **kwargs) -> DeepgramStreamingASR:

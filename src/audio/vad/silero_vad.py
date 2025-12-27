@@ -21,6 +21,9 @@ import numpy as np
 
 from src.audio.transport.audio_clock import get_audio_clock
 from src.config.constants import TMF
+from src.observability.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class VADState(Enum):
@@ -218,7 +221,12 @@ class SileroVAD:
             speech_prob = self._model(audio_tensor, self.sample_rate).item()
             return float(speech_prob)
 
-        except Exception:
+        except Exception as e:
+            logger.warning(
+                "vad_inference_error",
+                session_id=self.session_id,
+                error=str(e),
+            )
             return 0.0
 
     async def _emit_speech_start(self, event: VADEvent) -> None:
@@ -229,8 +237,13 @@ class SileroVAD:
                     await callback(event)
                 else:
                     callback(event)
-            except Exception:
-                pass  # Don't let callback errors break VAD
+            except Exception as e:
+                logger.warning(
+                    "vad_speech_start_callback_error",
+                    session_id=self.session_id,
+                    callback=getattr(callback, "__name__", str(callback)),
+                    error=str(e),
+                )
 
     async def _emit_speech_end(self, event: VADEvent) -> None:
         """Emit speech end event to all callbacks."""
@@ -240,8 +253,13 @@ class SileroVAD:
                     await callback(event)
                 else:
                     callback(event)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(
+                    "vad_speech_end_callback_error",
+                    session_id=self.session_id,
+                    callback=getattr(callback, "__name__", str(callback)),
+                    error=str(e),
+                )
 
     @property
     def state(self) -> VADState:

@@ -18,6 +18,9 @@ from typing import Callable
 
 from src.audio.transport.audio_clock import get_audio_clock
 from src.config.constants import TMF
+from src.observability.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class CancelReason(Enum):
@@ -148,8 +151,13 @@ class CancellationController:
                 # Wrap sync handler
                 try:
                     handler(message)
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.warning(
+                        "cancel_handler_error",
+                        session_id=self._session_id,
+                        handler=getattr(handler, "__name__", str(handler)),
+                        error=str(e),
+                    )
 
         if not tasks:
             return True

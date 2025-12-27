@@ -14,6 +14,10 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import AsyncIterator, Callable, Protocol
 
+from src.observability.logging import get_logger
+
+logger = get_logger(__name__)
+
 
 class ASREventType(Enum):
     """Types of ASR events."""
@@ -152,24 +156,36 @@ class BaseASREngine(ABC):
         for callback in self._callbacks_partial:
             try:
                 callback(text, t_ms)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(
+                    "asr_partial_callback_error",
+                    callback=getattr(callback, "__name__", str(callback)),
+                    error=str(e),
+                )
 
     async def _emit_final(self, text: str, start_ms: int, end_ms: int) -> None:
         """Emit final transcription to all registered callbacks."""
         for callback in self._callbacks_final:
             try:
                 callback(text, start_ms, end_ms)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(
+                    "asr_final_callback_error",
+                    callback=getattr(callback, "__name__", str(callback)),
+                    error=str(e),
+                )
 
     async def _emit_endpoint(self, t_ms: int) -> None:
         """Emit endpoint event to all registered callbacks."""
         for callback in self._callbacks_endpoint:
             try:
                 callback(t_ms)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(
+                    "asr_endpoint_callback_error",
+                    callback=getattr(callback, "__name__", str(callback)),
+                    error=str(e),
+                )
 
     @property
     def session_id(self) -> str | None:

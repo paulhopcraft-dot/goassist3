@@ -22,6 +22,9 @@ from typing import Callable
 from src.audio.transport.audio_clock import get_audio_clock
 from src.audio.vad.silero_vad import VADEvent, VADState
 from src.config.constants import TMF
+from src.observability.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class TurnState(Enum):
@@ -262,8 +265,13 @@ class TurnDetector:
                     await callback(event)
                 else:
                     callback(event)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(
+                    "turn_state_change_callback_error",
+                    session_id=self.session_id,
+                    callback=getattr(callback, "__name__", str(callback)),
+                    error=str(e),
+                )
 
         return event
 
@@ -275,8 +283,13 @@ class TurnDetector:
                     await callback(event)
                 else:
                     callback(event)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(
+                    "turn_endpoint_callback_error",
+                    session_id=self.session_id,
+                    callback=getattr(callback, "__name__", str(callback)),
+                    error=str(e),
+                )
 
     async def _emit_barge_in(self, event: TurnEvent) -> None:
         """Emit barge-in event."""
@@ -286,8 +299,13 @@ class TurnDetector:
                     await callback(event)
                 else:
                     callback(event)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(
+                    "turn_barge_in_callback_error",
+                    session_id=self.session_id,
+                    callback=getattr(callback, "__name__", str(callback)),
+                    error=str(e),
+                )
 
     @property
     def state(self) -> TurnState:

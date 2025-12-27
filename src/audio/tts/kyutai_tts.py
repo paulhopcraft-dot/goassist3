@@ -381,8 +381,13 @@ class KyutaiTTSEngine(BaseTTSEngine):
                     self._state.ws.send(json.dumps({"type": "cancel"})),
                     timeout=self._config.cancel_timeout_ms / 1000,
                 )
-            except Exception:
-                pass  # Best effort
+            except Exception as e:
+                # Best effort - log at debug to avoid latency impact
+                logger.debug(
+                    "kyutai_tts_cancel_send_error",
+                    session_id=self._state.session_id,
+                    error=str(e),
+                )
 
         cancel_duration_ms = (time.monotonic() - cancel_start) * 1000
 
@@ -402,8 +407,12 @@ class KyutaiTTSEngine(BaseTTSEngine):
         if self._state.ws:
             try:
                 await self._state.ws.close()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(
+                    "kyutai_tts_close_error",
+                    session_id=self._state.session_id,
+                    error=str(e),
+                )
             self._state.ws = None
 
         await super().stop()

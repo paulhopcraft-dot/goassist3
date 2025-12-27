@@ -18,6 +18,9 @@ from typing import Callable
 from src.animation.base import BlendshapeFrame, get_neutral_blendshapes
 from src.audio.transport.audio_clock import get_audio_clock
 from src.config.constants import TMF
+from src.observability.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -123,8 +126,12 @@ class HeartbeatEmitter:
 
             except asyncio.CancelledError:
                 break
-            except Exception:
-                # Don't let errors crash heartbeat loop
+            except Exception as e:
+                logger.warning(
+                    "heartbeat_loop_error",
+                    session_id=self._session_id,
+                    error=str(e),
+                )
                 continue
 
     def set_neutral_pose(self, pose: dict) -> None:
@@ -233,7 +240,12 @@ class HeartbeatMonitor:
 
             except asyncio.CancelledError:
                 break
-            except Exception:
+            except Exception as e:
+                logger.warning(
+                    "heartbeat_monitor_error",
+                    session_id=self._session_id,
+                    error=str(e),
+                )
                 continue
 
     @property

@@ -18,8 +18,10 @@ from enum import IntEnum
 from typing import Callable
 
 from src.config.constants import TMF
-from src.observability.logging import BackpressureLogger
+from src.observability.logging import BackpressureLogger, get_logger
 from src.observability.metrics import record_backpressure
+
+logger = get_logger(__name__)
 
 
 class BackpressureLevel(IntEnum):
@@ -242,8 +244,14 @@ class BackpressureController:
         for callback in self._on_level_change:
             try:
                 callback(new_level)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(
+                    "backpressure_callback_error",
+                    session_id=self._session_id,
+                    callback=getattr(callback, "__name__", str(callback)),
+                    level=new_level.name,
+                    error=str(e),
+                )
 
     def _get_trigger_reason(self) -> str:
         """Get the primary reason for current backpressure."""
