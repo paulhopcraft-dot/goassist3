@@ -35,8 +35,11 @@ class TMFConstants:
 
     # Section 4.2: Animation Thresholds
     ANIMATION_YIELD_LAG_MS: Final[int] = 120  # Yield animation if lag exceeds
+    ANIMATION_YIELD_THRESHOLD_MS: Final[int] = 120  # Alias for ANIMATION_YIELD_LAG_MS
     ANIMATION_SLOW_FREEZE_MS: Final[int] = 150  # Ease to neutral duration
+    ANIMATION_FREEZE_DURATION_MS: Final[int] = 150  # Alias for SLOW_FREEZE_MS
     ANIMATION_HEARTBEAT_THRESHOLD_MS: Final[int] = 100  # Missing frame threshold
+    ANIMATION_FREEZE_THRESHOLD_MS: Final[int] = 100  # Alias for HEARTBEAT threshold
     ANIMATION_TARGET_FPS: Final[int] = 30  # Minimum animation FPS
 
     # Section 5.2: Backpressure Thresholds
@@ -52,6 +55,7 @@ class TMFConstants:
     SOAK_DUTY_CYCLE_PERCENT: Final[float] = 0.30  # Active duty cycle
 
     # Session Defaults
+    MAX_CONCURRENT_SESSIONS: Final[int] = 100  # Max concurrent sessions per node
     SESSION_IDLE_TIMEOUT_S: Final[int] = 300  # 5 minutes
     SESSION_MAX_DURATION_S: Final[int] = 3600  # 1 hour max session
     SESSION_WARMUP_TURNS: Final[int] = 3  # Turns before steady-state

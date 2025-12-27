@@ -11,7 +11,7 @@ os.environ.update({
     "MAX_CONCURRENT_SESSIONS": "5",
     "LLM_MODEL_PATH": "/test/models/llm",
     "ASR_MODEL_PATH": "/test/models/asr",
-    "TTS_ENGINE": "test",
+    "TTS_ENGINE": "mock",  # Use mock TTS for testing
     "TTS_MODEL_PATH": "/test/models/tts",
     "ENVIRONMENT": "development",
     "ANIMATION_ENABLED": "false",  # Disable animation for unit tests
@@ -26,7 +26,7 @@ def test_settings():
         max_concurrent_sessions=5,
         llm_model_path="/test/models/llm",
         asr_model_path="/test/models/asr",
-        tts_engine="test",
+        tts_engine="mock",  # Use mock TTS for testing
         tts_model_path="/test/models/tts",
         animation_enabled=False,
     )

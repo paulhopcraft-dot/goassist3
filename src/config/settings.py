@@ -38,7 +38,7 @@ class Settings(BaseSettings):
 
     # Session Configuration
     max_concurrent_sessions: int = Field(
-        ..., ge=1, le=100, description="Maximum concurrent sessions (GPU-dependent)"
+        default=10, ge=1, le=100, description="Maximum concurrent sessions (GPU-dependent)"
     )
     session_idle_timeout_s: int = Field(
         default=TMF.SESSION_IDLE_TIMEOUT_S,
@@ -48,7 +48,9 @@ class Settings(BaseSettings):
     )
 
     # LLM Configuration
-    llm_model_path: str = Field(..., description="Path to LLM model weights")
+    llm_model_path: str = Field(
+        default="models/llm", description="Path to LLM model weights"
+    )
     llm_max_context_tokens: int = Field(
         default=TMF.LLM_MAX_CONTEXT_TOKENS,
         ge=1024,
@@ -64,7 +66,9 @@ class Settings(BaseSettings):
     )
 
     # ASR Configuration
-    asr_model_path: str = Field(..., description="Path to ASR model")
+    asr_model_path: str = Field(
+        default="models/asr", description="Path to ASR model"
+    )
     vad_engine: Literal["silero", "webrtc"] = Field(
         default="silero", description="VAD engine selection"
     )
@@ -75,8 +79,12 @@ class Settings(BaseSettings):
     )
 
     # TTS Configuration
-    tts_engine: str = Field(..., description="TTS engine identifier")
-    tts_model_path: str = Field(..., description="Path to TTS model")
+    tts_engine: Literal["mock", "kyutai"] = Field(
+        default="mock", description="TTS engine (mock, kyutai)"
+    )
+    tts_model_path: str = Field(
+        default="models/tts", description="Path to TTS model"
+    )
     audio_packet_ms: int = Field(
         default=TMF.AUDIO_PACKET_DURATION_MS,
         ge=10,
@@ -88,6 +96,22 @@ class Settings(BaseSettings):
         ge=0,
         le=20,
         description="Audio overlap for cross-fade",
+    )
+
+    # Kyutai TTS Configuration (when tts_engine="kyutai")
+    kyutai_tts_url: str = Field(
+        default="ws://localhost:8080/tts",
+        description="Kyutai TTS WebSocket server URL",
+    )
+    kyutai_voice_id: str = Field(
+        default="default",
+        description="Voice ID from Kyutai repository",
+    )
+    kyutai_sample_rate: int = Field(
+        default=24000,
+        ge=16000,
+        le=48000,
+        description="Kyutai TTS sample rate (24kHz default)",
     )
 
     # Animation Configuration
@@ -180,6 +204,22 @@ class Settings(BaseSettings):
                     "webrtc_turn_username and webrtc_turn_password are required "
                     "when webrtc_turn_server is set"
                 )
+
+    # Property aliases for backward compatibility
+    @property
+    def turn_url(self) -> str | None:
+        """Alias for webrtc_turn_server."""
+        return self.webrtc_turn_server
+
+    @property
+    def turn_username(self) -> str | None:
+        """Alias for webrtc_turn_username."""
+        return self.webrtc_turn_username
+
+    @property
+    def turn_credential(self) -> str | None:
+        """Alias for webrtc_turn_password."""
+        return self.webrtc_turn_password
 
 
 @lru_cache
