@@ -93,8 +93,8 @@ class Settings(BaseSettings):
     )
 
     # TTS Configuration
-    tts_engine: Literal["mock", "kyutai"] = Field(
-        default="mock", description="TTS engine (mock, kyutai)"
+    tts_engine: Literal["mock", "xtts-v2", "kyutai"] = Field(
+        default="xtts-v2", description="Primary TTS backend (xtts-v2, kyutai, mock)"
     )
     tts_model_path: str = Field(
         default="models/tts", description="Path to TTS model"
@@ -111,8 +111,22 @@ class Settings(BaseSettings):
         le=20,
         description="Audio overlap for cross-fade",
     )
+    tts_fallback_to_mock: bool = Field(
+        default=True,
+        description="Fallback to mock TTS if primary backend fails",
+    )
+
+    # XTTS-v2 Configuration (when tts_engine="xtts-v2")
+    xtts_server_url: str = Field(
+        default="http://localhost:8020",
+        description="XTTS-v2 server HTTP URL",
+    )
 
     # Kyutai TTS Configuration (when tts_engine="kyutai")
+    kyutai_enabled: bool = Field(
+        default=False,
+        description="Enable Kyutai TTS backend (OPTIONAL, disabled by default)",
+    )
     kyutai_tts_url: str = Field(
         default="ws://localhost:8080/tts",
         description="Kyutai TTS WebSocket server URL",

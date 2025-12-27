@@ -2,11 +2,26 @@
 
 Provides pluggable TTS engines per TMF v3.0 and Addendum A.
 
-Available engines:
-- MockTTSEngine: For testing (generates silence)
-- KyutaiTTSEngine: Streaming TTS with 220ms latency (recommended)
+ARCHITECTURE:
+- TTSBackend: Canonical interface for all TTS backends
+- TTSManager: Config-based backend selection (recommended)
+- Legacy TTSEngine: Original interface (maintained for compatibility)
 
-Usage:
+Available backends:
+- xtts-v2: Coqui XTTS-v2 (PRIMARY production backend)
+- kyutai: Streaming TTS (OPTIONAL, disabled by default)
+- mock: For testing (generates silence)
+
+Usage (recommended - new backend architecture):
+    from src.audio.tts import create_tts_manager
+
+    manager = create_tts_manager(primary="xtts-v2")
+    await manager.init()
+
+    async for chunk in manager.stream(TTSRequest(text="Hello")):
+        send_audio(chunk.chunk)
+
+Usage (legacy - for existing code compatibility):
     from src.audio.tts import create_tts_engine
 
     tts = create_tts_engine("kyutai", server_url="ws://localhost:8080/tts")
@@ -23,25 +38,55 @@ from src.audio.tts.base import (
     TTSEngine,
     text_to_stream,
 )
+from src.audio.tts.TTSManager import (
+    TTSManager,
+    TTSManagerConfig,
+    create_tts_manager,
+)
 
 __all__ = [
-    # Protocol and base
+    # New backend architecture (recommended)
+    "TTSBackend",
+    "TTSManager",
+    "TTSManagerConfig",
+    "TTSRequest",
+    "TTSResult",
+    "TTSStreamChunk",
+    "TTSHealthStatus",
+    "create_tts_manager",
+    # Legacy interface (compatibility)
     "TTSEngine",
     "BaseTTSEngine",
     "TTSChunk",
-    # Implementations
     "MockTTSEngine",
     "KyutaiTTSEngine",
     "KyutaiTTSConfig",
-    # Utilities
     "text_to_stream",
     "create_tts_engine",
 ]
 
 
-# Lazy imports for optional engines
+# Lazy imports for optional components
 def __getattr__(name: str):
-    """Lazy import for optional TTS engines."""
+    """Lazy import for optional TTS components."""
+    # Backend interface
+    if name in ("TTSBackend", "TTSRequest", "TTSResult", "TTSStreamChunk", "TTSHealthStatus"):
+        from src.audio.tts.backends.interface import (
+            TTSBackend,
+            TTSRequest,
+            TTSResult,
+            TTSStreamChunk,
+            TTSHealthStatus,
+        )
+        return {
+            "TTSBackend": TTSBackend,
+            "TTSRequest": TTSRequest,
+            "TTSResult": TTSResult,
+            "TTSStreamChunk": TTSStreamChunk,
+            "TTSHealthStatus": TTSHealthStatus,
+        }[name]
+
+    # Legacy Kyutai engine (for compatibility)
     if name in ("KyutaiTTSEngine", "KyutaiTTSConfig"):
         from src.audio.tts.kyutai_tts import KyutaiTTSConfig, KyutaiTTSEngine
 
@@ -56,7 +101,9 @@ def create_tts_engine(
     engine: str = "mock",
     **kwargs,
 ) -> TTSEngine:
-    """Factory function to create TTS engines.
+    """Factory function to create TTS engines (legacy interface).
+
+    DEPRECATED: Prefer create_tts_manager() for new code.
 
     Args:
         engine: Engine type ("mock", "kyutai")
