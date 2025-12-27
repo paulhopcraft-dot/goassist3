@@ -27,7 +27,9 @@ def get_session_manager() -> SessionManager:
     """Get global session manager."""
     global _session_manager
     if _session_manager is None:
-        _session_manager = SessionManager()
+        from src.config.settings import get_settings
+        settings = get_settings()
+        _session_manager = SessionManager(max_sessions=settings.max_concurrent_sessions)
     return _session_manager
 
 
@@ -233,6 +235,16 @@ async def ice_candidate(
     request: ICECandidateRequest,
 ) -> dict:
     """Add ICE candidate for WebRTC connection."""
+    # Verify session exists
+    manager = get_session_manager()
+    session = manager.get_session(session_id)
+
+    if session is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Session {session_id} not found",
+        )
+
     gateway = get_webrtc_gateway()
 
     try:
