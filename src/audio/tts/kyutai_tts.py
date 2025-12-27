@@ -32,10 +32,14 @@ logger = get_logger(__name__)
 # Attempt to import websockets, provide helpful error if missing
 try:
     import websockets
-    from websockets.client import WebSocketClientProtocol
+    from websockets import ClientConnection  # Modern API (websockets 14+)
 except ImportError:
-    websockets = None  # type: ignore
-    WebSocketClientProtocol = None  # type: ignore
+    try:
+        import websockets
+        from websockets.client import WebSocketClientProtocol as ClientConnection  # Legacy
+    except ImportError:
+        websockets = None  # type: ignore
+        ClientConnection = None  # type: ignore
 
 
 @dataclass
@@ -76,7 +80,7 @@ class KyutaiTTSState:
     """Internal state for Kyutai TTS engine."""
 
     session_id: str | None = None
-    ws: "WebSocketClientProtocol | None" = None
+    ws: "ClientConnection | None" = None
     running: bool = False
     synthesizing: bool = False
     cancelled: bool = False
