@@ -42,7 +42,16 @@ Find the right command for your task.
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
 | `/project:branch` | Manage branches | Creating/merging features |
+| `/worktree` | Isolated workspaces | Safe feature development (v3.4) |
+| `/resolve` | AI merge resolution | Fix merge conflicts (v3.4) |
 | `/recover` | Fix git/project issues | Something's broken |
+
+### Memory & Context (v3.4)
+| Command | Purpose | When to Use |
+|---------|---------|-------------|
+| `/remember` | Save to memory | Store decisions, learnings, context |
+| `/recall` | Load from memory | Retrieve past context |
+| `/status --board` | Kanban board view | Visual task overview |
 
 ### PRD & Requirements
 | Command | Purpose | When to Use |
@@ -120,6 +129,12 @@ Find the right command for your task.
 2. `/project:review` - Code review
 3. `/project:security-scan` - Security check
 4. `/project:branch merge` - Merge when ready
+
+### Using Worktrees (v3.4)?
+1. `/worktree create F001` - Isolated workspace
+2. Build safely (main protected)
+3. `/worktree merge F001` - Merge back
+4. `/resolve` - If conflicts arise
 
 ## Command Aliases
 
