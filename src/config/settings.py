@@ -36,6 +36,20 @@ class Settings(BaseSettings):
         default="development", description="Environment name"
     )
 
+    # Authentication
+    api_key: str | None = Field(
+        default=None,
+        description="API key for authentication (required in production)",
+    )
+    api_key_header: str = Field(
+        default="X-API-Key",
+        description="Header name for API key",
+    )
+    auth_enabled: bool = Field(
+        default=True,
+        description="Enable API authentication (auto-disabled in development if no key)",
+    )
+
     # Session Configuration
     max_concurrent_sessions: int = Field(
         default=10, ge=1, le=100, description="Maximum concurrent sessions (GPU-dependent)"
@@ -204,6 +218,12 @@ class Settings(BaseSettings):
                     "webrtc_turn_username and webrtc_turn_password are required "
                     "when webrtc_turn_server is set"
                 )
+
+        # Validate API key in production
+        if self.environment == "production" and self.auth_enabled and not self.api_key:
+            raise ValueError(
+                "api_key is required when auth_enabled=true in production environment"
+            )
 
     # Property aliases for backward compatibility
     @property

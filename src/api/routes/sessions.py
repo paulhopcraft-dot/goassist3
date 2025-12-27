@@ -9,14 +9,20 @@ Provides REST endpoints for session management:
 Reference: Implementation-v3.0.md §4.4
 """
 
-from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
 from src.orchestrator.session import Session, SessionConfig, SessionManager
 from src.api.webrtc.gateway import WebRTCGateway, create_webrtc_gateway
 from src.api.websocket.blendshapes import get_blendshape_manager
+from src.api.auth import verify_api_key
 
-router = APIRouter(prefix="/sessions", tags=["sessions"])
+# All session routes require authentication
+router = APIRouter(
+    prefix="/sessions",
+    tags=["sessions"],
+    dependencies=[Depends(verify_api_key)],
+)
 
 # Global managers (initialized on startup)
 _session_manager: SessionManager | None = None
