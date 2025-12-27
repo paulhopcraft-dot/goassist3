@@ -1,0 +1,76 @@
+# GoAssist v3.0 Prometheus Configuration
+#
+# Scrapes metrics from GoAssist API and related services
+# Reference: Ops-Runbook-v3.0.md Section 5
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+  external_labels:
+    environment: '${ENVIRONMENT:-development}'
+    service: 'goassist'
+
+# Alerting rules (optional - configure Alertmanager)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
+# Load alerting rules
+# rule_files:
+#   - /etc/prometheus/rules/*.yml
+
+scrape_configs:
+  # ==========================================================================
+  # GoAssist API Metrics
+  # ==========================================================================
+  - job_name: 'goassist-api'
+    static_configs:
+      - targets: ['goassist-api:9464']
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+    # Relabel to add service labels
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '(.*):.*'
+        replacement: '${1}'
+
+  # ==========================================================================
+  # vLLM Metrics
+  # ==========================================================================
+  - job_name: 'vllm'
+    static_configs:
+      - targets: ['vllm:8000']
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # ==========================================================================
+  # Redis Metrics (requires redis_exporter)
+  # ==========================================================================
+  # - job_name: 'redis'
+  #   static_configs:
+  #     - targets: ['redis-exporter:9121']
+
+  # ==========================================================================
+  # PostgreSQL Metrics (requires postgres_exporter)
+  # ==========================================================================
+  # - job_name: 'postgres'
+  #   static_configs:
+  #     - targets: ['postgres-exporter:9187']
+
+  # ==========================================================================
+  # Node Exporter (optional - host metrics)
+  # ==========================================================================
+  # - job_name: 'node'
+  #   static_configs:
+  #     - targets: ['node-exporter:9100']
+
+  # ==========================================================================
+  # Prometheus self-monitoring
+  # ==========================================================================
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

@@ -1,0 +1,268 @@
+# GoAssist v3.0 Full Stack Docker Compose
+#
+# Usage:
+#   Development: docker compose -f docker-compose.goassist.yml up
+#   Production:  docker compose -f docker-compose.goassist.yml --profile production up
+#   GPU:         docker compose -f docker-compose.goassist.yml --profile gpu up
+#
+# Environment variables (set in .env or export):
+#   POSTGRES_PASSWORD - Database password (required for production)
+#   DEEPGRAM_API_KEY  - Deepgram API key (optional, for cloud ASR)
+#   HUGGINGFACE_TOKEN - HuggingFace token (for model downloads)
+
+version: '3.8'
+
+x-common-env: &common-env
+  ENVIRONMENT: ${ENVIRONMENT:-development}
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/goassist
+  REDIS_URL: redis://redis:6379
+
+services:
+  # ==========================================================================
+  # Core GoAssist API Service
+  # ==========================================================================
+  goassist-api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.goassist
+    container_name: goassist-api
+    ports:
+      - "${API_PORT:-8081}:8081"
+      - "${METRICS_PORT:-9464}:9464"
+    environment:
+      <<: *common-env
+      API_HOST: "0.0.0.0"
+      API_PORT: "8081"
+      # LLM Configuration
+      LLM_BASE_URL: http://vllm:8000/v1
+      LLM_MODEL_PATH: ${LLM_MODEL_PATH:-/models/llm}
+      LLM_MAX_CONTEXT_TOKENS: 8192
+      LLM_VRAM_CAP_GB: ${LLM_VRAM_CAP_GB:-20}
+      # TTS Configuration
+      TTS_ENGINE: ${TTS_ENGINE:-kyutai}
+      KYUTAI_TTS_URL: ws://kyutai-tts:8080/tts
+      KYUTAI_VOICE_ID: ${KYUTAI_VOICE_ID:-default}
+      # ASR Configuration
+      ASR_MODEL_PATH: ${ASR_MODEL_PATH:-/models/asr}
+      DEEPGRAM_API_KEY: ${DEEPGRAM_API_KEY:-}
+      # Animation Configuration
+      ANIMATION_ENABLED: ${ANIMATION_ENABLED:-true}
+      ANIMATION_ENGINE: ${ANIMATION_ENGINE:-audio2face}
+      AUDIO2FACE_GRPC_HOST: audio2face
+      AUDIO2FACE_GRPC_PORT: 50051
+      # WebRTC Configuration
+      WEBRTC_STUN_SERVER: ${WEBRTC_STUN_SERVER:-stun:stun.l.google.com:19302}
+      WEBRTC_TURN_SERVER: ${WEBRTC_TURN_SERVER:-}
+      WEBRTC_TURN_USERNAME: ${WEBRTC_TURN_USERNAME:-}
+      WEBRTC_TURN_PASSWORD: ${WEBRTC_TURN_PASSWORD:-}
+      # Session Configuration
+      MAX_CONCURRENT_SESSIONS: ${MAX_CONCURRENT_SESSIONS:-10}
+    volumes:
+      - models-volume:/models:ro
+      - ../src:/app/src:ro  # Read-only source mount for dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+    networks:
+      - goassist-network
+    restart: unless-stopped
+
+  # ==========================================================================
+  # vLLM - LLM Inference Server
+  # ==========================================================================
+  vllm:
+    image: vllm/vllm-openai:v0.6.0
+    container_name: goassist-vllm
+    ports:
+      - "${VLLM_PORT:-8000}:8000"
+    environment:
+      HUGGINGFACE_TOKEN: ${HUGGINGFACE_TOKEN:-}
+    command: >
+      --model ${LLM_MODEL:-meta-llama/Llama-3.1-8B-Instruct}
+      --host 0.0.0.0
+      --port 8000
+      --tensor-parallel-size ${TENSOR_PARALLEL_SIZE:-1}
+      --gpu-memory-utilization ${GPU_MEMORY_UTILIZATION:-0.85}
+      --max-model-len ${MAX_MODEL_LEN:-8192}
+      --enable-prefix-caching
+    volumes:
+      - models-volume:/models
+      - huggingface-cache:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - goassist-network
+    restart: unless-stopped
+    profiles:
+      - gpu
+
+  # ==========================================================================
+  # Kyutai TTS Server
+  # ==========================================================================
+  kyutai-tts:
+    image: kyutai/moshi-tts:latest  # Placeholder - build from source if needed
+    container_name: goassist-tts
+    ports:
+      - "${TTS_PORT:-8080}:8080"
+    environment:
+      TTS_VOICE_REPO: ${TTS_VOICE_REPO:-/voices}
+      TTS_SAMPLE_RATE: 24000
+      TTS_ENABLE_TIMESTAMPS: "true"
+    volumes:
+      - tts-voices:/voices
+    networks:
+      - goassist-network
+    restart: unless-stopped
+    profiles:
+      - tts
+
+  # ==========================================================================
+  # PostgreSQL - Session Persistence
+  # ==========================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: goassist-postgres
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: goassist
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d goassist"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - goassist-network
+    restart: unless-stopped
+
+  # ==========================================================================
+  # Redis - Pub/Sub and Caching
+  # ==========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: goassist-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - goassist-network
+    restart: unless-stopped
+
+  # ==========================================================================
+  # NVIDIA Audio2Face (Optional - GPU Profile)
+  # ==========================================================================
+  audio2face:
+    image: nvcr.io/nvidia/audio2face:2023.2.0
+    container_name: goassist-audio2face
+    ports:
+      - "${A2F_GRPC_PORT:-50051}:50051"
+    environment:
+      DISPLAY: ${DISPLAY:-:0}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - goassist-network
+    restart: unless-stopped
+    profiles:
+      - gpu
+      - animation
+
+  # ==========================================================================
+  # Prometheus (Optional - Observability Profile)
+  # ==========================================================================
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: goassist-prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    networks:
+      - goassist-network
+    restart: unless-stopped
+    profiles:
+      - observability
+
+  # ==========================================================================
+  # Grafana (Optional - Observability Profile)
+  # ==========================================================================
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: goassist-grafana
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    networks:
+      - goassist-network
+    restart: unless-stopped
+    profiles:
+      - observability
+
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  models-volume:
+    driver: local
+  huggingface-cache:
+    driver: local
+  tts-voices:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+networks:
+  goassist-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
