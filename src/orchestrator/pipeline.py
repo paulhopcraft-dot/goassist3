@@ -96,6 +96,7 @@ class ConversationPipeline:
         self._running: bool = False
         self._current_transcript: str = ""
         self._processing_turn: bool = False
+        self._turn_lock: asyncio.Lock = asyncio.Lock()
 
         # Callbacks
         self._on_audio_output: Callable[[bytes], None] | None = None
@@ -231,22 +232,31 @@ class ConversationPipeline:
             self._on_transcript(text, True)
 
     def _handle_asr_endpoint(self, t_ms: int) -> None:
-        """Handle ASR endpoint detection - user finished speaking."""
+        """Handle ASR endpoint detection - user finished speaking.
+
+        Uses atomic flag set to prevent race condition where multiple
+        endpoints trigger duplicate turn processing.
+        """
         if self._processing_turn:
+            logger.debug(
+                "asr_endpoint_skipped",
+                session_id=self._session.session_id,
+                reason="turn_already_processing",
+            )
             return
 
-        # Trigger turn processing
+        # Set flag BEFORE creating task to prevent race condition
+        # In single-threaded asyncio, this sync callback runs atomically
+        self._processing_turn = True
         asyncio.create_task(self._process_turn(t_ms))
 
     async def _process_turn(self, endpoint_ms: int) -> None:
         """Process a complete turn: ASR → LLM → TTS → Animation.
 
         This is the core pipeline that generates and outputs a response.
+        Note: _processing_turn flag is already set by _handle_asr_endpoint
+        to prevent race conditions.
         """
-        if self._processing_turn:
-            return
-
-        self._processing_turn = True
         user_text = self._current_transcript
 
         if not user_text.strip():
