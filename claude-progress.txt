@@ -754,42 +754,52 @@ Local Machine                        Cloud GPU (RunPod)
 - GoAssist app creates without errors
 - All routes available
 
-### Cloud GPU Setup (In Progress)
+---
 
-User is setting up RunPod GPU instance:
-- Selected GPU on RunPod
-- On "Deploy On-Demand" screen
-- Needs to click Deploy, then run vLLM commands
+## Session 23 (2025-12-28): Cloud GPU vLLM Running + MetaHuman Branch
 
-**Next Steps for User:**
-1. Click "Deploy On-Demand" on RunPod
-2. Connect to pod terminal
-3. Run: `pip install vllm`
-4. Run: `python -m vllm.entrypoints.openai.api_server --model Qwen/Qwen2.5-7B-Instruct --host 0.0.0.0 --port 8000 --max-model-len 4096`
-5. Get pod URL and update `.env` with `LLM_BASE_URL`
-6. Run: `python -m src.main`
-7. Run: `python scripts/test_voice_pipeline.py`
+### vLLM Server Running on RunPod ✓
+
+User successfully deployed and started vLLM server:
+- Pod: `unfair_brown_lynx` (ID: pnzvwm4ixg73qp)
+- Volume: 30GB (increased from initial 0GB)
+- vLLM 0.13.0 installed
+- Server started with all routes available
+
+**vLLM Routes Active:**
+- `/v1/models`
+- `/v1/chat/completions`
+- `/v1/completions`
+- `/v1/embeddings`
+- `/v1/audio/transcriptions`
+- `/ping`
+
+### MetaHuman Feature Branch Created
+
+Created branch `feature/metahuman` for avatar work.
 
 ### Session Handoff
 
 **Completed:**
-- Pluggable TTS architecture with 4 backends
-- Voice E2E test configuration (.env)
-- Test script for pipeline verification
-- 189 tests passing
+- ✅ vLLM server running on RunPod cloud GPU
+- ✅ `feature/metahuman` branch created
+- ✅ 189 tests passing
 
-**In Progress:**
-- User deploying RunPod GPU instance
-- vLLM server not yet running
-
-**Blockers:**
-- Need cloud GPU URL from user to complete voice testing
+**Pending:**
+- Update `.env` with actual RunPod URL (get from pod's HTTP port 8000 proxy URL)
+- Run voice pipeline test: `python scripts/test_voice_pipeline.py`
+- Test full pipeline: GoAssist → vLLM → response
 
 **Next Session:**
-1. User provides RunPod URL
-2. Update `.env` with actual LLM_BASE_URL
-3. Start GoAssist and run test script
-4. Add real TTS (XTTS-v2) if mock works
-5. Add real ASR (Deepgram) if pipeline works
+1. Get RunPod proxy URL (format: `https://[pod-id]-8000.proxy.runpod.net/v1`)
+2. Update `.env`: `LLM_BASE_URL=https://pnzvwm4ixg73qp-8000.proxy.runpod.net/v1`
+3. Start GoAssist: `python -m src.main`
+4. Run test: `python scripts/test_voice_pipeline.py`
+5. If working, enable real ASR/TTS
+
+**RunPod Pod Details:**
+- Pod ID: `pnzvwm4ixg73qp`
+- Expected URL: `https://pnzvwm4ixg73qp-8000.proxy.runpod.net/v1`
+- Note: Verify port 8000 is exposed in RunPod pod settings
 
 ---
