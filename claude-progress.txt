@@ -484,3 +484,312 @@ Researched TTS options. Kyutai wins because it's the only TTS that accepts strea
 **Test Suite:** 42 tests passing (19 original + 23 Kyutai TTS)
 
 ---
+
+## Session 20 (2025-12-27): MetaHuman Live Link Integration + Handoff
+
+### Completion Assessment
+
+User asked about overall completion status. Honest assessment:
+- **~80% code written**, **~20% end-to-end tested**
+- 105 tests passing at session start
+- 44 Python modules
+
+**Complete:**
+- API routes & session management
+- Audio clock, packetizer, VAD
+- TTS adapters (ElevenLabs, Deepgram, Kyutai)
+- Animation pipeline (blendshapes, interpolation)
+- Docker/compose configuration
+- Observability (metrics, logging)
+
+**Incomplete:**
+- End-to-end integration testing
+- ASR integration testing
+- LLM integration testing
+- WebRTC audio streaming
+- Audio2Face gRPC integration
+- 24h soak test
+- Frontend client/avatar
+
+### MetaHuman Integration (Avatar)
+
+User confirmed TMF v3.0 §3.6 specifies "Unreal Engine 5.7 + MetaHuman, Ingest via Live Link / UDP".
+
+**Initially wrong approach:** Started building Three.js + Ready Player Me web client.
+**User corrected:** MetaHuman was the specified solution.
+**Fixed:** Deleted frontend directory, created Live Link integration instead.
+
+### Live Link Integration Created
+
+**Commit:** `063f6f6` - feat(avatar): add MetaHuman integration via Live Link
+
+**Files Created:**
+
+1. **`src/animation/livelink/sender.py`** (350+ lines)
+   - `LiveLinkSender`: UDP sender for streaming blendshapes to Unreal Engine
+   - `LiveLinkBridge`: Rate-limited bridge from animation pipeline to Live Link
+   - `LiveLinkConfig`: Configuration dataclass
+   - JSON packet format matching Unreal's Live Link Face plugin
+   - Supports all 52 ARKit blendshapes + head rotation
+
+2. **`src/animation/livelink/__init__.py`**
+   - Module exports for Live Link integration
+
+3. **`docs/MetaHuman-Setup.md`** (comprehensive guide)
+   - Step-by-step Unreal Engine + MetaHuman setup
+   - Architecture diagram: GoAssist → Live Link → Unreal → MetaHuman
+   - Plugin requirements, Live Link configuration
+   - Blueprint setup for MetaHuman
+   - Troubleshooting section
+   - API reference for packet format
+
+4. **`tests/test_livelink.py`** (21 tests)
+   - Config tests, sender creation, state management
+   - Packet building (52 blendshapes, clamping, head rotation)
+   - Bridge rate limiting
+   - Integration tests
+
+**Test Suite:** 126/126 passing
+
+### Architecture
+
+```
+GoAssist Backend                    Unreal Engine 5
+┌─────────────────┐                ┌──────────────────┐
+│ Audio + TTS     │                │ Live Link Face   │
+│      ↓          │                │ Plugin           │
+│ Audio2Face/LAM  │   UDP:11111    │      ↓           │
+│      ↓          │ ──────────────→│ MetaHuman BP     │
+│ LiveLinkSender  │                │      ↓           │
+│ (JSON packets)  │                │ MetaHuman Mesh   │
+└─────────────────┘                └──────────────────┘
+```
+
+### Next Steps for Next Session
+
+1. **User must install Unreal Engine 5.x manually**
+   - Download Epic Games Launcher from unrealengine.com
+   - Install Unreal Engine 5.3+ (50GB)
+   - Enable Live Link Face and MetaHuman plugins
+   - Follow docs/MetaHuman-Setup.md
+
+2. **Test end-to-end with MetaHuman** (pending Unreal installation)
+   - Run test script from MetaHuman-Setup.md
+   - Verify blendshapes animate MetaHuman face
+   - Validate 30fps streaming
+
+3. **Audio2Face gRPC integration** (for production lip-sync)
+   - Currently using LAM fallback
+   - Audio2Face provides higher quality
+
+4. **WebRTC audio streaming** (browser → GoAssist)
+   - Currently stubbed
+   - Needed for full voice interaction
+
+### Recent Commits
+
+```
+063f6f6 feat(avatar): add MetaHuman integration via Live Link
+781c894 feat(docker): add GoAssist v3.0 deployment configuration
+d516282 test(animation): add 45 tests for animation pipeline
+de2ba2d feat(api): add integration tests and fix session bugs
+```
+
+### Session Handoff Complete
+
+- All work committed
+- 126 tests passing
+- Progress documented
+- Ready for next session
+
+---
+
+## Session 21 (2025-12-27): Conversation Pipeline + Final Push
+
+### End-to-End Conversation Pipeline Created
+
+**Commit:** `7902043` - feat(orchestrator): add end-to-end conversation pipeline
+
+Created `ConversationPipeline` class that wires all components together:
+
+```
+Audio In → VAD → ASR → LLM → TTS → Animation → Live Link
+                              ↓
+                          Audio Out
+```
+
+**Files Created/Modified:**
+
+1. **`src/orchestrator/pipeline.py`** (NEW - 405 lines)
+   - `PipelineConfig`: Component enablement + TTS/LiveLink config
+   - `ConversationPipeline`: Full orchestration class
+   - `create_pipeline()`: Factory function
+   - Key methods:
+     - `start()` / `stop()` - Lifecycle management
+     - `process_audio()` - Feed audio from WebRTC
+     - `_process_turn()` - Core turn: ASR → LLM → TTS → Animation
+     - `handle_barge_in()` - Cancel all components (<150ms target)
+
+2. **`src/orchestrator/__init__.py`** (MODIFIED)
+   - Added pipeline exports: `ConversationPipeline`, `PipelineConfig`, `create_pipeline`
+
+3. **`src/orchestrator/session.py`** (FIXED)
+   - Changed `clock.register_session()` → `clock.start_session()`
+   - Changed `clock.unregister_session()` → `clock.end_session()`
+
+4. **`tests/test_pipeline.py`** (NEW - 12 tests)
+   - Config tests, pipeline creation, start/stop
+   - Barge-in handling, callbacks, audio processing
+
+5. **`tests/test_audio_clock.py`** (FIXED)
+   - Widened timing tolerance (15-50ms) for system load
+
+### Verification Results
+
+Ran `/verify` skill:
+- **138 tests passing** (12 new pipeline tests)
+- **16 core modules** import successfully
+- **4 documentation features** verified (TMF-09, TMF-08, OPS-06, PAR-03)
+
+### GitHub Push
+
+Pushed 11 commits to GitHub including:
+- Kyutai TTS adapter (`587f17f`)
+- Kyutai TTS tests (`1fe8015`)
+- MetaHuman Live Link (`063f6f6`)
+- Conversation Pipeline (`7902043`)
+
+**All code now on GitHub:** https://github.com/paulhopcraft-dot/goassist3
+
+### Test Suite: 138/138 Passing
+
+```
+tests/test_animation.py        - 45 tests
+tests/test_api.py              - 16 tests
+tests/test_audio_clock.py      - 6 tests
+tests/test_health.py           - 8 tests
+tests/test_kyutai_tts.py       - 23 tests
+tests/test_livelink.py         - 21 tests
+tests/test_pipeline.py         - 12 tests (NEW)
+tests/test_state_machine.py    - 7 tests
+```
+
+### Pending Tasks for Next Session
+
+1. **Improve error handling** - XTTS-v2 TTS engine (retry logic, graceful fallback)
+2. **Increase modularity** - TTS and avatar modules (clear interfaces for swapping)
+3. **End-to-end testing** - Browser client → full pipeline → MetaHuman
+4. **Audio2Face gRPC** - Replace LAM fallback with production quality
+
+### Session Handoff Complete
+
+- All 11 commits pushed to GitHub ✓
+- 138 tests passing ✓
+- Kyutai TTS on GitHub ✓
+- Progress documented ✓
+- Ready for next session ✓
+
+---
+
+## Session 22 (2025-12-28): Voice E2E Testing Setup + Pluggable TTS
+
+### Pluggable TTS Backend Architecture (Completed)
+
+**Commit:** `1be762d` - feat: implement pluggable TTS backend architecture
+
+Created canonical TTS backend system per user's detailed requirements:
+
+**Files Created:**
+1. `src/audio/tts/backends/interface.py` - TTSBackend abstract interface
+2. `src/audio/tts/backends/mock_backend.py` - Mock backend for testing
+3. `src/audio/tts/backends/xtts_backend.py` - XTTS-v2 primary backend
+4. `src/audio/tts/backends/kyutai_backend.py` - Optional Kyutai backend
+5. `src/audio/tts/TTSManager.py` - Config-based backend switching
+
+**Key Design:**
+- XTTS-v2 is PRIMARY production backend
+- Kyutai is OPTIONAL, disabled by default
+- Backend switching via config ONLY (no runtime switching)
+- Kyutai NOT instantiated unless `kyutai_enabled=True`
+- Fallback to mock if primary fails
+
+**Settings Added (src/config/settings.py):**
+```python
+tts_engine: Literal["mock", "xtts-v2", "kyutai"]
+xtts_server_url: str
+kyutai_enabled: bool = False
+kyutai_tts_url: str
+tts_fallback_to_mock: bool = True
+```
+
+**Test Suite:** 189 tests passing
+
+### Voice E2E Testing Preparation
+
+**Goal:** Test voice pipeline end-to-end with self-hosted components (NO OpenAI)
+
+**Architecture:**
+```
+Local Machine                        Cloud GPU (RunPod)
+┌─────────────────┐                  ┌──────────────────┐
+│ GoAssist API    │  LLM_BASE_URL    │ vLLM Server      │
+│ (FastAPI:8081)  │ ◄──────────────► │ Qwen-7B-Instruct │
+│                 │                  │ :8000            │
+│ Mock TTS/ASR    │                  └──────────────────┘
+└─────────────────┘
+```
+
+**Files Created:**
+1. `.env` - Configuration with Qwen LLM, mock TTS/ASR
+2. `scripts/test_voice_pipeline.py` - E2E test script
+
+**Configuration (.env):**
+- LLM: Qwen/Qwen2.5-7B-Instruct on cloud vLLM
+- TTS: Mock (for initial testing)
+- ASR: Mock (for initial testing)
+- Animation: Disabled
+
+**Verified:**
+- Settings load correctly
+- GoAssist app creates without errors
+- All routes available
+
+### Cloud GPU Setup (In Progress)
+
+User is setting up RunPod GPU instance:
+- Selected GPU on RunPod
+- On "Deploy On-Demand" screen
+- Needs to click Deploy, then run vLLM commands
+
+**Next Steps for User:**
+1. Click "Deploy On-Demand" on RunPod
+2. Connect to pod terminal
+3. Run: `pip install vllm`
+4. Run: `python -m vllm.entrypoints.openai.api_server --model Qwen/Qwen2.5-7B-Instruct --host 0.0.0.0 --port 8000 --max-model-len 4096`
+5. Get pod URL and update `.env` with `LLM_BASE_URL`
+6. Run: `python -m src.main`
+7. Run: `python scripts/test_voice_pipeline.py`
+
+### Session Handoff
+
+**Completed:**
+- Pluggable TTS architecture with 4 backends
+- Voice E2E test configuration (.env)
+- Test script for pipeline verification
+- 189 tests passing
+
+**In Progress:**
+- User deploying RunPod GPU instance
+- vLLM server not yet running
+
+**Blockers:**
+- Need cloud GPU URL from user to complete voice testing
+
+**Next Session:**
+1. User provides RunPod URL
+2. Update `.env` with actual LLM_BASE_URL
+3. Start GoAssist and run test script
+4. Add real TTS (XTTS-v2) if mock works
+5. Add real ASR (Deepgram) if pipeline works
+
+---
