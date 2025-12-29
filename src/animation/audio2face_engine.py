@@ -74,6 +74,7 @@ class Audio2FaceEngine(BaseAnimationEngine):
         # gRPC client (initialized in start)
         self._stub = None
         self._channel = None
+        self._grpc_client = None  # Audio2FaceClient instance
 
         # Yield and heartbeat controllers
         self._yield_controller: YieldController | None = None
@@ -121,15 +122,22 @@ class Audio2FaceEngine(BaseAnimationEngine):
 
     async def _connect_grpc(self) -> None:
         """Connect to Audio2Face gRPC service."""
-        # Placeholder for actual gRPC connection
-        # In production:
-        # import grpc
-        # from audio2face_pb2_grpc import Audio2FaceStub
-        # self._channel = grpc.aio.insecure_channel(
-        #     f"{self._config.grpc_host}:{self._config.grpc_port}"
-        # )
-        # self._stub = Audio2FaceStub(self._channel)
-        pass
+        from src.animation.grpc.client import Audio2FaceClient
+
+        self._grpc_client = Audio2FaceClient(
+            host=self._config.grpc_host,
+            port=self._config.grpc_port,
+            style=self._config.style,
+            timeout_s=self._config.timeout_s,
+        )
+
+        connected = await self._grpc_client.connect()
+        if not connected:
+            logger.warning(
+                "audio2face_using_fallback",
+                session_id=self._session_id,
+                reason="Connection failed, using RMS-based lip-sync",
+            )
 
     async def generate_frames(
         self,
@@ -216,22 +224,34 @@ class Audio2FaceEngine(BaseAnimationEngine):
         Returns:
             ARKit-52 blendshape dict
         """
-        # In production, this would call Audio2Face gRPC
-        # For now, return neutral with simulated lip movement
+        # Use gRPC client if connected
+        if self._grpc_client and self._grpc_client.connected:
+            return self._grpc_client._fallback_blendshapes(audio)
+
+        # Fallback: RMS-based lip-sync simulation
         blendshapes = get_neutral_blendshapes()
 
-        # Simple lip-sync simulation based on audio energy
         if audio:
-            # Calculate RMS energy (simplified)
+            # Calculate RMS energy
             samples = [int.from_bytes(audio[i:i+2], 'little', signed=True)
-                      for i in range(0, min(len(audio), 320), 2)]
+                      for i in range(0, min(len(audio), 640), 2)]
             if samples:
                 rms = (sum(s * s for s in samples) / len(samples)) ** 0.5
-                normalized = min(1.0, rms / 10000.0)
+                normalized = min(1.0, rms / 8000.0)
 
-                # Apply to jaw/mouth
-                blendshapes["jawOpen"] = normalized * 0.5
-                blendshapes["mouthClose"] = 0.1 - normalized * 0.1
+                # Jaw opening based on volume
+                blendshapes["jawOpen"] = normalized * 0.6
+
+                # Mouth shapes for speech simulation
+                blendshapes["mouthClose"] = max(0, 0.1 - normalized * 0.15)
+                blendshapes["mouthFunnel"] = normalized * 0.2
+                blendshapes["mouthPucker"] = normalized * 0.1
+
+                # Subtle lip movement
+                blendshapes["mouthUpperUpLeft"] = normalized * 0.15
+                blendshapes["mouthUpperUpRight"] = normalized * 0.15
+                blendshapes["mouthLowerDownLeft"] = normalized * 0.2
+                blendshapes["mouthLowerDownRight"] = normalized * 0.2
 
         return blendshapes
 
@@ -258,7 +278,12 @@ class Audio2FaceEngine(BaseAnimationEngine):
         """Stop engine and cleanup."""
         await self.cancel()
 
-        # Close gRPC channel
+        # Disconnect gRPC client
+        if self._grpc_client:
+            await self._grpc_client.disconnect()
+            self._grpc_client = None
+
+        # Close gRPC channel (legacy)
         if self._channel:
             await self._channel.close()
             self._channel = None
