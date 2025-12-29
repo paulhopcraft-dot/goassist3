@@ -35,6 +35,9 @@ class TMFConstants:
 
     # Section 4.2: Animation Thresholds
     ANIMATION_YIELD_LAG_MS: Final[int] = 120  # Yield animation if lag exceeds
+    ANIMATION_YIELD_THRESHOLD_MS: Final[int] = 120  # Alias for yield threshold
+    ANIMATION_FREEZE_THRESHOLD_MS: Final[int] = 120  # Freeze trigger threshold
+    ANIMATION_FREEZE_DURATION_MS: Final[int] = 150  # Freeze animation duration
     ANIMATION_SLOW_FREEZE_MS: Final[int] = 150  # Ease to neutral duration
     ANIMATION_HEARTBEAT_THRESHOLD_MS: Final[int] = 100  # Missing frame threshold
     ANIMATION_TARGET_FPS: Final[int] = 30  # Minimum animation FPS

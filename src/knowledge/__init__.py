@@ -18,7 +18,7 @@ Usage:
     await rag.add_file("docs/policies.pdf")
     results = await rag.query("shipping costs", k=5)
 
-Reference: PRD v3.0 §5
+Reference: PRD v3.0 Section 5
 """
 
 from src.knowledge.rag import (
