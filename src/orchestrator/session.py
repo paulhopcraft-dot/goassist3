@@ -119,6 +119,9 @@ class Session:
         self._metrics = SessionMetrics()
         self._logger = SessionLogger(self._session_id)
 
+        # Conversation history for LLM context
+        self._conversation_history: list[dict[str, str]] = []
+
         # Turn tracking
         self._current_turn_id: int = 0
         self._turn_start_ms: int = 0
@@ -153,6 +156,11 @@ class Session:
         if self._context:
             return self._context.total_tokens
         return 0
+
+    @property
+    def conversation_history(self) -> list[dict[str, str]]:
+        """Conversation history for LLM context."""
+        return self._conversation_history
 
     async def start(
         self,

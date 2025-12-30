@@ -10,9 +10,11 @@ Reference: Implementation-v3.0.md §4.4
 """
 
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from src.orchestrator.session import Session, SessionConfig, SessionManager
+from src.llm.vllm_client import VLLMClient, build_messages
 from src.api.webrtc.gateway import WebRTCGateway, create_webrtc_gateway
 from src.api.websocket.blendshapes import get_blendshape_manager
 from src.api.auth import verify_api_key
@@ -27,6 +29,7 @@ router = APIRouter(
 # Global managers (initialized on startup)
 _session_manager: SessionManager | None = None
 _webrtc_gateway: WebRTCGateway | None = None
+_llm_client: VLLMClient | None = None
 
 
 def get_session_manager() -> SessionManager:
@@ -45,6 +48,15 @@ def get_webrtc_gateway() -> WebRTCGateway:
     if _webrtc_gateway is None:
         _webrtc_gateway = create_webrtc_gateway()
     return _webrtc_gateway
+
+
+async def get_llm_client() -> VLLMClient:
+    """Get global LLM client."""
+    global _llm_client
+    if _llm_client is None:
+        _llm_client = VLLMClient()
+        await _llm_client.start()
+    return _llm_client
 
 
 # Request/Response models
@@ -101,6 +113,20 @@ class ICECandidateRequest(BaseModel):
     """ICE candidate from client."""
 
     candidate: dict
+
+
+class ChatRequest(BaseModel):
+    """Chat message request."""
+
+    message: str = Field(..., description="User message text")
+    stream: bool = Field(False, description="Stream response tokens")
+
+
+class ChatResponse(BaseModel):
+    """Chat message response."""
+
+    response: str
+    session_id: str
 
 
 # Endpoints
@@ -198,6 +224,51 @@ async def list_sessions() -> dict:
         "available_slots": manager.available_slots,
         "sessions": manager.list_sessions(),
     }
+
+
+@router.post("/{session_id}/chat", response_model=ChatResponse)
+async def chat(session_id: str, request: ChatRequest) -> ChatResponse:
+    """Send a chat message and get LLM response.
+
+    This is the main text interaction endpoint.
+    For voice, use WebRTC audio streaming instead.
+    """
+    manager = get_session_manager()
+    session = manager.get_session(session_id)
+
+    if session is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Session {session_id} not found",
+        )
+
+    try:
+        llm = await get_llm_client()
+
+        # Build messages with conversation history
+        messages = build_messages(
+            system_prompt=session.config.system_prompt,
+            conversation=session.conversation_history,
+            user_input=request.message,
+        )
+
+        # Generate response
+        response = await llm.generate(messages)
+
+        # Update session conversation history
+        session.conversation_history.append({"role": "user", "content": request.message})
+        session.conversation_history.append({"role": "assistant", "content": response.text})
+
+        return ChatResponse(
+            response=response.text,
+            session_id=session_id,
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"LLM generation failed: {str(e)}",
+        )
 
 
 # WebRTC signaling endpoints

@@ -428,10 +428,28 @@
 
         // Send to backend
         async function sendToBackend(text) {
-            // TODO: Implement actual API call to process message
-            // For now, simulate response
-            await new Promise(r => setTimeout(r, 1000));
-            return `You said: "${text}". (Backend processing not yet connected)`;
+            if (!sessionId) {
+                return 'No session active. Please refresh the page.';
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/sessions/${sessionId}/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+
+                if (!res.ok) {
+                    const error = await res.json();
+                    throw new Error(error.detail || 'Chat request failed');
+                }
+
+                const data = await res.json();
+                return data.response;
+            } catch (e) {
+                console.error('Chat error:', e);
+                return `Error: ${e.message}. Make sure vLLM is running on RunPod.`;
+            }
         }
 
         // Show/hide typing indicator
