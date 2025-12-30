@@ -803,3 +803,82 @@ Created branch `feature/metahuman` for avatar work.
 - Note: Verify port 8000 is exposed in RunPod pod settings
 
 ---
+
+## Branch Status Dashboard
+
+*Last updated: 2025-12-31*
+
+| Branch | Status | Waiting On | Next Action |
+|--------|--------|------------|-------------|
+| `master` | 🟡 Ready | vLLM health check | In RunPod terminal: `curl localhost:8000/v1/models` |
+| `feature/metahuman` | 🟢 Code Done | User: Unreal Engine install | Download UE5.3+, enable Live Link Face plugin |
+| `feature/tts-finetuning` | 🟢 Frontend+API Ready | User: Test frontend | Start server, open `http://localhost:8081` |
+
+### Status Legend
+- 🟢 **Ready**: Code complete, waiting for user action
+- 🟡 **Pending**: Needs verification/testing
+- 🔴 **Blocked**: External dependency (not user-actionable)
+- ✅ **Done**: Merged to master
+
+### Branch Details
+
+**master** (voice pipeline)
+- Voice pipeline code complete (189 tests passing)
+- vLLM client configured: `LLM_BASE_URL=https://pnzvwm4ixg73qp-8000.proxy.runpod.net/v1`
+- RunPod pod running but vLLM serving status unknown
+- **User Action**: Check if vLLM process running in RunPod Web Terminal
+
+**feature/metahuman** (avatar)
+- Live Link sender implemented (`src/animation/livelink/sender.py`)
+- Animation engine ready with ARKit-52 blendshapes
+- **User Action**: Install Unreal Engine 5.3+, enable Live Link Face plugin, import MetaHuman
+
+**feature/tts-finetuning** (voice cloning)
+- Recording scripts created and verified ✓
+- Dependencies installed: sounddevice, soundfile, whisper ✓
+- USB Microphone detected (device 1) ✓
+- Web frontend added with chat UI ✓
+- Chat API endpoint integrated with vLLM ✓
+- **User Action**: Run recording script, speak 5-10 min of varied content
+
+---
+
+## Session 24 - 2025-12-31
+
+### Completed
+- ✅ Built web frontend (`frontend/index.html`) with chat UI, mic button, status indicators
+- ✅ Added static file serving to FastAPI (`src/main.py`)
+- ✅ Created chat API endpoint (`POST /sessions/{id}/chat`)
+- ✅ Integrated chat with vLLM client and conversation history
+- ✅ Configured permissions to bypass confirmation prompts
+- ✅ Updated toolkit commands and added new skills (engineering-mode, launch, pal, prompt-gov, react)
+- ✅ All 189 tests passing
+
+### Commits This Session
+- `92e5bd1` feat: add web frontend and TTS recording scripts
+- `8418e3d` feat(api): add chat endpoint and wire frontend to LLM
+- `a51248b` chore: configure permissions to bypass confirmation prompts
+- `0a93ef9` chore: update toolkit commands and add new skills
+
+### In Progress
+- Voice recording for TTS fine-tuning (user to do)
+- MetaHuman setup (blocked by hardware - Intel UHD Graphics only)
+
+### Next Steps
+1. Start server: `python -m uvicorn src.main:create_app --factory --host 0.0.0.0 --port 8081`
+2. Open browser: `http://localhost:8081`
+3. Verify vLLM running on RunPod: `curl https://pnzvwm4ixg73qp-8000.proxy.runpod.net/v1/models`
+4. Test chat functionality end-to-end
+5. Record voice samples when ready: `python scripts/tts_finetuning/record_and_transcribe.py`
+
+### Blockers
+- MetaHuman: User has Intel UHD Graphics (integrated only), not suitable for Unreal Engine
+- vLLM: Need to verify pod is running and healthy on RunPod
+
+### Notes
+- Frontend uses `http://localhost:8081` as API base
+- Chat endpoint maintains conversation history per session
+- Permissions configured in `.claude/settings.local.json` with `bypassPermissions` mode
+- VS Code settings updated with `claude.autoApproveTools: true`
+
+---
