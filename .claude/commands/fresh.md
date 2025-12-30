@@ -2,28 +2,23 @@
 description: Context reset with state preservation
 ---
 
-<instructions>
 Perform a context reset while preserving all project state.
-</instructions>
 
-<pre_reset_checklist>
-<step number="1">Read current @features.json</step>
-<step number="2">Read current @claude-progress.txt</step>
-<step number="3">Review uncommitted changes (git status)</step>
-<step number="4">Note current task/position</step>
-</pre_reset_checklist>
+## Pre-Reset Checklist
+1. Read current @features.json
+2. Read current @claude-progress.txt  
+3. Review uncommitted changes (git status)
+4. Note current task/position
 
-<state_preservation>
-<task>Update @claude-progress.txt</task>
-<content>
+## State Preservation
+Update @claude-progress.txt with:
 - Current date/time
 - Task in progress (if any)
 - Recent accomplishments (last 3-5 items)
 - Next planned task
 - Any blockers or notes
-</content>
 
-<format>
+Format:
 ```
 [YYYY-MM-DD HH:MM] - Context reset
 - Completed: [list recent work]
@@ -31,13 +26,11 @@ Perform a context reset while preserving all project state.
 - Next: [planned task]
 - Notes: [any important context]
 ```
-</format>
-</state_preservation>
 
-<instructions_for_user>
+## Instructions for User
 After state is saved, instruct user:
 
-"✅ State preserved to claude-progress.txt.
+"✅ State preserved to claude-progress.txt. 
 
 **Next steps:**
 1. Run `/clear` to reset context
@@ -45,4 +38,3 @@ After state is saved, instruct user:
 3. Continue from: [current task]"
 
 Then wait for user to run /clear.
-</instructions_for_user>

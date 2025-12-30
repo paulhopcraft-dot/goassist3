@@ -2,53 +2,36 @@
 description: Blind validation - separate verifier runs tests
 ---
 
-<instructions>
 Perform independent validation using separate verifier agent.
-</instructions>
 
-<principle>
-**Builder Never Validates Own Work**
+## Principle: Builder Never Validates Own Work
 
 The builder (current session) creates a test plan. A separate validator agent executes it independently and reports results.
-</principle>
 
-<process>
-<step number="1">
-<title>Create Test Plan</title>
-<builder_documents>
+## Process
+
+### 1. Create Test Plan
 Builder documents:
 - What was built/changed
 - Expected behavior
 - Test commands to run
 - Success criteria
 - Files to check
-</builder_documents>
-</step>
 
-<step number="2">
-<title>Spawn Validator Agent</title>
-<use_task_tool>
+### 2. Spawn Validator Agent
 Use Task tool with validation agent:
 - Provide test plan only
 - No access to build context
 - Fresh perspective
-</use_task_tool>
-</step>
 
-<step number="3">
-<title>Validator Executes</title>
-<independently>
+### 3. Validator Executes
 Independently:
 - Runs specified tests
 - Checks for regressions
 - Verifies success criteria
 - Reports PASS/FAIL with evidence
-</independently>
-</step>
 
-<step number="4">
-<title>Report Results</title>
-<validator_returns>
+### 4. Report Results
 Validator returns:
 ```
 VALIDATION RESULT: [PASS/FAIL]
@@ -63,17 +46,12 @@ Regressions: None detected
 Evidence:
 [Test output, logs, metrics]
 ```
-</validator_returns>
-</step>
-</process>
 
-<when_to_use>
+## When to Use
 - After implementing new features
 - Before merging to main
 - When tests are critical (performance, security)
 - After refactoring
-</when_to_use>
 
-<execution>
+## Execute Validation
 [Create test plan and spawn validator agent for current changes]
-</execution>

@@ -1,0 +1,45 @@
+{
+  "_readme": "APE Evaluation - Command Performance Tracker",
+  "_version": "1.1.0",
+  "_note": "This file tracks optimization history and current performance for each command. Now with Prompt-Gov validation.",
+
+  "/prompt-gov": {
+    "prompt_version": "2.1.0",
+    "baseline_score": 100.0,
+    "current_score": 100.0,
+    "improvement_pct": 0,
+    "executions_total": 0,
+    "executions_since_optimization": 0,
+    "next_optimization_at": 50,
+    "metrics": {
+      "modes_used": {
+        "builder": 0,
+        "reviewer": 0,
+        "surgeon": 0,
+        "factory": 0,
+        "eval_designer": 0,
+        "incident_response": 0
+      },
+      "validation_success_rate": 1.0
+    },
+    "optimization_history": [],
+    "_note": "Meta-engineering tool - validates other prompts"
+  },
+
+  "/build-feature": {
+    "prompt_version": "1.0",
+    "baseline_score": 60.0,
+    "current_score": 60.0,
+    "improvement_pct": 0,
+    "executions_total": 1,
+    "executions_since_optimization": 1,
+    "next_optimization_at": 50,
+    "metrics": {
+      "success_rate": 1.0,
+      "avg_test_coverage": 87,
+      "avg_quality_score": 85,
+      "avg_duration_sec": 120
+    },
+    "optimization_history": []
+  }
+}

@@ -2,54 +2,39 @@
 description: Define constraints before implementing complex features
 ---
 
-<instructions>
-Define implementation boundaries BEFORE writing code. Prevents over-engineering and scope creep.
-</instructions>
+# Constraint Analysis: $ARGUMENTS
 
-<arguments>$ARGUMENTS</arguments>
+Define implementation boundaries BEFORE writing code:
 
-<hard_constraints>
 ## HARD CONSTRAINTS (Cannot Violate)
 
-<performance>
 ### Performance
 - Response time: [e.g., <300ms p95]
 - Throughput: [e.g., 100 req/sec]
 - Latency budget: [component breakdown]
-</performance>
 
-<resource_limits>
 ### Resource Limits
 - Memory: [e.g., <2GB VRAM, <500MB RAM]
 - CPU: [e.g., <70% sustained utilization]
 - Storage: [e.g., <100MB on disk]
 - Network: [e.g., <5MB download size]
-</resource_limits>
 
-<security>
 ### Security
 - Authentication: [required methods]
 - Authorization: [access control rules]
 - Data handling: [encryption, PII rules]
 - Compliance: [GDPR, HIPAA, etc.]
-</security>
 
-<compatibility>
 ### Compatibility
 - Must work with: [existing systems, APIs, versions]
 - Cannot break: [specific integrations]
 - Backward compatibility: [requirements]
-</compatibility>
 
-<business_rules>
 ### Business Rules
 - Cost ceiling: [max $/month, $/request]
 - SLA requirements: [uptime, recovery time]
 - Legal requirements: [licenses, terms]
-</business_rules>
-</hard_constraints>
 
-<soft_preferences>
 ## SOFT PREFERENCES (Optimize For)
 
 Rank by priority (1 = highest):
@@ -58,9 +43,7 @@ Rank by priority (1 = highest):
 3. [e.g., Test coverage >80%]
 4. [e.g., Minimal dependencies]
 5. [e.g., Observable/debuggable]
-</soft_preferences>
 
-<anti_patterns>
 ## ANTI-PATTERNS (Explicitly Avoid)
 
 **Do NOT:**
@@ -72,18 +55,18 @@ Rank by priority (1 = highest):
 
 **Why these are forbidden:**
 - [Reasoning for each anti-pattern]
-</anti_patterns>
 
-<validation_checklist>
+## Constraint Validation
+
 Before marking feature complete, verify:
 - [ ] All hard constraints tested and passing
 - [ ] Soft preferences optimized (at least top 3)
 - [ ] No anti-patterns present in code
 - [ ] Performance benchmarks meet targets
 - [ ] Resource usage within limits
-</validation_checklist>
 
-<implementation_notes>
+## Implementation Notes
+
 Update features.json with constraints:
 ```json
 {
@@ -101,4 +84,3 @@ Update features.json with constraints:
 ```
 
 Now implement within these boundaries.
-</implementation_notes>

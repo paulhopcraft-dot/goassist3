@@ -2,36 +2,28 @@
 description: Generate PROJECT_INDEX.json codebase map
 ---
 
-<instructions>
 Generate comprehensive codebase index for fast context loading.
-</instructions>
 
-<scan_strategy>
-<source_files pattern="src/**/*.py">
-- Module docstrings
-- Class names and purposes
-- Public functions/methods
-- Key imports
-</source_files>
+## Scan Strategy
+1. **Source files** (src/**/*.py)
+   - Module docstrings
+   - Class names and purposes
+   - Public functions/methods
+   - Key imports
 
-<test_files pattern="tests/**/*.py">
-- Test coverage areas
-- Integration test suites
-</test_files>
+2. **Test files** (tests/**/*.py)
+   - Test coverage areas
+   - Integration test suites
 
-<config_files>
-- dev.yaml, prod.yaml structure
-- Key configuration sections
-</config_files>
+3. **Config files**
+   - dev.yaml, prod.yaml structure
+   - Key configuration sections
 
-<documentation>
-- README, specs, architecture docs
-</documentation>
-</scan_strategy>
+4. **Documentation**
+   - README, specs, architecture docs
 
-<output_format>
-<file_structure>PROJECT_INDEX.json</file_structure>
-<schema>
+## Output Format: PROJECT_INDEX.json
+
 ```json
 {
   "generated": "YYYY-MM-DD HH:MM",
@@ -56,11 +48,8 @@ Generate comprehensive codebase index for fast context loading.
   }
 }
 ```
-</schema>
-</output_format>
 
-<execution>
+## Generate Index
 Scan codebase and create PROJECT_INDEX.json with above structure.
 
 Report: "✅ Generated PROJECT_INDEX.json ([X] files, [Y] LOC)"
-</execution>

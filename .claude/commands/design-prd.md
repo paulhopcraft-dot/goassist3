@@ -2,26 +2,21 @@
 description: Design with PRD constraints
 ---
 
-<instructions>
-Design solutions that respect PRD boundaries. For architectural decisions in regulated systems.
-</instructions>
+# PRD-Constrained Design: $ARGUMENTS
 
-<arguments>$ARGUMENTS</arguments>
-
-<prd_location>
-**Read PRD:** /docs/PRD/*.md
+## Read PRD: /docs/PRD/*.md
 
 Design decisions MUST align with PRD constraints.
-</prd_location>
 
-<design_scope>
+## Design Scope
+
 **PRD Section:** [Which section does this design implement?]
 
 **Requirements from PRD:**
 - [List requirements this design must satisfy]
-</design_scope>
 
-<prd_constraints>
+## PRD Constraints
+
 Extract from PRD:
 
 **Functional Requirements:**
@@ -35,9 +30,9 @@ Extract from PRD:
 
 **Explicit Exclusions:**
 - [What PRD says NOT to build]
-</prd_constraints>
 
-<design_options>
+## Design Options
+
 For each option, verify PRD alignment:
 
 **Option A:**
@@ -51,17 +46,17 @@ For each option, verify PRD alignment:
 - PRD support: [Which sections support this]
 - PRD violations: [Any conflicts with PRD]
 - Compliance: [Satisfies PRD regulatory requirements?]
-</design_options>
 
-<decision_criteria>
+## Decision Criteria
+
 **From PRD (non-negotiable):**
 - [List must-have criteria from PRD]
 
 **From context (optimize for):**
 - [Additional criteria not in PRD]
-</decision_criteria>
 
-<recommendation>
+## Recommendation
+
 **Chosen design:** [Which option]
 
 **PRD justification:**
@@ -73,4 +68,3 @@ For each option, verify PRD alignment:
 - docs/DESIGN.md
 - Reference PRD sections
 - Include requirements traceability matrix
-</recommendation>

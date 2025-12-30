@@ -2,18 +2,24 @@
 description: Role-Based Constraint Prompting - Get 10x more specific outputs
 ---
 
-<instructions>
-Assign expert roles with specific constraints for dramatically better outputs.
+# /expert - Role-Based Constraint Prompting
 
-Use this when you need production-quality code, not generic examples.
+**Technique:** Assign expert roles with specific constraints for dramatically better outputs.
+
+**Use this when:** You need production-quality code, not generic examples.
+
+---
+
+## Instructions
+
+I need you to adopt an expert role with specific constraints.
 
 **Task:** $ARGUMENTS
-</instructions>
 
-<workflow>
-<step number="1">
-<title>Define the Expert Role</title>
-<define>
+---
+
+## Step 1: Define the Expert Role
+
 Based on the task, determine:
 
 **Expert Role:**
@@ -21,68 +27,59 @@ Based on the task, determine:
 - Experience: [e.g., "10 years", "15 years"]
 - Domain: [e.g., "data pipeline optimization", "distributed systems", "computer vision"]
 - Specialization: [e.g., "real-time processing", "cloud infrastructure", "production ML"]
-</define>
 
-<example>
+**Example:**
 ```
-You are a Senior Python Engineer with 10 years experience in data pipeline
+You are a Senior Python Engineer with 10 years experience in data pipeline 
 optimization, specializing in real-time processing at scale.
 ```
-</example>
-</step>
 
-<step number="2">
-<title>Extract/Define Constraints</title>
-<identify>Identify or ask for **3-5 specific technical constraints**</identify>
+---
 
-<constraint_categories>
-<category name="Technology Stack">
+## Step 2: Extract/Define Constraints
+
+Identify or ask for **3-5 specific technical constraints**:
+
+**Constraint Categories:**
+
+**Technology Stack:**
 - Must use: [specific libraries/frameworks]
 - Cannot use: [prohibited tools]
 - Version requirements: [e.g., Python 3.11+, Node 18+]
-</category>
 
-<category name="Performance">
+**Performance:**
 - Latency: [e.g., sub-100ms, <500ms p95]
 - Throughput: [e.g., 10M records/hour, 1000 req/sec]
 - Memory: [e.g., max 2GB footprint, <500MB RAM]
 - CPU: [e.g., <30% utilization, single-threaded]
-</category>
 
-<category name="Reliability">
+**Reliability:**
 - Availability: [e.g., 99.9% uptime, zero downtime]
 - Data integrity: [e.g., zero data loss, exactly-once delivery]
 - Error handling: [e.g., graceful degradation, retry logic]
-</category>
 
-<category name="Code Quality">
+**Code Quality:**
 - Test coverage: [e.g., >80%, all critical paths]
 - Documentation: [e.g., inline, docstrings, type hints]
 - Style: [e.g., follows PEP8, linted, formatted]
-</category>
 
-<category name="Deployment">
+**Deployment:**
 - Environment: [e.g., Docker, Kubernetes, serverless]
 - Monitoring: [e.g., Prometheus metrics, structured logging]
 - Configuration: [e.g., 12-factor, env vars]
-</category>
 
-<category name="Security">
+**Security:**
 - Authentication: [e.g., OAuth2, API keys]
 - Data handling: [e.g., encrypt at rest, no PII in logs]
 - Dependencies: [e.g., no CVEs, pinned versions]
-</category>
-</constraint_categories>
 
-<clarification>
-If constraints aren't obvious from the task, ask:
+**If constraints aren't obvious from the task, ask:**
 "What are the critical constraints for this implementation?"
-</clarification>
-</step>
 
-<step number="3">
-<title>Define Output Format</title>
-<deliverables>
+---
+
+## Step 3: Define Output Format
+
 Specify exactly what format you need:
 
 **Code Deliverables:**
@@ -102,20 +99,21 @@ Specify exactly what format you need:
 - [ ] Deployment instructions
 - [ ] Performance characteristics
 - [ ] Trade-offs explained
-</deliverables>
 
-<note>Select what's needed for this task.</note>
-</step>
+**Select what's needed for this task.**
 
-<step number="4">
-<title>Construct the Expert Prompt</title>
-<template>
+---
+
+## Step 4: Construct the Expert Prompt
+
+Combine everything into a structured prompt:
+
 ```
 ========================================
 EXPERT ROLE
 ========================================
 
-You are a [Role] with [X years] experience in [Domain],
+You are a [Role] with [X years] experience in [Domain], 
 specializing in [Specialization].
 
 Your task: [Specific task description]
@@ -158,31 +156,28 @@ Code Requirements:
 
 ========================================
 ```
-</template>
-</step>
 
-<step number="5">
-<title>Execute as Expert</title>
-<implement>
+---
+
+## Step 5: Execute as Expert
+
 Now implement the task **strictly adhering to the role and constraints**.
-</implement>
 
-<execution_rules>
+**Execution Rules:**
 1. **Stay in character** - Think like the expert you defined
 2. **Honor ALL constraints** - No shortcuts or "good enough"
 3. **Match output format exactly** - Deliver what was specified
 4. **Explain trade-offs** - When you make architectural decisions
 5. **Production quality only** - No "TODO" or "implement later"
-</execution_rules>
 
-<action>
+**Start implementation:**
+
 [Implement the full solution following the expert prompt above]
-</action>
-</step>
 
-<step number="6">
-<title>Validation Checklist</title>
-<verify>
+---
+
+## Step 6: Validation Checklist
+
 Before marking complete, verify:
 
 **Role Adherence:**
@@ -199,14 +194,15 @@ Before marking complete, verify:
 - [ ] All requested deliverables present
 - [ ] Documentation is complete
 - [ ] Examples/tests included
-</verify>
 
-<note>If any checkbox fails, revise the solution.</note>
-</step>
-</workflow>
+**If any checkbox fails, revise the solution.**
 
-<examples>
-<example name="Data Pipeline">
+---
+
+## Examples
+
+### Example 1: Data Pipeline
+
 **Command:**
 ```
 /expert Build real-time ETL pipeline for 10M records/hour
@@ -214,7 +210,7 @@ Before marking complete, verify:
 
 **Expert Prompt Generated:**
 ```
-You are a Senior Data Engineer with 12 years experience in distributed
+You are a Senior Data Engineer with 12 years experience in distributed 
 data processing, specializing in high-throughput streaming pipelines.
 
 Your task: Build a real-time ETL pipeline for 10M records/hour
@@ -234,9 +230,9 @@ Output format:
 5. Deployment guide (Kubernetes + Helm)
 6. Monitoring dashboard (Grafana + Prometheus)
 ```
-</example>
 
-<example name="API Endpoint">
+### Example 2: API Endpoint
+
 **Command:**
 ```
 /expert Create authenticated REST API for file uploads with virus scanning
@@ -244,7 +240,7 @@ Output format:
 
 **Expert Prompt Generated:**
 ```
-You are a Senior Backend Engineer with 8 years experience in secure
+You are a Senior Backend Engineer with 8 years experience in secure 
 API development, specializing in file handling and security.
 
 Your task: Create authenticated REST API for file uploads with virus scanning
@@ -267,9 +263,9 @@ Output format:
 6. Integration tests with mocked S3 and ClamAV
 7. Deployment config (Docker + docker-compose)
 ```
-</example>
 
-<example name="Database Optimization">
+### Example 3: Database Optimization
+
 **Command:**
 ```
 /expert Optimize slow PostgreSQL query returning 10K rows in 5 seconds
@@ -277,7 +273,7 @@ Output format:
 
 **Expert Prompt Generated:**
 ```
-You are a Senior Database Engineer with 15 years experience in PostgreSQL
+You are a Senior Database Engineer with 15 years experience in PostgreSQL 
 optimization, specializing in query performance tuning.
 
 Your task: Optimize slow PostgreSQL query returning 10K rows in 5 seconds
@@ -297,11 +293,11 @@ Output format:
 5. Monitoring query for detecting regression
 6. Migration plan (zero downtime)
 ```
-</example>
-</examples>
 
-<usage_guidance>
-<when_to_use>
+---
+
+## When to Use /expert vs /continue
+
 **Use `/expert` when:**
 - Need production-quality code
 - Have specific technical constraints
@@ -314,33 +310,36 @@ Output format:
 - Constraints already established in CLAUDE.md
 - Following existing patterns
 - Quick fixes or minor features
-</when_to_use>
 
-<pro_tips>
-<tip name="Be Specific with Experience Level">
+---
+
+## Pro Tips
+
+### 1. Be Specific with Experience Level
+
 **Vague:** "You are a developer"
 **Better:** "You are a Senior Python Engineer with 10 years experience"
 **Best:** "You are a Principal Engineer with 15 years in distributed systems, having built 3 production platforms handling >1B requests/day"
-</tip>
 
-<tip name="Quantify Everything">
+### 2. Quantify Everything
+
 **Vague:** "Make it fast"
 **Better:** "Low latency"
 **Best:** "p50 <50ms, p95 <100ms, p99 <200ms"
-</tip>
 
-<tip name="Specify Output Format Exactly">
+### 3. Specify Output Format Exactly
+
 **Vague:** "Write code"
 **Better:** "Write production code with tests"
 **Best:** "Production-ready Python with type hints, inline docs, 80% test coverage, structured logging, and README with examples"
-</tip>
 
-<tip name="Add Domain Context">
+### 4. Add Domain Context
+
 **Generic:** "You are a Python engineer"
 **Domain-Specific:** "You are a Python engineer specializing in financial systems with SOX compliance experience"
-</tip>
 
-<tip name="Combine with Other Commands">
+### 5. Combine with Other Commands
+
 ```bash
 # Plan first
 /think:parallel "Build payment processing system"
@@ -354,12 +353,11 @@ Output format:
 # Learn
 /reflect "Payment system implementation"
 ```
-</tip>
-</pro_tips>
-</usage_guidance>
 
-<advanced>
-<custom_profiles>
+---
+
+## Advanced: Custom Expert Profiles
+
 Create reusable expert profiles in PROJECT_INDEX.json:
 
 ```json
@@ -394,9 +392,11 @@ Create reusable expert profiles in PROJECT_INDEX.json:
 ```
 
 Then reference: `/expert "Use backend_api profile for user authentication endpoint"`
-</custom_profiles>
 
-<integration_with_rules>
+---
+
+## Integration with Engineering Rules
+
 Expert constraints should complement (not contradict) your engineering rules:
 
 **In `.claude/rules/engineering.md`:**
@@ -412,9 +412,11 @@ When using /expert command, always apply:
 ```
 
 These become **baseline constraints** that every expert role includes.
-</integration_with_rules>
 
-<measuring_impact>
+---
+
+## Measuring Impact
+
 Track improvements from using `/expert`:
 
 **Metrics to monitor:**
@@ -435,10 +437,11 @@ Track improvements from using `/expert`:
 - Edge cases handled
 - Complete documentation
 - No TODOs (or documented as intentional)
-</measuring_impact>
-</advanced>
 
-<summary>
+---
+
+## Summary
+
 **The Pattern:**
 ```
 Role + Experience + Domain + Constraints + Output Format = 10x Better Results
@@ -451,4 +454,3 @@ Role + Experience + Domain + Constraints + Output Format = 10x Better Results
 
 **What You Get:**
 Not "a solution" but "THE solution an expert would build."
-</summary>

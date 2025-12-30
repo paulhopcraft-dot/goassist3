@@ -2,14 +2,10 @@
 description: Analyze decisions from multiple viewpoints
 ---
 
-<instructions>
-Analyze from four distinct lenses to catch blind spots in decision-making.
-</instructions>
+# Multi-Perspective Analysis: $ARGUMENTS
 
-<arguments>$ARGUMENTS</arguments>
+Analyze from four distinct lenses to catch blind spots:
 
-<analysis>
-<technical_perspective>
 ## Perspective 1: Technical Feasibility
 
 **Implementation Complexity:**
@@ -31,9 +27,9 @@ Analyze from four distinct lenses to catch blind spots in decision-making.
 - Testing complexity: [How hard to test]
 
 **Rating:** [1-10] | **Blockers:** [Major technical risks]
-</technical_perspective>
 
-<operational_perspective>
+---
+
 ## Perspective 2: Operational Impact
 
 **Deployment:**
@@ -60,9 +56,9 @@ Analyze from four distinct lenses to catch blind spots in decision-making.
 - On-call burden: [Incident frequency expected]
 
 **Rating:** [1-10] | **Concerns:** [Operational risks]
-</operational_perspective>
 
-<business_perspective>
+---
+
 ## Perspective 3: Business Value
 
 **User Impact:**
@@ -90,9 +86,9 @@ Analyze from four distinct lenses to catch blind spots in decision-making.
 - RICE score: [(Reach * Impact * Confidence) / Effort]
 
 **Rating:** [1-10] | **Business Risk:** [Market/revenue risks]
-</business_perspective>
 
-<future_perspective>
+---
+
 ## Perspective 4: Future-Proofing
 
 **Scalability Headroom:**
@@ -120,10 +116,9 @@ Analyze from four distinct lenses to catch blind spots in decision-making.
 - Replacement timeline: [When might we need to rewrite]
 
 **Rating:** [1-10] | **Future Debt:** [Long-term concerns]
-</future_perspective>
-</analysis>
 
-<synthesis>
+---
+
 ## Synthesis & Recommendation
 
 **Perspective Scores:**
@@ -150,4 +145,3 @@ Document in docs/DECISIONS.md with all four perspectives summarized.
 **Action Items:**
 1. [Specific next step based on decision]
 2. [...]
-</synthesis>
