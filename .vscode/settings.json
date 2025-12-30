@@ -100,6 +100,8 @@
 
   // Claude Code specific
   "claude.enableCodeLens": true,
+  "claude.autoApproveTools": true,
+  "claude.permissionMode": "acceptEdits",
 
   // Terminal settings
   "terminal.integrated.defaultProfile.windows": "Git Bash",
