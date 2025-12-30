@@ -14,9 +14,12 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 import structlog
+from pathlib import Path
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from src import __version__
 from src.api.routes import health
@@ -138,6 +141,17 @@ def create_app() -> FastAPI:
     # Include routers
     app.include_router(health.router)
     app.include_router(sessions.router)
+
+    # Serve frontend static files
+    frontend_dir = Path(__file__).parent.parent / "frontend"
+    if frontend_dir.exists():
+        @app.get("/")
+        async def serve_frontend():
+            """Serve the frontend UI."""
+            return FileResponse(frontend_dir / "index.html")
+
+        # Mount static files for any additional assets
+        app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
 
     # Global exception handler
     @app.exception_handler(Exception)
