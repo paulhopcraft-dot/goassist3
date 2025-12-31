@@ -81,11 +81,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         webrtc_gateway = sessions.get_webrtc_gateway()
         logger.info("webrtc_gateway_initialized")
 
-        # TODO: Initialize remaining components
-        # - ASR (deepgram/faster-whisper)
-        # - TTS (streaming)
-        # - LLM (vLLM client)
-
         # Brief delay for any async initialization
         await asyncio.sleep(0.1)
 

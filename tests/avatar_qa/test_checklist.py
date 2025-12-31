@@ -66,29 +66,27 @@ class TestLipSync:
         """Should pass with ≤2 desyncs per 10 seconds."""
         checklist = AvatarQAChecklist()
 
-        # 10 seconds of frames at 30fps
+        # 10 seconds of frames at 30fps with jawOpen always active
+        # This simulates continuous speech with the mouth consistently open
         blendshape_frames = [
             {
                 "timestamp_ms": i * 33.3,
-                "jawOpen": 0.5 if i % 10 < 5 else 0.1,
-                "mouthClose": 0.4 if i % 10 >= 5 else 0.1,
+                "jawOpen": 0.5,  # Always active to match DD viseme
+                "mouthClose": 0.1,
             }
             for i in range(300)
         ]
 
-        # Expected visemes that match our blendshape pattern
+        # Expected visemes - all DD which expects jawOpen > 0.3
         expected_visemes = [
-            {"timestamp_ms": i * 100, "viseme": "PP", "phoneme": "p"}
+            {"timestamp_ms": i * 100, "viseme": "DD", "phoneme": "d"}
             for i in range(100)
         ]
-        # Make most match
-        for v in expected_visemes[:-2]:
-            v["viseme"] = "DD"  # DD maps to jawOpen
 
         result = checklist.check_lip_sync(blendshape_frames, expected_visemes)
 
-        # Should have few desyncs
-        assert result.metrics["desyncs_per_10s"] <= 5  # Relaxed for test
+        # Should have few desyncs since jawOpen is always active
+        assert result.metrics["desyncs_per_10s"] <= 2
 
     def test_fails_with_poor_lip_sync(self):
         """Should fail with many desyncs."""
@@ -151,7 +149,7 @@ class TestEyeContact:
         result = checklist.check_eye_contact(blendshape_frames, duration_s=10.0)
 
         # Will have very long dead stare since no saccades
-        assert result.metrics["saccade_count"] == 0
+        assert result.metrics["saccades_per_10s"] == 0
 
 
 class TestBlinkCadence:
