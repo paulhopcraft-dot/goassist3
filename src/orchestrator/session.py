@@ -136,6 +136,11 @@ class Session:
         return self._session_id
 
     @property
+    def config(self) -> SessionConfig:
+        """Session configuration."""
+        return self._config
+
+    @property
     def state(self) -> SessionState:
         """Current session state."""
         return self._state_machine.state

@@ -14,7 +14,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from src.orchestrator.session import Session, SessionConfig, SessionManager
-from src.llm.vllm_client import VLLMClient, build_messages
+from src.llm import create_llm_client, build_messages
 from src.api.webrtc.gateway import WebRTCGateway, create_webrtc_gateway
 from src.api.websocket.blendshapes import get_blendshape_manager
 from src.api.auth import verify_api_key
@@ -29,7 +29,7 @@ router = APIRouter(
 # Global managers (initialized on startup)
 _session_manager: SessionManager | None = None
 _webrtc_gateway: WebRTCGateway | None = None
-_llm_client: VLLMClient | None = None
+_llm_client = None  # VLLMClient or MockLLMClient
 
 
 def get_session_manager() -> SessionManager:
@@ -50,12 +50,11 @@ def get_webrtc_gateway() -> WebRTCGateway:
     return _webrtc_gateway
 
 
-async def get_llm_client() -> VLLMClient:
-    """Get global LLM client."""
+async def get_llm_client():
+    """Get global LLM client (VLLMClient or MockLLMClient based on settings)."""
     global _llm_client
     if _llm_client is None:
-        _llm_client = VLLMClient()
-        await _llm_client.start()
+        _llm_client = await create_llm_client()
     return _llm_client
 
 

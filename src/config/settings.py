@@ -62,6 +62,9 @@ class Settings(BaseSettings):
     )
 
     # LLM Configuration
+    llm_engine: Literal["mock", "vllm"] = Field(
+        default="vllm", description="LLM backend (mock for testing, vllm for production)"
+    )
     llm_model_path: str = Field(
         default="models/llm", description="Path to LLM model weights"
     )
