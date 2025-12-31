@@ -1,0 +1,123 @@
+// Audio2Face gRPC Service Definition
+//
+// Defines the streaming API for audio-driven facial animation.
+// Based on NVIDIA Audio2Face API patterns.
+//
+// Reference: TMF v3.0 Addendum A §A3
+
+syntax = "proto3";
+
+package audio2face;
+
+option python_generic_services = true;
+
+// Audio2Face streaming service for real-time lip-sync
+service Audio2Face {
+    // Bidirectional streaming: send audio, receive blendshapes
+    rpc ProcessAudioStream(stream AudioRequest) returns (stream BlendshapeResponse);
+
+    // Unary call to get service status
+    rpc GetStatus(StatusRequest) returns (StatusResponse);
+
+    // Configure the animation session
+    rpc ConfigureSession(SessionConfig) returns (SessionConfigResponse);
+}
+
+// Audio chunk for processing
+message AudioRequest {
+    // Session identifier
+    string session_id = 1;
+
+    // Audio samples (PCM 16-bit signed, mono)
+    bytes audio_data = 2;
+
+    // Sample rate in Hz (typically 16000)
+    int32 sample_rate = 3;
+
+    // Timestamp in milliseconds (from audio clock)
+    int64 timestamp_ms = 4;
+
+    // Sequence number for ordering
+    int32 sequence = 5;
+
+    // End of audio stream marker
+    bool end_of_stream = 6;
+}
+
+// Blendshape frame response
+message BlendshapeResponse {
+    // Session identifier
+    string session_id = 1;
+
+    // Frame sequence number
+    int32 sequence = 2;
+
+    // Timestamp in milliseconds
+    int64 timestamp_ms = 3;
+
+    // ARKit-52 blendshape weights (name -> weight 0.0-1.0)
+    map<string, float> blendshapes = 4;
+
+    // Target FPS for this frame
+    int32 fps = 5;
+
+    // Is this a heartbeat frame (no audio input)
+    bool heartbeat = 6;
+
+    // Processing latency in milliseconds
+    int32 latency_ms = 7;
+}
+
+// Service status request
+message StatusRequest {}
+
+// Service status response
+message StatusResponse {
+    // Service is ready to process
+    bool ready = 1;
+
+    // Service version
+    string version = 2;
+
+    // Current active sessions
+    int32 active_sessions = 3;
+
+    // GPU memory usage (MB)
+    int32 gpu_memory_mb = 4;
+
+    // Model loaded
+    string model_name = 5;
+}
+
+// Session configuration
+message SessionConfig {
+    // Session identifier
+    string session_id = 1;
+
+    // Audio sample rate
+    int32 sample_rate = 2;
+
+    // Target output FPS (30 or 60)
+    int32 target_fps = 3;
+
+    // Animation style (must be "NEUTRAL" per TMF)
+    string style = 4;
+
+    // Enable emotion inference (must be false per TMF)
+    bool enable_emotion = 5;
+
+    // Blendshape format ("arkit52" for ARKit-52)
+    string blendshape_format = 6;
+}
+
+// Session configuration response
+message SessionConfigResponse {
+    // Configuration accepted
+    bool success = 1;
+
+    // Error message if failed
+    string error = 2;
+
+    // Assigned session ID (may differ from requested)
+    string session_id = 3;
+}

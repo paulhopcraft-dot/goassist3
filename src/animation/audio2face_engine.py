@@ -21,6 +21,11 @@ from src.animation.base import (
     BlendshapeFrame,
     get_neutral_blendshapes,
 )
+from src.animation.grpc.client import (
+    Audio2FaceClient,
+    Audio2FaceClientConfig,
+    ConnectionState,
+)
 from src.animation.heartbeat import HeartbeatEmitter
 from src.animation.yield_controller import YieldController
 from src.audio.transport.audio_clock import get_audio_clock
@@ -72,8 +77,7 @@ class Audio2FaceEngine(BaseAnimationEngine):
         )
 
         # gRPC client (initialized in start)
-        self._stub = None
-        self._channel = None
+        self._grpc_client: Audio2FaceClient | None = None
 
         # Yield and heartbeat controllers
         self._yield_controller: YieldController | None = None
@@ -100,42 +104,52 @@ class Audio2FaceEngine(BaseAnimationEngine):
         )
         self._heartbeat.start()
 
-        # Initialize gRPC connection
-        # Note: In production, this would connect to Audio2Face service
-        # For now, we use mock implementation
-        try:
-            await self._connect_grpc()
+        # Initialize gRPC client
+        grpc_config = Audio2FaceClientConfig(
+            host=self._config.grpc_host,
+            port=self._config.grpc_port,
+            sample_rate=16000,  # TMF standard
+            target_fps=self._config.target_fps,
+            style=self._config.style,
+            enable_emotion=self._config.enable_emotion,
+        )
+        self._grpc_client = Audio2FaceClient(grpc_config)
+
+        # Register state change callback
+        self._grpc_client.on_state_change(self._handle_connection_state)
+
+        # Connect to Audio2Face service
+        connected = await self._grpc_client.connect(session_id)
+        if connected:
             logger.info(
                 "audio2face_connected",
                 session_id=session_id,
                 host=self._config.grpc_host,
                 port=self._config.grpc_port,
             )
-        except Exception as e:
+        else:
             logger.warning(
                 "audio2face_connection_failed",
                 session_id=session_id,
-                error=str(e),
+                message="Using mock mode for blendshape generation",
             )
-            # Continue with mock mode
 
-    async def _connect_grpc(self) -> None:
-        """Connect to Audio2Face gRPC service."""
-        # Placeholder for actual gRPC connection
-        # In production:
-        # import grpc
-        # from audio2face_pb2_grpc import Audio2FaceStub
-        # self._channel = grpc.aio.insecure_channel(
-        #     f"{self._config.grpc_host}:{self._config.grpc_port}"
-        # )
-        # self._stub = Audio2FaceStub(self._channel)
-        pass
+    def _handle_connection_state(self, state: ConnectionState) -> None:
+        """Handle gRPC connection state changes."""
+        logger.debug(
+            "audio2face_state_change",
+            session_id=self._session_id,
+            state=state.value,
+        )
 
     async def generate_frames(
         self,
         audio_stream: AsyncIterator[bytes],
     ) -> AsyncIterator[BlendshapeFrame]:
         """Generate blendshape frames from audio.
+
+        Uses gRPC client to stream audio to Audio2Face service
+        and receive blendshape frames.
 
         Args:
             audio_stream: Async iterator of audio chunks
@@ -147,91 +161,130 @@ class Audio2FaceEngine(BaseAnimationEngine):
         self._cancelled = False
 
         clock = get_audio_clock()
-        frame_interval_s = self.frame_interval_ms / 1000.0
-        last_frame_time = clock.get_absolute_ms()
+
+        def get_timestamp() -> int:
+            return clock.get_time_ms(self._session_id or "")
 
         try:
-            async for audio_chunk in audio_stream:
-                if self._cancelled:
-                    break
+            if self._grpc_client and self._grpc_client.is_connected:
+                # Use gRPC client for streaming
+                async for grpc_frame in self._grpc_client.process_audio_stream(
+                    self._buffered_audio_stream(audio_stream),
+                    timestamp_fn=get_timestamp,
+                ):
+                    if self._cancelled:
+                        break
 
-                # Buffer audio
-                self._audio_buffer.extend(audio_chunk)
+                    t_ms = grpc_frame.timestamp_ms
 
-                # Check if we have enough audio for a frame
-                batch_size = int(self._config.batch_audio_ms * 16 * 2)  # 16kHz mono 16-bit
-                if len(self._audio_buffer) < batch_size:
-                    continue
+                    # Check for yield (backpressure)
+                    if self._yield_controller and self._yield_controller.should_yield(grpc_frame.latency_ms):
+                        blendshapes = self._yield_controller.get_yield_pose(t_ms)
+                    else:
+                        blendshapes = grpc_frame.blendshapes
+                        if self._yield_controller:
+                            self._yield_controller.record_frame(blendshapes, t_ms)
 
-                # Get audio batch
-                audio_batch = bytes(self._audio_buffer[:batch_size])
-                self._audio_buffer = self._audio_buffer[batch_size:]
+                    # Create output frame
+                    frame = BlendshapeFrame(
+                        session_id=self._session_id or "",
+                        seq=self.next_seq(),
+                        t_audio_ms=t_ms,
+                        blendshapes=blendshapes,
+                        fps=self._target_fps,
+                        heartbeat=grpc_frame.heartbeat,
+                    )
 
-                # Get current time
-                t_ms = clock.get_time_ms(self._session_id or "")
+                    yield frame
 
-                # Check for yield
-                lag_ms = t_ms - last_frame_time - int(self.frame_interval_ms)
-                if self._yield_controller and self._yield_controller.should_yield(lag_ms):
-                    # Yield: use interpolated pose
-                    blendshapes = self._yield_controller.get_yield_pose(t_ms)
-                else:
-                    # Generate actual blendshapes
-                    blendshapes = await self._generate_blendshapes(audio_batch)
-
-                    # Record successful frame
-                    if self._yield_controller:
-                        self._yield_controller.record_frame(blendshapes, t_ms)
-
-                # Create frame
-                frame = BlendshapeFrame(
-                    session_id=self._session_id or "",
-                    seq=self.next_seq(),
-                    t_audio_ms=t_ms,
-                    blendshapes=blendshapes,
-                    fps=self._target_fps,
-                )
-
-                yield frame
-
-                # Update heartbeat
-                if self._heartbeat:
-                    self._heartbeat.frame_sent(t_ms)
-
-                last_frame_time = t_ms
-
-                # Pace frame output
-                await asyncio.sleep(frame_interval_s)
+                    # Update heartbeat
+                    if self._heartbeat:
+                        self._heartbeat.frame_sent(t_ms)
+            else:
+                # Fallback to local mock generation
+                async for frame in self._generate_frames_local(audio_stream, get_timestamp):
+                    yield frame
 
         finally:
             self._generating = False
             self._audio_buffer.clear()
 
-    async def _generate_blendshapes(self, audio: bytes) -> dict[str, float]:
-        """Generate blendshapes from audio using Audio2Face.
+    async def _buffered_audio_stream(
+        self,
+        audio_stream: AsyncIterator[bytes],
+    ) -> AsyncIterator[bytes]:
+        """Buffer audio stream into consistent batch sizes."""
+        batch_size = int(self._config.batch_audio_ms * 16 * 2)  # 16kHz mono 16-bit
 
-        Args:
-            audio: Audio bytes (16kHz mono 16-bit)
+        async for audio_chunk in audio_stream:
+            if self._cancelled:
+                break
 
-        Returns:
-            ARKit-52 blendshape dict
+            self._audio_buffer.extend(audio_chunk)
+
+            while len(self._audio_buffer) >= batch_size:
+                yield bytes(self._audio_buffer[:batch_size])
+                self._audio_buffer = self._audio_buffer[batch_size:]
+
+        # Yield remaining buffer
+        if self._audio_buffer:
+            yield bytes(self._audio_buffer)
+
+    async def _generate_frames_local(
+        self,
+        audio_stream: AsyncIterator[bytes],
+        timestamp_fn,
+    ) -> AsyncIterator[BlendshapeFrame]:
+        """Generate frames locally when gRPC unavailable."""
+        frame_interval_s = self.frame_interval_ms / 1000.0
+
+        async for audio_chunk in self._buffered_audio_stream(audio_stream):
+            if self._cancelled:
+                break
+
+            t_ms = timestamp_fn()
+            blendshapes = self._generate_mock_blendshapes(audio_chunk)
+
+            if self._yield_controller:
+                self._yield_controller.record_frame(blendshapes, t_ms)
+
+            frame = BlendshapeFrame(
+                session_id=self._session_id or "",
+                seq=self.next_seq(),
+                t_audio_ms=t_ms,
+                blendshapes=blendshapes,
+                fps=self._target_fps,
+            )
+
+            yield frame
+
+            if self._heartbeat:
+                self._heartbeat.frame_sent(t_ms)
+
+            await asyncio.sleep(frame_interval_s)
+
+    def _generate_mock_blendshapes(self, audio: bytes) -> dict[str, float]:
+        """Generate mock blendshapes from audio energy.
+
+        Simple lip-sync simulation when Audio2Face unavailable.
         """
-        # In production, this would call Audio2Face gRPC
-        # For now, return neutral with simulated lip movement
         blendshapes = get_neutral_blendshapes()
 
-        # Simple lip-sync simulation based on audio energy
-        if audio:
-            # Calculate RMS energy (simplified)
-            samples = [int.from_bytes(audio[i:i+2], 'little', signed=True)
-                      for i in range(0, min(len(audio), 320), 2)]
-            if samples:
-                rms = (sum(s * s for s in samples) / len(samples)) ** 0.5
-                normalized = min(1.0, rms / 10000.0)
+        if audio and len(audio) >= 2:
+            try:
+                samples = [
+                    int.from_bytes(audio[i:i + 2], "little", signed=True)
+                    for i in range(0, min(len(audio), 320), 2)
+                ]
+                if samples:
+                    rms = (sum(s * s for s in samples) / len(samples)) ** 0.5
+                    normalized = min(1.0, rms / 10000.0)
 
-                # Apply to jaw/mouth
-                blendshapes["jawOpen"] = normalized * 0.5
-                blendshapes["mouthClose"] = 0.1 - normalized * 0.1
+                    blendshapes["jawOpen"] = normalized * 0.5
+                    blendshapes["mouthClose"] = max(0, 0.1 - normalized * 0.1)
+                    blendshapes["mouthPucker"] = normalized * 0.1
+            except Exception:
+                pass
 
         return blendshapes
 
@@ -258,11 +311,10 @@ class Audio2FaceEngine(BaseAnimationEngine):
         """Stop engine and cleanup."""
         await self.cancel()
 
-        # Close gRPC channel
-        if self._channel:
-            await self._channel.close()
-            self._channel = None
-            self._stub = None
+        # Disconnect gRPC client
+        if self._grpc_client:
+            await self._grpc_client.disconnect()
+            self._grpc_client = None
 
         if self._yield_controller:
             self._yield_controller.reset()
@@ -273,6 +325,16 @@ class Audio2FaceEngine(BaseAnimationEngine):
     def yield_controller(self) -> YieldController | None:
         """Yield controller instance."""
         return self._yield_controller
+
+    @property
+    def grpc_client(self) -> Audio2FaceClient | None:
+        """gRPC client instance."""
+        return self._grpc_client
+
+    @property
+    def is_grpc_connected(self) -> bool:
+        """Whether gRPC client is connected."""
+        return self._grpc_client is not None and self._grpc_client.is_connected
 
 
 def create_audio2face_engine(

@@ -146,7 +146,8 @@ class ConversationPipeline:
 
         # Initialize Animation
         if self._config.enable_animation:
-            self._animation = MockAnimationEngine()  # TODO: Use Audio2Face
+            from src.animation import create_audio2face_engine
+            self._animation = create_audio2face_engine()
             await self._animation.start(session_id)
 
         # Initialize Live Link
