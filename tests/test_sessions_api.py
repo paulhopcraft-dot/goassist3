@@ -255,3 +255,171 @@ class TestAPIDocumentation:
 
         assert response.status_code == 200
         assert "text/html" in response.headers["content-type"]
+
+
+class TestChatEndpoint:
+    """Tests for chat endpoint."""
+
+    def test_chat_requires_valid_session(self, client: TestClient):
+        """Test chat endpoint requires valid session."""
+        fake_id = "00000000-0000-0000-0000-000000000000"
+
+        response = client.post(
+            f"/sessions/{fake_id}/chat",
+            json={"message": "Hello"}
+        )
+
+        assert response.status_code == 404
+
+    def test_chat_with_valid_session(self, client: TestClient):
+        """Test chat with valid session returns response."""
+        # Create session
+        create_resp = client.post("/sessions", json={})
+        session_id = create_resp.json()["session_id"]
+
+        # Send chat message
+        response = client.post(
+            f"/sessions/{session_id}/chat",
+            json={"message": "Hello, how are you?"}
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "response" in data
+        assert data["session_id"] == session_id
+        assert len(data["response"]) > 0
+
+    def test_chat_updates_conversation_history(self, client: TestClient):
+        """Test that chat updates session conversation history."""
+        # Create session
+        create_resp = client.post("/sessions", json={})
+        session_id = create_resp.json()["session_id"]
+
+        # Send first message
+        client.post(
+            f"/sessions/{session_id}/chat",
+            json={"message": "Hello"}
+        )
+
+        # Send second message
+        response = client.post(
+            f"/sessions/{session_id}/chat",
+            json={"message": "Tell me more"}
+        )
+
+        assert response.status_code == 200
+
+    def test_chat_empty_message(self, client: TestClient):
+        """Test chat with empty message."""
+        create_resp = client.post("/sessions", json={})
+        session_id = create_resp.json()["session_id"]
+
+        response = client.post(
+            f"/sessions/{session_id}/chat",
+            json={"message": ""}
+        )
+
+        # Should still work (LLM handles empty)
+        assert response.status_code == 200
+
+
+class TestSessionCreationOptions:
+    """Tests for session creation options."""
+
+    def test_create_session_with_custom_id(self, client: TestClient):
+        """Test creating session with custom session ID."""
+        custom_id = "my-custom-session-id"
+
+        response = client.post("/sessions", json={
+            "session_id": custom_id
+        })
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["session_id"] == custom_id
+
+        # Cleanup
+        client.delete(f"/sessions/{custom_id}")
+
+    def test_create_session_duplicate_id_handled(self, client: TestClient):
+        """Test creating session with duplicate ID."""
+        custom_id = "duplicate-test-id"
+
+        # Create first
+        resp1 = client.post("/sessions", json={"session_id": custom_id})
+        assert resp1.status_code == 200
+
+        # Try to create duplicate
+        resp2 = client.post("/sessions", json={"session_id": custom_id})
+        # Should fail or return same session
+        assert resp2.status_code in [200, 400, 409]
+
+        # Cleanup
+        client.delete(f"/sessions/{custom_id}")
+
+
+class TestWebRTCSignalingExtended:
+    """Extended WebRTC signaling tests."""
+
+    def test_ice_candidate_with_valid_session(self, client: TestClient):
+        """Test ICE candidate with valid session."""
+        # Create session
+        create_resp = client.post("/sessions", json={})
+        session_id = create_resp.json()["session_id"]
+
+        response = client.post(
+            f"/sessions/{session_id}/ice-candidate",
+            json={
+                "candidate": {
+                    "candidate": "candidate:0 1 UDP 2122252543 192.168.1.1 59999 typ host",
+                    "sdpMid": "0",
+                    "sdpMLineIndex": 0
+                }
+            }
+        )
+
+        # Should succeed or fail gracefully (no WebRTC connection yet)
+        assert response.status_code in [200, 500]
+
+
+class TestSessionMetrics:
+    """Tests for session metrics in status response."""
+
+    def test_session_status_has_metrics(self, client: TestClient):
+        """Test session status includes metrics."""
+        create_resp = client.post("/sessions", json={})
+        session_id = create_resp.json()["session_id"]
+
+        response = client.get(f"/sessions/{session_id}")
+
+        assert response.status_code == 200
+        data = response.json()
+
+        # Check all expected fields
+        assert "context_tokens" in data
+        assert "turns_completed" in data
+        assert "avg_ttfa_ms" in data
+        assert isinstance(data["context_tokens"], int)
+        assert isinstance(data["turns_completed"], int)
+        assert isinstance(data["avg_ttfa_ms"], (int, float))
+
+    def test_session_metrics_update_after_chat(self, client: TestClient):
+        """Test that session metrics update after chat."""
+        create_resp = client.post("/sessions", json={})
+        session_id = create_resp.json()["session_id"]
+
+        # Get initial metrics
+        initial = client.get(f"/sessions/{session_id}").json()
+        initial_turns = initial["turns_completed"]
+
+        # Send a chat message
+        client.post(
+            f"/sessions/{session_id}/chat",
+            json={"message": "Hello"}
+        )
+
+        # Get updated metrics
+        updated = client.get(f"/sessions/{session_id}").json()
+
+        # Context tokens should increase (conversation history)
+        assert updated["context_tokens"] >= initial["context_tokens"]

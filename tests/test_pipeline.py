@@ -343,3 +343,191 @@ class TestPipelineProcessAudio:
         await pipeline.process_audio(b"\x00" * 640, 100)
 
         await pipeline.stop()
+
+
+class TestPipelineASRCallbacks:
+    """Tests for ASR callback handling."""
+
+    @pytest.fixture
+    def session(self):
+        """Create session for testing."""
+        return Session(session_id="asr-callback-session")
+
+    @pytest.fixture
+    def minimal_config(self):
+        """Minimal config for testing."""
+        return PipelineConfig(
+            enable_vad=False,
+            enable_asr=False,
+            enable_llm=False,
+            enable_tts=False,
+            enable_animation=False,
+            enable_livelink=False,
+        )
+
+    @pytest.mark.asyncio
+    async def test_handle_asr_final_stores_transcript(self, session, minimal_config):
+        """Test ASR final callback stores transcript."""
+        pipeline = ConversationPipeline(session, minimal_config)
+        await pipeline.start()
+
+        pipeline._handle_asr_final("Hello world", 100, 500)
+
+        assert pipeline._current_transcript == "Hello world"
+
+        await pipeline.stop()
+
+    @pytest.mark.asyncio
+    async def test_handle_asr_final_invokes_callback(self, session, minimal_config):
+        """Test ASR final invokes transcript callback."""
+        pipeline = ConversationPipeline(session, minimal_config)
+        transcripts = []
+
+        def on_transcript(text: str, is_final: bool):
+            transcripts.append((text, is_final))
+
+        pipeline.set_transcript_callback(on_transcript)
+        await pipeline.start()
+
+        pipeline._handle_asr_final("Test text", 100, 500)
+
+        assert len(transcripts) == 1
+        assert transcripts[0] == ("Test text", True)
+
+        await pipeline.stop()
+
+    @pytest.mark.asyncio
+    async def test_handle_asr_endpoint_prevents_duplicate_turns(
+        self, session, minimal_config
+    ):
+        """Test endpoint handler prevents duplicate turn processing."""
+        pipeline = ConversationPipeline(session, minimal_config)
+        await pipeline.start()
+
+        # Set processing flag
+        pipeline._processing_turn = True
+
+        # This should be skipped
+        pipeline._handle_asr_endpoint(1000)
+
+        # Allow async task to run
+        await asyncio.sleep(0.01)
+
+        # Still should be True (not reset by skipped handler)
+        assert pipeline._processing_turn is True
+
+        await pipeline.stop()
+
+
+class TestPipelineTurnProcessing:
+    """Tests for turn processing flow."""
+
+    @pytest.fixture
+    def session(self):
+        """Create session for testing."""
+        return Session(session_id="turn-session")
+
+    @pytest.fixture
+    def minimal_config(self):
+        """Minimal config for testing."""
+        return PipelineConfig(
+            enable_vad=False,
+            enable_asr=False,
+            enable_llm=False,
+            enable_tts=False,
+            enable_animation=False,
+            enable_livelink=False,
+        )
+
+    @pytest.mark.asyncio
+    async def test_process_turn_skips_empty_transcript(self, session, minimal_config):
+        """Test empty transcript is skipped."""
+        pipeline = ConversationPipeline(session, minimal_config)
+        await pipeline.start()
+
+        pipeline._current_transcript = ""
+        pipeline._processing_turn = True
+
+        await pipeline._process_turn(1000)
+
+        # Flag should be cleared
+        assert pipeline._processing_turn is False
+
+        await pipeline.stop()
+
+    @pytest.mark.asyncio
+    async def test_process_turn_skips_whitespace_transcript(
+        self, session, minimal_config
+    ):
+        """Test whitespace-only transcript is skipped."""
+        pipeline = ConversationPipeline(session, minimal_config)
+        await pipeline.start()
+
+        pipeline._current_transcript = "   "
+        pipeline._processing_turn = True
+
+        await pipeline._process_turn(1000)
+
+        assert pipeline._processing_turn is False
+
+        await pipeline.stop()
+
+
+class TestPipelineDefaultConfig:
+    """Tests for pipeline with default config."""
+
+    @pytest.fixture
+    def session(self):
+        """Create session for testing."""
+        return Session(session_id="default-config-session")
+
+    def test_pipeline_accepts_none_config(self, session):
+        """Test pipeline accepts None config."""
+        pipeline = ConversationPipeline(session, None)
+        assert pipeline._config is not None
+        assert pipeline._config.enable_vad is True
+
+    def test_pipeline_uses_default_when_no_config(self, session):
+        """Test pipeline uses default config when not provided."""
+        pipeline = ConversationPipeline(session)
+        assert pipeline._config.enable_vad is True
+        assert pipeline._config.enable_asr is True
+
+
+class TestPipelineProperties:
+    """Tests for pipeline properties."""
+
+    @pytest.fixture
+    def session(self):
+        """Create session for testing."""
+        return Session(session_id="props-session")
+
+    @pytest.fixture
+    def minimal_config(self):
+        """Minimal config for testing."""
+        return PipelineConfig(
+            enable_vad=False,
+            enable_asr=False,
+            enable_llm=False,
+            enable_tts=False,
+            enable_animation=False,
+            enable_livelink=False,
+        )
+
+    def test_session_property(self, session, minimal_config):
+        """Test session property returns correct session."""
+        pipeline = ConversationPipeline(session, minimal_config)
+        assert pipeline.session is session
+
+    def test_is_running_initially_false(self, session, minimal_config):
+        """Test is_running is initially False."""
+        pipeline = ConversationPipeline(session, minimal_config)
+        assert pipeline.is_running is False
+
+    @pytest.mark.asyncio
+    async def test_is_running_true_after_start(self, session, minimal_config):
+        """Test is_running is True after start."""
+        pipeline = ConversationPipeline(session, minimal_config)
+        await pipeline.start()
+        assert pipeline.is_running is True
+        await pipeline.stop()
