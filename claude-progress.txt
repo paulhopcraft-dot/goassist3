@@ -940,5 +940,23 @@ Added 79 new tests across 4 test files:
 ### Commits This Session
 - `d205dc4` feat(llm): add mock LLM backend for offline testing
 - `7936045` test: add comprehensive tests for LLM, context, and cancellation modules
+- `e8382f2` fix: replace deprecated asyncio.iscoroutinefunction
+- `93f4d79` test: add tests for backpressure, constants, and settings
+- `fad342d` test: add comprehensive tests for SessionStateMachine
+
+### Total Test Coverage Expansion
+| Session | Tests Added | Total |
+|---------|-------------|-------|
+| Start   | -           | 189   |
+| +Mock LLM | +18       | 207   |
+| +VLLMClient | +18     | 225   |
+| +Context | +22        | 247   |
+| +Cancel | +21         | 268   |
+| +Backpressure | +35   | 303   |
+| +Constants | +36      | 339   |
+| +Settings | +27       | 366   |
+| +StateMachine | +28   | 394   |
+
+**Total: 189 → 394 tests (+205 tests added)**
 
 ---
