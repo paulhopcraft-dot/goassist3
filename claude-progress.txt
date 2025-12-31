@@ -882,3 +882,63 @@ Created branch `feature/metahuman` for avatar work.
 - VS Code settings updated with `claude.autoApproveTools: true`
 
 ---
+
+## Session 25 - 2025-12-31
+
+### Completed
+- ✅ Added mock LLM backend for offline testing (`src/llm/mock_client.py`)
+- ✅ Added `LLM_ENGINE` config option (mock/vllm) to settings
+- ✅ Created LLM factory function for backend selection
+- ✅ Fixed missing `Session.config` property
+- ✅ Tested full chat flow end-to-end with mock LLM
+- ✅ All 189 tests passing
+
+### Commits This Session
+- `d205dc4` feat(llm): add mock LLM backend for offline testing
+
+### Mock LLM Features
+- Pattern-matching canned responses (hello, name, help, thanks, bye)
+- Simulated token-by-token streaming
+- Abort support for barge-in testing
+- No external dependencies required
+
+### Usage
+Set in `.env`:
+```
+LLM_ENGINE=mock  # For testing (no cloud required)
+LLM_ENGINE=vllm  # For production (requires vLLM server)
+```
+
+### Verified Working
+```
+POST /sessions → Creates session
+POST /sessions/{id}/chat {"message": "Hello"}
+→ {"response": "Hello! I'm GoAssist, your voice assistant..."}
+```
+
+---
+
+## Session 25 (continued) - Autonomous Testing Session
+
+### Test Coverage Expansion
+Added 79 new tests across 4 test files:
+
+| Test File | Tests | Coverage |
+|-----------|-------|----------|
+| `test_mock_llm.py` | 18 | MockLLMClient, patterns, streaming, abort |
+| `test_vllm_client.py` | 18 | LLMConfig, LLMResponse, build_messages, lifecycle |
+| `test_context_rollover.py` | 22 | ContextWindow, rollover, messages, tokens |
+| `test_cancellation.py` | 21 | CancellationController, handlers, timeout |
+
+**Total tests: 189 → 268 (+79)**
+
+### Code Quality Fixes
+- Fixed deprecated `asyncio.iscoroutinefunction` → `inspect.iscoroutinefunction`
+- Updated 4 files: cancellation.py, state_machine.py, turn_detector.py, silero_vad.py
+- Python 3.16 forward-compatible
+
+### Commits This Session
+- `d205dc4` feat(llm): add mock LLM backend for offline testing
+- `7936045` test: add comprehensive tests for LLM, context, and cancellation modules
+
+---

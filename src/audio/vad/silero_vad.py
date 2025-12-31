@@ -13,6 +13,7 @@ Reference: TMF v3.0 §6 Turn Detection
 """
 
 import asyncio
+import inspect
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Callable
@@ -233,7 +234,7 @@ class SileroVAD:
         """Emit speech start event to all callbacks."""
         for callback in self._callbacks_speech_start:
             try:
-                if asyncio.iscoroutinefunction(callback):
+                if inspect.iscoroutinefunction(callback):
                     await callback(event)
                 else:
                     callback(event)
@@ -249,7 +250,7 @@ class SileroVAD:
         """Emit speech end event to all callbacks."""
         for callback in self._callbacks_speech_end:
             try:
-                if asyncio.iscoroutinefunction(callback):
+                if inspect.iscoroutinefunction(callback):
                     await callback(event)
                 else:
                     callback(event)

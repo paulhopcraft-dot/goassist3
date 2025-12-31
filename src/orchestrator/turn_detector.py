@@ -15,6 +15,7 @@ Reference: Implementation-v3.0.md §5 Orchestrator
 """
 
 import asyncio
+import inspect
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Callable
@@ -261,7 +262,7 @@ class TurnDetector:
 
         for callback in self._callbacks_state_change:
             try:
-                if asyncio.iscoroutinefunction(callback):
+                if inspect.iscoroutinefunction(callback):
                     await callback(event)
                 else:
                     callback(event)
@@ -279,7 +280,7 @@ class TurnDetector:
         """Emit endpoint detection event."""
         for callback in self._callbacks_endpoint:
             try:
-                if asyncio.iscoroutinefunction(callback):
+                if inspect.iscoroutinefunction(callback):
                     await callback(event)
                 else:
                     callback(event)
@@ -295,7 +296,7 @@ class TurnDetector:
         """Emit barge-in event."""
         for callback in self._callbacks_barge_in:
             try:
-                if asyncio.iscoroutinefunction(callback):
+                if inspect.iscoroutinefunction(callback):
                     await callback(event)
                 else:
                     callback(event)
