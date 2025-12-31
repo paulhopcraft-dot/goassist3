@@ -531,3 +531,465 @@ class TestPipelineProperties:
         await pipeline.start()
         assert pipeline.is_running is True
         await pipeline.stop()
+
+
+class TestPipelineWithVAD:
+    """Tests for pipeline with VAD enabled."""
+
+    @pytest.fixture
+    def session(self):
+        """Create session for testing."""
+        return Session(session_id="vad-session")
+
+    @pytest.mark.asyncio
+    async def test_pipeline_with_vad_enabled(self, session):
+        """Test pipeline initializes VAD when enabled."""
+        config = PipelineConfig(
+            enable_vad=True,
+            enable_asr=False,
+            enable_llm=False,
+            enable_tts=False,
+            enable_animation=False,
+            enable_livelink=False,
+        )
+        pipeline = ConversationPipeline(session, config)
+
+        with patch("src.orchestrator.pipeline.SileroVAD") as mock_vad_cls:
+            mock_vad = AsyncMock()
+            mock_vad.start = AsyncMock()
+            mock_vad.stop = AsyncMock()
+            mock_vad.process = AsyncMock(return_value=False)
+            mock_vad_cls.return_value = mock_vad
+
+            await pipeline.start()
+            assert pipeline._vad is not None
+
+            await pipeline.stop()
+            mock_vad.stop.assert_awaited()
+
+    @pytest.mark.asyncio
+    async def test_process_audio_with_vad(self, session):
+        """Test process_audio with VAD enabled."""
+        config = PipelineConfig(
+            enable_vad=True,
+            enable_asr=False,
+            enable_llm=False,
+            enable_tts=False,
+            enable_animation=False,
+            enable_livelink=False,
+        )
+        pipeline = ConversationPipeline(session, config)
+
+        with patch("src.orchestrator.pipeline.SileroVAD") as mock_vad_cls:
+            mock_vad = AsyncMock()
+            mock_vad.start = AsyncMock()
+            mock_vad.stop = AsyncMock()
+            mock_vad.process = AsyncMock(return_value=True)
+            mock_vad_cls.return_value = mock_vad
+
+            await pipeline.start()
+
+            # Process audio should trigger VAD
+            await pipeline.process_audio(b"\x00" * 640, 100)
+
+            mock_vad.process.assert_awaited()
+
+            await pipeline.stop()
+
+
+class TestPipelineWithASR:
+    """Tests for pipeline with ASR enabled."""
+
+    @pytest.fixture
+    def session(self):
+        """Create session for testing."""
+        return Session(session_id="asr-session")
+
+    @pytest.mark.asyncio
+    async def test_pipeline_with_asr_enabled(self, session):
+        """Test pipeline initializes ASR when enabled."""
+        config = PipelineConfig(
+            enable_vad=False,
+            enable_asr=True,
+            enable_llm=False,
+            enable_tts=False,
+            enable_animation=False,
+            enable_livelink=False,
+        )
+        pipeline = ConversationPipeline(session, config)
+
+        await pipeline.start()
+        assert pipeline._asr is not None
+
+        await pipeline.stop()
+
+    @pytest.mark.asyncio
+    async def test_process_audio_pushes_to_asr(self, session):
+        """Test process_audio pushes to ASR when in LISTENING state."""
+        config = PipelineConfig(
+            enable_vad=False,
+            enable_asr=True,
+            enable_llm=False,
+            enable_tts=False,
+            enable_animation=False,
+            enable_livelink=False,
+        )
+        pipeline = ConversationPipeline(session, config)
+
+        await pipeline.start()
+
+        # Transition to LISTENING state
+        await session.on_speech_start()
+        assert session.state == SessionState.LISTENING
+
+        # Mock ASR push_audio
+        pipeline._asr.push_audio = AsyncMock()
+
+        await pipeline.process_audio(b"\x00" * 640, 100)
+
+        pipeline._asr.push_audio.assert_awaited_with(b"\x00" * 640, 100)
+
+        await pipeline.stop()
+
+
+class TestPipelineWithLLM:
+    """Tests for pipeline with LLM enabled."""
+
+    @pytest.fixture
+    def session(self):
+        """Create session for testing."""
+        return Session(session_id="llm-session")
+
+    @pytest.mark.asyncio
+    async def test_pipeline_with_llm_enabled(self, session):
+        """Test pipeline initializes LLM when enabled."""
+        config = PipelineConfig(
+            enable_vad=False,
+            enable_asr=False,
+            enable_llm=True,
+            enable_tts=False,
+            enable_animation=False,
+            enable_livelink=False,
+        )
+        pipeline = ConversationPipeline(session, config)
+
+        await pipeline.start()
+        assert pipeline._llm is not None
+
+        await pipeline.stop()
+
+
+class TestPipelineWithTTS:
+    """Tests for pipeline with TTS enabled."""
+
+    @pytest.fixture
+    def session(self):
+        """Create session for testing."""
+        return Session(session_id="tts-session")
+
+    @pytest.mark.asyncio
+    async def test_pipeline_with_tts_enabled(self, session):
+        """Test pipeline initializes TTS when enabled."""
+        config = PipelineConfig(
+            enable_vad=False,
+            enable_asr=False,
+            enable_llm=False,
+            enable_tts=True,
+            enable_animation=False,
+            enable_livelink=False,
+        )
+        pipeline = ConversationPipeline(session, config)
+
+        with patch("src.orchestrator.pipeline.create_tts_engine") as mock_create_tts:
+            mock_tts = AsyncMock()
+            mock_tts.start = AsyncMock()
+            mock_tts.stop = AsyncMock()
+            mock_create_tts.return_value = mock_tts
+
+            await pipeline.start()
+            assert pipeline._tts is not None
+
+            await pipeline.stop()
+
+
+class TestPipelineStopWithActiveTask:
+    """Tests for stopping pipeline with active generation."""
+
+    @pytest.fixture
+    def session(self):
+        """Create session for testing."""
+        return Session(session_id="active-task-session")
+
+    @pytest.mark.asyncio
+    async def test_stop_cancels_generation_task(self, session):
+        """Test stop cancels active generation task."""
+        config = PipelineConfig(
+            enable_vad=False,
+            enable_asr=False,
+            enable_llm=False,
+            enable_tts=False,
+            enable_animation=False,
+            enable_livelink=False,
+        )
+        pipeline = ConversationPipeline(session, config)
+        await pipeline.start()
+
+        # Create a mock task that runs forever
+        async def long_running():
+            await asyncio.sleep(100)
+
+        pipeline._generation_task = asyncio.create_task(long_running())
+
+        # Stop should cancel the task
+        await pipeline.stop()
+
+        assert pipeline._generation_task.cancelled() or pipeline._generation_task.done()
+
+
+class TestPipelineGenerateResponse:
+    """Tests for response generation."""
+
+    @pytest.fixture
+    def session(self):
+        """Create session for testing."""
+        return Session(session_id="generate-session")
+
+    @pytest.mark.asyncio
+    async def test_generate_response_skips_without_llm_tts(self, session):
+        """Test generate response is no-op without LLM/TTS."""
+        config = PipelineConfig(
+            enable_vad=False,
+            enable_asr=False,
+            enable_llm=False,
+            enable_tts=False,
+            enable_animation=False,
+            enable_livelink=False,
+        )
+        pipeline = ConversationPipeline(session, config)
+        await pipeline.start()
+
+        # Should not raise
+        await pipeline._generate_response([{"role": "user", "content": "Hello"}])
+
+        await pipeline.stop()
+
+    @pytest.mark.asyncio
+    async def test_generate_response_with_mocked_llm_tts(self, session):
+        """Test generate response with mocked LLM and TTS."""
+        config = PipelineConfig(
+            enable_vad=False,
+            enable_asr=False,
+            enable_llm=True,
+            enable_tts=True,
+            enable_animation=False,
+            enable_livelink=False,
+        )
+        pipeline = ConversationPipeline(session, config)
+
+        with patch("src.orchestrator.pipeline.create_tts_engine") as mock_create_tts:
+            mock_tts = AsyncMock()
+            mock_tts.start = AsyncMock()
+            mock_tts.stop = AsyncMock()
+            mock_create_tts.return_value = mock_tts
+
+            await pipeline.start()
+
+            # Transition to SPEAKING state
+            await session.on_speech_start()
+            await session.on_endpoint_detected(100)
+
+            # Mock LLM stream
+            async def mock_llm_stream(messages):
+                yield "Hello"
+                yield " world"
+
+            pipeline._llm.generate_stream = mock_llm_stream
+
+            # Mock TTS stream with simple dict-like object
+            from src.audio.tts.base import TTSChunk
+
+            async def mock_tts_stream(text_stream):
+                yield TTSChunk(audio=b"\x00" * 100, is_final=False, text_offset=0)
+
+            pipeline._tts.synthesize_stream = mock_tts_stream
+
+            # Generate response
+            await pipeline._generate_response([{"role": "user", "content": "Hi"}])
+
+            await pipeline.stop()
+
+
+class TestPipelineBargeInWithComponents:
+    """Tests for barge-in with components."""
+
+    @pytest.fixture
+    def session(self):
+        """Create session for testing."""
+        return Session(session_id="barge-components-session")
+
+    @pytest.mark.asyncio
+    async def test_barge_in_aborts_llm(self, session):
+        """Test barge-in aborts LLM."""
+        config = PipelineConfig(
+            enable_vad=False,
+            enable_asr=False,
+            enable_llm=True,
+            enable_tts=False,
+            enable_animation=False,
+            enable_livelink=False,
+        )
+        pipeline = ConversationPipeline(session, config)
+        await pipeline.start()
+
+        # Transition to SPEAKING
+        await session.on_speech_start()
+        await session.on_endpoint_detected(100)
+        await session.on_response_ready()
+
+        # Mock LLM abort
+        pipeline._llm.abort = AsyncMock()
+
+        await pipeline.handle_barge_in()
+
+        pipeline._llm.abort.assert_awaited()
+
+        await pipeline.stop()
+
+    @pytest.mark.asyncio
+    async def test_barge_in_cancels_tts(self, session):
+        """Test barge-in cancels TTS."""
+        config = PipelineConfig(
+            enable_vad=False,
+            enable_asr=False,
+            enable_llm=False,
+            enable_tts=True,
+            enable_animation=False,
+            enable_livelink=False,
+        )
+        pipeline = ConversationPipeline(session, config)
+
+        with patch("src.orchestrator.pipeline.create_tts_engine") as mock_create_tts:
+            mock_tts = AsyncMock()
+            mock_tts.start = AsyncMock()
+            mock_tts.stop = AsyncMock()
+            mock_tts.cancel = AsyncMock()
+            mock_create_tts.return_value = mock_tts
+
+            await pipeline.start()
+
+            # Transition to SPEAKING
+            await session.on_speech_start()
+            await session.on_endpoint_detected(100)
+            await session.on_response_ready()
+
+            await pipeline.handle_barge_in()
+
+            pipeline._tts.cancel.assert_awaited()
+
+            await pipeline.stop()
+
+    @pytest.mark.asyncio
+    async def test_barge_in_cancels_animation(self, session):
+        """Test barge-in cancels animation."""
+        config = PipelineConfig(
+            enable_vad=False,
+            enable_asr=False,
+            enable_llm=False,
+            enable_tts=False,
+            enable_animation=True,
+            enable_livelink=False,
+        )
+        pipeline = ConversationPipeline(session, config)
+        await pipeline.start()
+
+        # Transition to SPEAKING
+        await session.on_speech_start()
+        await session.on_endpoint_detected(100)
+        await session.on_response_ready()
+
+        # Mock animation cancel
+        pipeline._animation.cancel = AsyncMock()
+
+        await pipeline.handle_barge_in()
+
+        pipeline._animation.cancel.assert_awaited()
+
+        await pipeline.stop()
+
+
+class TestPipelineProcessAnimation:
+    """Tests for animation processing."""
+
+    @pytest.fixture
+    def session(self):
+        """Create session for testing."""
+        return Session(session_id="anim-process-session")
+
+    @pytest.mark.asyncio
+    async def test_process_animation_skips_without_components(self, session):
+        """Test process animation is no-op without animation/livelink."""
+        config = PipelineConfig(
+            enable_vad=False,
+            enable_asr=False,
+            enable_llm=False,
+            enable_tts=False,
+            enable_animation=False,
+            enable_livelink=False,
+        )
+        pipeline = ConversationPipeline(session, config)
+        await pipeline.start()
+
+        # Should not raise
+        await pipeline._process_animation(b"\x00" * 640, 100)
+
+        await pipeline.stop()
+
+    @pytest.mark.asyncio
+    async def test_process_animation_with_mocked_components(self, session):
+        """Test process animation with mocked components."""
+        config = PipelineConfig(
+            enable_vad=False,
+            enable_asr=False,
+            enable_llm=False,
+            enable_tts=False,
+            enable_animation=True,
+            enable_livelink=True,
+        )
+        pipeline = ConversationPipeline(session, config)
+
+        with patch("src.animation.create_audio2face_engine") as mock_create_anim, \
+             patch("src.orchestrator.pipeline.create_livelink_sender") as mock_create_ll:
+            # Setup mock animation
+            mock_anim = AsyncMock()
+            mock_anim.start = AsyncMock()
+            mock_anim.stop = AsyncMock()
+            mock_create_anim.return_value = mock_anim
+
+            # Setup mock livelink
+            mock_ll = AsyncMock()
+            mock_ll.start = AsyncMock()
+            mock_ll.stop = AsyncMock()
+            mock_ll.is_running = True
+            mock_ll.send_blendshape_frame = AsyncMock()
+            mock_create_ll.return_value = mock_ll
+
+            await pipeline.start()
+
+            # Mock animation generate_frames
+            from src.animation.base import BlendshapeFrame
+
+            async def mock_generate_frames(audio_stream):
+                yield BlendshapeFrame(
+                    session_id="anim-process-session",
+                    seq=1,
+                    t_audio_ms=100,
+                    blendshapes={"jawOpen": 0.5},
+                )
+
+            pipeline._animation.generate_frames = mock_generate_frames
+
+            await pipeline._process_animation(b"\x00" * 640, 100)
+
+            pipeline._livelink.send_blendshape_frame.assert_awaited()
+
+            await pipeline.stop()

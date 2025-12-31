@@ -251,3 +251,268 @@ class TestCreateVLLMClient:
         assert client._config.model == "test-model"
         assert client._config.max_tokens == 256
         await client.stop()
+
+
+class TestVLLMClientStreaming:
+    """Tests for streaming generation with mocked OpenAI client."""
+
+    @pytest.mark.asyncio
+    async def test_generate_stream_with_mock_client(self):
+        """Test streaming with mocked OpenAI client."""
+        from unittest.mock import AsyncMock, MagicMock, patch
+
+        config = LLMConfig(base_url="http://localhost:8000/v1")
+        client = VLLMClient(config)
+
+        # Create mock chunk response
+        mock_chunk1 = MagicMock()
+        mock_chunk1.choices = [MagicMock()]
+        mock_chunk1.choices[0].delta.content = "Hello"
+
+        mock_chunk2 = MagicMock()
+        mock_chunk2.choices = [MagicMock()]
+        mock_chunk2.choices[0].delta.content = " world"
+
+        mock_chunk3 = MagicMock()
+        mock_chunk3.choices = [MagicMock()]
+        mock_chunk3.choices[0].delta.content = None  # End chunk
+
+        async def mock_chunks():
+            yield mock_chunk1
+            yield mock_chunk2
+            yield mock_chunk3
+
+        with patch.object(client, "_client") as mock_openai:
+            mock_openai.chat.completions.create = AsyncMock(return_value=mock_chunks())
+            client._running = True
+
+            tokens = []
+            async for token in client.generate_stream([{"role": "user", "content": "Hi"}]):
+                tokens.append(token)
+
+            assert tokens == ["Hello", " world"]
+
+    @pytest.mark.asyncio
+    async def test_generate_stream_aborts_on_event(self):
+        """Test streaming aborts when abort event is set."""
+        from unittest.mock import AsyncMock, MagicMock, patch
+
+        config = LLMConfig(base_url="http://localhost:8000/v1")
+        client = VLLMClient(config)
+
+        mock_chunk = MagicMock()
+        mock_chunk.choices = [MagicMock()]
+        mock_chunk.choices[0].delta.content = "Token"
+
+        async def mock_chunks():
+            yield mock_chunk
+            client._abort_event.set()  # Set abort during streaming
+            yield mock_chunk
+
+        with patch.object(client, "_client") as mock_openai:
+            mock_openai.chat.completions.create = AsyncMock(return_value=mock_chunks())
+            client._running = True
+
+            tokens = []
+            async for token in client.generate_stream([{"role": "user", "content": "Hi"}]):
+                tokens.append(token)
+
+            # Should have stopped early
+            assert len(tokens) == 1
+
+    @pytest.mark.asyncio
+    async def test_generate_stream_handles_empty_choices(self):
+        """Test streaming handles empty choices."""
+        from unittest.mock import AsyncMock, MagicMock, patch
+
+        config = LLMConfig(base_url="http://localhost:8000/v1")
+        client = VLLMClient(config)
+
+        mock_chunk = MagicMock()
+        mock_chunk.choices = []  # Empty choices
+
+        async def mock_chunks():
+            yield mock_chunk
+
+        with patch.object(client, "_client") as mock_openai:
+            mock_openai.chat.completions.create = AsyncMock(return_value=mock_chunks())
+            client._running = True
+
+            tokens = []
+            async for token in client.generate_stream([{"role": "user", "content": "Hi"}]):
+                tokens.append(token)
+
+            assert tokens == []
+
+
+class TestVLLMClientGenerate:
+    """Tests for non-streaming generate."""
+
+    @pytest.mark.asyncio
+    async def test_generate_collects_tokens(self):
+        """Test generate collects all tokens into response."""
+        from unittest.mock import AsyncMock, MagicMock, patch
+
+        config = LLMConfig(base_url="http://localhost:8000/v1")
+        client = VLLMClient(config)
+
+        mock_chunk1 = MagicMock()
+        mock_chunk1.choices = [MagicMock()]
+        mock_chunk1.choices[0].delta.content = "Hello"
+
+        mock_chunk2 = MagicMock()
+        mock_chunk2.choices = [MagicMock()]
+        mock_chunk2.choices[0].delta.content = " world"
+
+        async def mock_chunks():
+            yield mock_chunk1
+            yield mock_chunk2
+
+        with patch.object(client, "_client") as mock_openai:
+            mock_openai.chat.completions.create = AsyncMock(return_value=mock_chunks())
+            client._running = True
+
+            response = await client.generate([{"role": "user", "content": "Hi"}])
+
+            assert response.text == "Hello world"
+            assert response.is_complete is True
+
+
+class TestVLLMClientAbort:
+    """Tests for abort functionality."""
+
+    @pytest.mark.asyncio
+    async def test_abort_cancels_current_task(self):
+        """Test abort cancels current task if present."""
+        import asyncio
+
+        config = LLMConfig(base_url="http://localhost:8000/v1")
+        client = VLLMClient(config)
+        await client.start()
+
+        # Create a task
+        async def long_task():
+            await asyncio.sleep(100)
+
+        client._current_task = asyncio.create_task(long_task())
+
+        await client.abort()
+
+        assert client._abort_event.is_set()
+        # Task should be cancelled
+        assert client._current_task.cancelled() or client._current_task.done()
+
+        await client.stop()
+
+    @pytest.mark.asyncio
+    async def test_abort_handles_no_task(self):
+        """Test abort handles case with no current task."""
+        config = LLMConfig(base_url="http://localhost:8000/v1")
+        client = VLLMClient(config)
+        await client.start()
+
+        # No current task
+        client._current_task = None
+
+        # Should not raise
+        await client.abort()
+
+        assert client._abort_event.is_set()
+
+        await client.stop()
+
+    @pytest.mark.asyncio
+    async def test_abort_handles_completed_task(self):
+        """Test abort handles completed task."""
+        import asyncio
+
+        config = LLMConfig(base_url="http://localhost:8000/v1")
+        client = VLLMClient(config)
+        await client.start()
+
+        # Create and complete a task
+        async def quick_task():
+            return "done"
+
+        client._current_task = asyncio.create_task(quick_task())
+        await asyncio.sleep(0.01)  # Let it complete
+
+        # Should not raise
+        await client.abort()
+
+        await client.stop()
+
+
+class TestVLLMClientErrorHandling:
+    """Tests for error handling."""
+
+    @pytest.mark.asyncio
+    async def test_generate_stream_raises_on_error(self):
+        """Test streaming raises on API error."""
+        from unittest.mock import AsyncMock, patch
+
+        config = LLMConfig(base_url="http://localhost:8000/v1")
+        client = VLLMClient(config)
+
+        with patch.object(client, "_client") as mock_openai:
+            mock_openai.chat.completions.create = AsyncMock(
+                side_effect=Exception("API error")
+            )
+            client._running = True
+
+            with pytest.raises(RuntimeError, match="LLM generation failed"):
+                async for _ in client.generate_stream([{"role": "user", "content": "Hi"}]):
+                    pass
+
+    @pytest.mark.asyncio
+    async def test_generate_stream_cancelled_error_propagates(self):
+        """Test CancelledError is properly propagated."""
+        from unittest.mock import AsyncMock, patch
+        import asyncio
+
+        config = LLMConfig(base_url="http://localhost:8000/v1")
+        client = VLLMClient(config)
+
+        with patch.object(client, "_client") as mock_openai:
+            mock_openai.chat.completions.create = AsyncMock(
+                side_effect=asyncio.CancelledError()
+            )
+            client._running = True
+
+            with pytest.raises(asyncio.CancelledError):
+                async for _ in client.generate_stream([{"role": "user", "content": "Hi"}]):
+                    pass
+
+
+class TestVLLMClientKwargs:
+    """Tests for generate_stream kwargs handling."""
+
+    @pytest.mark.asyncio
+    async def test_generate_stream_uses_kwargs(self):
+        """Test generate_stream uses provided kwargs."""
+        from unittest.mock import AsyncMock, MagicMock, patch
+
+        config = LLMConfig(base_url="http://localhost:8000/v1")
+        client = VLLMClient(config)
+
+        async def mock_chunks():
+            return
+            yield  # Empty generator
+
+        with patch.object(client, "_client") as mock_openai:
+            mock_openai.chat.completions.create = AsyncMock(return_value=mock_chunks())
+            client._running = True
+
+            async for _ in client.generate_stream(
+                [{"role": "user", "content": "Hi"}],
+                max_tokens=100,
+                temperature=0.5,
+                top_p=0.8,
+            ):
+                pass
+
+            # Verify kwargs were passed
+            call_kwargs = mock_openai.chat.completions.create.call_args.kwargs
+            assert call_kwargs["max_tokens"] == 100
+            assert call_kwargs["temperature"] == 0.5
+            assert call_kwargs["top_p"] == 0.8
