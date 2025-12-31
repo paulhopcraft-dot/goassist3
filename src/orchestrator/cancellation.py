@@ -12,6 +12,7 @@ Reference: Implementation-v3.0.md §3.2 CANCEL Schema
 """
 
 import asyncio
+import inspect
 from dataclasses import dataclass
 from enum import Enum
 from typing import Callable
@@ -145,7 +146,7 @@ class CancellationController:
         # Call all handlers concurrently
         tasks = []
         for handler in self._handlers:
-            if asyncio.iscoroutinefunction(handler):
+            if inspect.iscoroutinefunction(handler):
                 tasks.append(asyncio.create_task(handler(message)))
             else:
                 # Wrap sync handler
@@ -218,7 +219,7 @@ def create_cancel_handler(
 
     async def handler(message: CancelMessage) -> None:
         try:
-            if asyncio.iscoroutinefunction(cancel_fn):
+            if inspect.iscoroutinefunction(cancel_fn):
                 await cancel_fn()
             else:
                 cancel_fn()
