@@ -249,6 +249,57 @@ class TestFactoryFunction:
         await pipeline.stop()
 
 
+class TestPipelineWithAnimation:
+    """Tests for pipeline with animation enabled."""
+
+    @pytest.fixture
+    def session(self):
+        """Create session for testing."""
+        return Session(session_id="animation-session")
+
+    @pytest.mark.asyncio
+    async def test_pipeline_initializes_audio2face(self, session):
+        """Test pipeline initializes Audio2Face engine when animation enabled."""
+        config = PipelineConfig(
+            enable_vad=False,
+            enable_asr=False,
+            enable_llm=False,
+            enable_tts=False,
+            enable_animation=True,
+            enable_livelink=False,
+        )
+        pipeline = ConversationPipeline(session, config)
+
+        await pipeline.start()
+
+        # Animation engine should be initialized
+        assert pipeline._animation is not None
+        assert pipeline.is_running is True
+
+        await pipeline.stop()
+
+    @pytest.mark.asyncio
+    async def test_pipeline_with_animation_and_livelink(self, session):
+        """Test pipeline with both animation and livelink enabled."""
+        config = PipelineConfig(
+            enable_vad=False,
+            enable_asr=False,
+            enable_llm=False,
+            enable_tts=False,
+            enable_animation=True,
+            enable_livelink=True,
+        )
+        pipeline = ConversationPipeline(session, config)
+
+        await pipeline.start()
+
+        assert pipeline._animation is not None
+        assert pipeline._livelink is not None
+        assert pipeline.is_running is True
+
+        await pipeline.stop()
+
+
 class TestPipelineProcessAudio:
     """Tests for audio processing flow."""
 
