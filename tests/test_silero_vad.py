@@ -314,3 +314,5 @@ class TestVADAudioProcessing:
 
         assert prob == 0.0
         await vad.stop()
+
+
