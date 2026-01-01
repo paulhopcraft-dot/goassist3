@@ -26,6 +26,7 @@ from slowapi.errors import RateLimitExceeded
 from src import __version__
 from src.api.routes import health
 from src.api.routes import sessions
+from src.api.csrf import CSRFMiddleware
 from src.api.ratelimit import get_limiter, rate_limit_exceeded_handler
 from src.config.settings import Settings, get_settings
 from src.observability.logging import init_logging
@@ -135,6 +136,16 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # CSRF protection middleware
+    if settings.csrf_enabled:
+        app.add_middleware(
+            CSRFMiddleware,
+            cookie_name=settings.csrf_cookie_name,
+            header_name=settings.csrf_header_name,
+            cookie_secure=settings.csrf_cookie_secure,
+            cookie_samesite=settings.csrf_cookie_samesite,
+        )
 
     # Rate limiting
     if settings.rate_limit_enabled:

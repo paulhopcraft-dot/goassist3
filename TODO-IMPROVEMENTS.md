@@ -14,7 +14,7 @@
   - [x] TransportError (WebRTCError, DataChannelError)
 - [x] **Add async timeouts** - LLM streaming (30s), animation callbacks (500ms per frame), context rollover (5s)
 - [ ] **Refactor health endpoint registry** - Extract from hardcoded list in auth.py
-- [ ] **Add CSRF protection** - For state-changing operations
+- [x] **Add CSRF protection** - Double-submit cookie pattern for POST/PUT/DELETE/PATCH
 - [ ] **Add input sanitization** - Sanitize TTS text input (bleach or similar)
 
 ## Phase 2: Testing & Observability
@@ -36,6 +36,6 @@
 - [ ] **Document backpressure recovery** - How to go from SESSION_REJECT → NORMAL
 
 ## Metrics to Track
-- Current test count: 1144 tests
-- Current coverage: 86%
+- Current test count: 1170 tests
+- Current coverage: 85%
 - Target: ✅ 85%+ coverage achieved, <100ms p95 TTFA

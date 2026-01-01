@@ -16,6 +16,7 @@ os.environ.update({
     "ENVIRONMENT": "development",
     "ANIMATION_ENABLED": "false",  # Disable animation for unit tests
     "RATE_LIMIT_ENABLED": "false",  # Disable rate limiting for tests
+    "CSRF_ENABLED": "false",  # Disable CSRF for tests (tested separately)
 })
 
 

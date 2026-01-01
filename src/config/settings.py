@@ -212,6 +212,23 @@ class Settings(BaseSettings):
         default=1000, ge=1, le=10000, description="Default requests per hour per client"
     )
 
+    # CSRF Protection
+    csrf_enabled: bool = Field(
+        default=True, description="Enable CSRF protection for state-changing operations"
+    )
+    csrf_cookie_name: str = Field(
+        default="csrf_token", description="Name of CSRF cookie"
+    )
+    csrf_header_name: str = Field(
+        default="X-CSRF-Token", description="Name of CSRF header"
+    )
+    csrf_cookie_secure: bool = Field(
+        default=True, description="Set Secure flag on CSRF cookie (HTTPS only)"
+    )
+    csrf_cookie_samesite: Literal["strict", "lax", "none"] = Field(
+        default="strict", description="SameSite attribute for CSRF cookie"
+    )
+
     # Alerting Thresholds (from Ops-Runbook-v3.0.md)
     alert_crash_loop_threshold: int = Field(
         default=3, description="Crash count per hour to trigger alert"
