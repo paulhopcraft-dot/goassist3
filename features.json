@@ -24,7 +24,9 @@
       "verified_at": "2024-12-22",
       "resolution": "Specified 7500 token threshold (93.75% of 8192), orchestrator ownership, 5-second timeout, and failure handling (reject new turn with error)",
       "blocked_by": [],
-      "blocks": ["IMP-04"]
+      "blocks": [
+        "IMP-04"
+      ]
     },
     {
       "id": "TMF-05",
@@ -35,7 +37,7 @@
       "line": 137,
       "issue_type": "ambiguity",
       "description": "Barge-in latency contract doesn't specify if measured at server or client (network adds 40-100ms)",
-      "current_text": "Barge-in cancel: ≤150ms from user speech detection to halted agent playback",
+      "current_text": "Barge-in cancel: \u00e2\u2030\u00a4150ms from user speech detection to halted agent playback",
       "required_change": "Specify measurement endpoint: server packet emission stop OR client audio output stop",
       "acceptance_criteria": [
         "Measurement point explicitly stated (server or client)",
@@ -69,7 +71,10 @@
       "verified_at": "2024-12-23",
       "resolution": "Cross-references added to all 5 documents: PRD (3 refs), Implementation, Ops Runbook, Parallel Dev (2 refs), Addendum A. All reference TMF v3.0 section 7.3 definition. Standard format used throughout.",
       "blocked_by": [],
-      "blocks": ["ADD-02", "IMP-03"]
+      "blocks": [
+        "ADD-02",
+        "IMP-03"
+      ]
     },
     {
       "id": "OPS-06",
@@ -126,8 +131,8 @@
       "line": 33,
       "issue_type": "internal_contradiction",
       "description": "TTFA contract doesn't specify percentile (p50/p95/p99). Section 6 budget implies no variance but that's impossible.",
-      "current_text": "TTFA ≤ 250ms (steady-state target, not 'demo mode')",
-      "required_change": "Specify percentile (e.g., 'TTFA ≤ 250ms p95') and clarify if budget is ideal-case or includes variance",
+      "current_text": "TTFA \u00e2\u2030\u00a4 250ms (steady-state target, not 'demo mode')",
+      "required_change": "Specify percentile (e.g., 'TTFA \u00e2\u2030\u00a4 250ms p95') and clarify if budget is ideal-case or includes variance",
       "acceptance_criteria": [
         "Percentile explicitly specified (p50, p95, or p99)",
         "Section 6 latency budget table updated with percentile note",
@@ -137,7 +142,10 @@
       "verified_at": "2024-12-23",
       "resolution": "Specified p95 as operational contract in section 1.2. Added notes to section 6 clarifying budget is ideal-case (p50) allocation, actual p95 may vary. Both p50 and p95 should be tracked.",
       "blocked_by": [],
-      "blocks": ["CD-01", "PRD-01"]
+      "blocks": [
+        "CD-01",
+        "PRD-01"
+      ]
     },
     {
       "id": "OPS-08",
@@ -180,7 +188,7 @@
       ],
       "passes": true,
       "verified_at": "2024-12-23",
-      "resolution": "Added section 6.1 with global overage policy: log degradation, continue processing, apply degradation order (animation→verbosity, audio never). Hard timeout: 500ms before first audio byte triggers turn reset. Metrics: ttfa_overage_count{component}, ttfa_actual_ms{component}.",
+      "resolution": "Added section 6.1 with global overage policy: log degradation, continue processing, apply degradation order (animation\u00e2\u2020\u2019verbosity, audio never). Hard timeout: 500ms before first audio byte triggers turn reset. Metrics: ttfa_overage_count{component}, ttfa_actual_ms{component}.",
       "blocked_by": [],
       "blocks": []
     },
@@ -202,7 +210,7 @@
       ],
       "passes": true,
       "verified_at": "2024-12-23",
-      "resolution": "Specified 100ms time-based threshold (≈3 frames at 30fps, ≈6 at 60fps). Referenced 30-60Hz cadence from section 3.1. Added implementation note: use monotonic timer, not frame count. FPS-agnostic and unambiguous.",
+      "resolution": "Specified 100ms time-based threshold (\u00e2\u2030\u02c63 frames at 30fps, \u00e2\u2030\u02c66 at 60fps). Referenced 30-60Hz cadence from section 3.1. Added implementation note: use monotonic timer, not frame count. FPS-agnostic and unambiguous.",
       "blocked_by": [],
       "blocks": []
     },
@@ -226,7 +234,9 @@
       "verified_at": "2024-12-24",
       "resolution": "Added section A1.1 (Validation & Liability) to Addendum A (lines 23-34). Pre-deployment validation required against TMF 1.2 contracts (TTFA, barge-in, chunking). Clear liability statement: TMF defines contracts, implementation owns component selection. Failures from substituted components are implementation failures, not TMF violations.",
       "blocked_by": [],
-      "blocks": ["TMF-04"]
+      "blocks": [
+        "TMF-04"
+      ]
     },
     {
       "id": "DA-01",
@@ -287,7 +297,7 @@
       ],
       "passes": true,
       "verified_at": "2024-12-25",
-      "resolution": "Added Audio clock definition to section 2.2. Specified system monotonic time (CLOCK_MONOTONIC/QueryPerformanceCounter). Single-node: shared memory, no sync needed. Multi-node: ±1ms tolerance, implementation concern.",
+      "resolution": "Added Audio clock definition to section 2.2. Specified system monotonic time (CLOCK_MONOTONIC/QueryPerformanceCounter). Single-node: shared memory, no sync needed. Multi-node: \u00c2\u00b11ms tolerance, implementation concern.",
       "blocked_by": [],
       "blocks": []
     },
@@ -300,7 +310,7 @@
       "line": 33,
       "issue_type": "ambiguity",
       "description": "TTFA contract references 'steady-state' without defining operational threshold",
-      "current_text": "TTFA ≤ 250ms (steady-state target, not 'demo mode')",
+      "current_text": "TTFA \u00e2\u2030\u00a4 250ms (steady-state target, not 'demo mode')",
       "required_change": "Define steady-state: e.g., 'after 10 minutes of continuous operation' or 'after the first 5 conversation turns'",
       "acceptance_criteria": [
         "Steady-state condition defined with measurable threshold",
@@ -322,7 +332,7 @@
       "line": "40-42",
       "issue_type": "ambiguity",
       "description": "20GB VRAM cap on 24GB GPU unclear: absolute cap for all GPUs? proportional (83%)? fixed headroom (4GB)?",
-      "current_text": "Reference node: 2× RTX 4090 (24GB each) / Per-GPU hard working cap: 20GB VRAM",
+      "current_text": "Reference node: 2\u00c3\u2014 RTX 4090 (24GB each) / Per-GPU hard working cap: 20GB VRAM",
       "required_change": "Specify: '20GB absolute cap regardless of GPU' OR 'leave 4GB headroom regardless of GPU size' OR 'use 83% of available VRAM as working cap'",
       "acceptance_criteria": [
         "Scaling policy explicitly stated",
@@ -331,7 +341,7 @@
       ],
       "passes": true,
       "verified_at": "2024-12-25",
-      "resolution": "Added VRAM scaling policy to section 1.3. Fixed 4GB headroom regardless of GPU size. Formula: working_cap = total_vram - 4GB. Examples: 24GB→20GB, 40GB→36GB, 80GB→76GB.",
+      "resolution": "Added VRAM scaling policy to section 1.3. Fixed 4GB headroom regardless of GPU size. Formula: working_cap = total_vram - 4GB. Examples: 24GB\u00e2\u2020\u201920GB, 40GB\u00e2\u2020\u201936GB, 80GB\u00e2\u2020\u201976GB.",
       "blocked_by": [],
       "blocks": []
     },
@@ -355,7 +365,9 @@
       "verified_at": "2024-12-24",
       "resolution": "Updated ASR (line 97) and TTS (line 104) notes to explicitly state any model meeting behavioral requirements and section 1.2 contracts is permitted. Added cross-reference to Addendum A section A1.1 for validation and liability. Clear: TMF owns contracts, Implementation owns model choice within contracts.",
       "blocked_by": [],
-      "blocks": ["CD-04"]
+      "blocks": [
+        "CD-04"
+      ]
     },
     {
       "id": "TMF-06",
@@ -375,7 +387,7 @@
       ],
       "passes": true,
       "verified_at": "2024-12-25",
-      "resolution": "Replaced '(product policy)' with '(TMF owns degradation order; PRD may configure verbosity thresholds within this constraint)'. TMF owns the order (visuals→verbosity→audio never), PRD can tune thresholds.",
+      "resolution": "Replaced '(product policy)' with '(TMF owns degradation order; PRD may configure verbosity thresholds within this constraint)'. TMF owns the order (visuals\u00e2\u2020\u2019verbosity\u00e2\u2020\u2019audio never), PRD can tune thresholds.",
       "blocked_by": [],
       "blocks": []
     },
@@ -388,7 +400,7 @@
       "line": 209,
       "issue_type": "missing_operational_detail",
       "description": "24-hour extended soak undefined: continuous uptime? active conversation? mixed load?",
-      "current_text": "8–24 hours (extended soak)",
+      "current_text": "8\u00e2\u20ac\u201c24 hours (extended soak)",
       "required_change": "Define: '24 hours of [continuous uptime | active conversation | mixed load with X% active, Y% idle]'",
       "acceptance_criteria": [
         "Load profile specified (continuous, mixed, duty cycle, etc.)",
@@ -397,9 +409,11 @@
       ],
       "passes": true,
       "verified_at": "2024-12-23",
-      "resolution": "Defined 24h soak as mixed-load operation with 30% active duty cycle. Active periods: concurrent sessions at capacity. Idle periods: system ready, no sessions. Pass criteria: no manual intervention, TTFA p95 ≤ 250ms, no OOM, no deadlocks. All docs inherit this definition.",
+      "resolution": "Defined 24h soak as mixed-load operation with 30% active duty cycle. Active periods: concurrent sessions at capacity. Idle periods: system ready, no sessions. Pass criteria: no manual intervention, TTFA p95 \u00e2\u2030\u00a4 250ms, no OOM, no deadlocks. All docs inherit this definition.",
       "blocked_by": [],
-      "blocks": ["CD-02"]
+      "blocks": [
+        "CD-02"
+      ]
     },
     {
       "id": "ADD-01",
@@ -417,9 +431,11 @@
         "Animation engineer can implement without guessing",
         "Testable (can verify neutral state is correct)"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Added explicit neutral expression definition: jaw/mouth blendshapes audio-driven, all other expression blendshapes at zero baseline, no emotion overlay. Lists specific ARKit-52 blendshape categories."
     },
     {
       "id": "ADD-02",
@@ -440,7 +456,10 @@
       "passes": true,
       "verified_at": "2024-12-24",
       "resolution": "Cross-reference already added during CD-02 resolution. Line 97 now reads 'stable long-run behavior (24h soak as defined in TMF v3.0 section 7.3)'. Uses standard format and inherits TMF definition.",
-      "blocked_by": ["TMF-07", "CD-02"],
+      "blocked_by": [
+        "TMF-07",
+        "CD-02"
+      ],
       "blocks": []
     },
     {
@@ -452,7 +471,7 @@
       "line": 145,
       "issue_type": "internal_contradiction",
       "description": "PRD specifies p50 but TMF doesn't specify percentile - authority conflict",
-      "current_text": "TTFA ≤ 250ms (target; measured p50 under normal load)",
+      "current_text": "TTFA \u00e2\u2030\u00a4 250ms (target; measured p50 under normal load)",
       "required_change": "Either: (1) remove 'p50' and defer to TMF, OR (2) add 'PRD interprets TMF's TTFA target as p50; stricter percentiles TBD'",
       "acceptance_criteria": [
         "No contradiction with TMF authority",
@@ -461,8 +480,10 @@
       ],
       "passes": true,
       "verified_at": "2024-12-24",
-      "resolution": "Updated PRD section 7.1 to align with TMF p95 contract. Now reads 'TTFA ≤ 250ms p95 (per TMF v3.0 section 1.2; p50 tracked for optimization)'. TMF authority preserved, percentile aligned, cross-reference added.",
-      "blocked_by": ["TMF-08"],
+      "resolution": "Updated PRD section 7.1 to align with TMF p95 contract. Now reads 'TTFA \u00e2\u2030\u00a4 250ms p95 (per TMF v3.0 section 1.2; p50 tracked for optimization)'. TMF authority preserved, percentile aligned, cross-reference added.",
+      "blocked_by": [
+        "TMF-08"
+      ],
       "blocks": []
     },
     {
@@ -501,9 +522,11 @@
         "VAD implementation can be configured without guessing",
         "User experience expectations clear"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Specified 700ms upper bound for natural pauses. Implementation owns threshold within this bound per TMF turn detection policy. Authority delegation explicit."
     },
     {
       "id": "PRD-04",
@@ -561,9 +584,11 @@
         "If delegated, cross-reference specified",
         "RAG implementation can be coded without guessing"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Defined knowledge missing criteria (no results above threshold). Delegated threshold to Implementation with PRD constraints: configurable per-tenant, default conservative. Authority boundary explicit."
     },
     {
       "id": "PRD-07",
@@ -581,9 +606,11 @@
         "Clear which docs own implementation details",
         "No ambiguity about responsibility"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Added ownership statement: Implementation v3.0 section 9 owns instrumentation/emission/aggregation; Ops Runbook v3.0 section 10 owns exposure/dashboards/alerting. Cross-references explicit."
     },
     {
       "id": "IMP-01",
@@ -625,7 +652,9 @@
       "verified_at": "2024-12-24",
       "resolution": "Added 'Logging & export policy' subsection to SCOS section 6 (lines 319-323). Clarifies: MAY log for debugging (internal only), MUST NOT export to external systems, debug logs auto-expire 7 days, production metrics may aggregate but not store individual signals. Balances debugging needs with privacy.",
       "blocked_by": [],
-      "blocks": ["CD-03"]
+      "blocks": [
+        "CD-03"
+      ]
     },
     {
       "id": "IMP-03",
@@ -646,7 +675,9 @@
       "passes": true,
       "verified_at": "2024-12-24",
       "resolution": "Cross-reference already added during CD-02 resolution. Line 400 now reads 'Soak test definition per TMF v3.0 section 7.3 (30% active duty cycle, mixed load)'. Links to canonical TMF definition which also satisfies PRD 7.2.",
-      "blocked_by": ["CD-02"],
+      "blocked_by": [
+        "CD-02"
+      ],
       "blocks": []
     },
     {
@@ -668,7 +699,9 @@
       "passes": true,
       "verified_at": "2024-12-24",
       "resolution": "Added explicit 7500 token threshold to section 5.2 context management. Now reads 'context rollover threshold: 7500 tokens (per TMF v3.0 section 3.2)'. Matches TMF-09 resolution and references context_rollover.py implementation.",
-      "blocked_by": ["TMF-09"],
+      "blocked_by": [
+        "TMF-09"
+      ],
       "blocks": []
     },
     {
@@ -687,9 +720,11 @@
         "Each metric has clear owner",
         "No ambiguity about emission responsibility"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Added metrics ownership table to section 9.1 mapping 11 metrics to responsible services (Orchestrator, Gateway, Session Manager, Facial Animation, LLM Service) with Prometheus as aggregation point."
     },
     {
       "id": "PAR-01",
@@ -747,9 +782,11 @@
         "Contract covers format, transport, protocol",
         "Different tracks can implement compatible interfaces"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Added SCOS API contract with JSON schema (SCOSSignal type, session_id, timestamp, signals object with verbosity/backchannel/clarification fields). Specified transport (async queue or Redis), protocol (JSON fire-and-forget), consumer (Orchestrator)."
     },
     {
       "id": "PAR-05",
@@ -780,7 +817,7 @@
       "line": "19-43",
       "issue_type": "ambiguity",
       "description": "Ops profiles (A/B/C) don't explicitly map to PRD modes (Voice/Avatar)",
-      "current_text": "Profile A — Voice-Only, Profile B — Avatar via Client Rendering, Profile C — Server-Rendered Avatar",
+      "current_text": "Profile A \u00e2\u20ac\u201d Voice-Only, Profile B \u00e2\u20ac\u201d Avatar via Client Rendering, Profile C \u00e2\u20ac\u201d Server-Rendered Avatar",
       "required_change": "Add explicit mapping: 'Profile A implements PRD Voice Mode. Profiles B and C implement PRD Avatar Mode with different rendering strategies'",
       "acceptance_criteria": [
         "Explicit mapping added to section 1",
@@ -849,9 +886,11 @@
         "Test procedure referenced",
         "Pass/fail criteria defined"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Added verification method (automated script or manual procedure), manual procedure steps, and pass criteria (TTFA \u2264 250ms p95 when avatar drops, no audio interruption, graceful freeze)."
     },
     {
       "id": "OPS-05",
@@ -903,7 +942,7 @@
       "line": "TMF 33, PRD 145",
       "issue_type": "internal_contradiction",
       "description": "TMF doesn't specify percentile, PRD says p50 - authority conflict",
-      "current_text": "TMF: 'TTFA ≤ 250ms' / PRD: 'TTFA ≤ 250ms (target; measured p50 under normal load)'",
+      "current_text": "TMF: 'TTFA \u00e2\u2030\u00a4 250ms' / PRD: 'TTFA \u00e2\u2030\u00a4 250ms (target; measured p50 under normal load)'",
       "required_change": "TMF should specify percentile (as highest authority), or explicitly delegate percentile definition to PRD",
       "acceptance_criteria": [
         "TMF specifies percentile OR explicitly delegates to PRD",
@@ -913,7 +952,9 @@
       "passes": true,
       "verified_at": "2024-12-24",
       "resolution": "Resolved by TMF-08 (TMF now specifies p95) and PRD-01 (PRD updated to align). TMF is source of truth for p95 contract, PRD references TMF section 1.2 and notes p50 tracked for optimization. No contradiction remains.",
-      "blocked_by": ["TMF-08"],
+      "blocked_by": [
+        "TMF-08"
+      ],
       "blocks": []
     },
     {
@@ -933,7 +974,9 @@
         "If internal-only, Implementation explicitly states this"
       ],
       "passes": false,
-      "blocked_by": ["IMP-02"],
+      "blocked_by": [
+        "IMP-02"
+      ],
       "blocks": []
     },
     {

@@ -98,8 +98,8 @@ Everything in Voice Mode, plus:
 - **Interrupted:** user begins speaking; agent stops output and returns to Listening
 
 ### 5.2 Turn-taking rules
-- The system must support natural short pauses without cutting the user off.
-- The system must support “backchannels” (small acknowledgements) where appropriate.
+- The system must support natural short pauses (up to 700ms of silence) without cutting the user off. Pause duration threshold is an Implementation decision (per TMF v3.0 section 3.3 turn detection policy); PRD requires support for pauses up to this upper bound.
+- The system must support "backchannels" (small acknowledgements) where appropriate.
 - User speech during agent speech triggers interruption behavior.
 
 ### 5.3 Barge-in
@@ -121,6 +121,8 @@ Everything in Voice Mode, plus:
 - Ability to ground answers in a tenant knowledge base
 - Ability to cite sources internally (for audits / QA)
 - Ability to refuse or defer when knowledge is missing (no confident fabrication)
+  - Knowledge is considered "missing" when RAG retrieval returns no results above the confidence threshold
+  - Confidence threshold is an Implementation decision (per Implementation v3.0 section 5); PRD requires the threshold to be configurable per-tenant and default to a conservative value that minimizes fabrication
 
 ### 6.3 Tool use (optional)
 - The agent may call tools (APIs) to complete tasks (e.g., lookup, ticket creation)
@@ -166,10 +168,12 @@ Everything in Voice Mode, plus:
 
 The product must expose:
 - session-level latency metrics (TTFA, barge-in)
-- error and degradation events (e.g., “avatar degraded”)
+- error and degradation events (e.g., "avatar degraded")
 - ASR quality indicators (confidence / endpoint timing)
 - user interruption count and outcomes
 - stability indicators (memory growth, restarts)
+
+**Implementation ownership:** Metrics implementation (instrumentation, emission, aggregation) is defined in Implementation v3.0 section 9. Metrics exposure (Prometheus endpoint, dashboards, alerting) is defined in Ops Runbook v3.0 section 10.
 
 ---
 

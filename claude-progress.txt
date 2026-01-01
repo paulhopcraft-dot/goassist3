@@ -12,11 +12,35 @@
 ## Status
 - Total features: 45
 - P0-BLOCKING: 0 remaining (11 complete) ✅ ALL P0 RESOLVED
-- P1: 3 remaining (12 complete)
+- P1: 2 remaining (19 complete)
 - P2: 10
-- Completed: 23
+- Completed: 30
 - In Progress: 0
 - Blocked: 0
+
+## Session 27 (2026-01-01): P1 Feature Completion + Frontend CSRF Fix
+
+### Completed
+- ✅ Fixed frontend CSRF handling in index.html (added token extraction, credentials:include, X-CSRF-Token header)
+- ✅ Fixed CORS configuration in main.py (explicit localhost origins instead of wildcard with credentials)
+- ✅ PRD-03: Define natural pause duration (700ms upper bound, Implementation owns threshold)
+- ✅ PRD-06: Define RAG confidence threshold (delegated to Implementation with configurable per-tenant)
+- ✅ PRD-07: Assign observability implementation ownership (Implementation section 9, Ops Runbook section 10)
+- ✅ ADD-01: Define neutral facial expression (ARKit-52 blendshape categories, jaw/mouth audio-driven, rest at zero)
+- ✅ IMP-05: Map metrics to responsible services (11-metric ownership table added to section 9.1)
+- ✅ PAR-04: Define SCOS API contract (JSON schema, transport, protocol, consumer)
+- ✅ OPS-04: Define avatar degradation verification (test script, manual procedure, pass criteria)
+- All 1267 tests passing
+
+### Next Steps
+- OPS-05: Add concurrency tuning guidance
+- OPS-07: Clarify container volume strategy
+- Remaining P2 features (10 total)
+
+### Notes
+- Server running on http://localhost:8081 with mock LLM
+- RunPod vLLM pod is stopped (needs manual start for real LLM testing)
+- Frontend now properly handles CSRF tokens
 
 ## Session 2 (2024-12-22): First Resolution - TMF-09
 - ✅ Completed TMF-09: Define context rollover threshold

@@ -68,6 +68,13 @@ Using Audio2Face must **not** introduce:
 
 If Audio2Face includes expressiveness controls, the default must be **neutral** (speech articulation only).
 
+**Neutral expression definition:** For ARKit-52 blendshapes, "neutral" means:
+- Jaw and mouth blendshapes (jawOpen, mouthClose, mouthFunnel, mouthPucker, mouthLeft, mouthRight, mouthSmile*, mouthFrown*, mouthDimple*, mouthStretch*, mouthRollLower, mouthRollUpper, mouthShrugLower, mouthShrugUpper, mouthPress*, mouthLowerDown*, mouthUpperUp*, tongueOut) are driven by audio input for speech articulation
+- All other expression blendshapes (browDown*, browInnerUp, browOuterUp*, eyeSquint*, eyeWide*, cheekPuff, cheekSquint*, noseSneer*) remain at zero (resting baseline)
+- No emotion overlay, enhancement, or inference-based expression generation
+
+This ensures the avatar appears natural during speech without introducing emotional inference.
+
 ### A3.4 Swap-out guarantee
 The system must support replacing Audio2Face with any other compliant audio→blendshape model without changing:
 - the audio transport contract

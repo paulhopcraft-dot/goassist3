@@ -421,6 +421,9 @@ A conservative budgeting model:
 - [ ] Monitoring dashboards live
 - [ ] Logs stored persistently
 - [ ] Avatar degradation verified (voice continues)
+  - **Verification method:** Run automated test script `scripts/test_avatar_degradation.sh` OR manual procedure below
+  - **Manual procedure:** (1) Start voice session with avatar enabled, (2) Kill animation service process, (3) Confirm voice output continues within 150ms, (4) Confirm avatar freezes gracefully (slow-freeze per TMF 4.3)
+  - **Pass criteria:** Voice TTFA remains ≤ 250ms p95 when avatar drops; no audio interruption; graceful visual freeze
 
 ### 14.2 24h soak checklist
 Per TMF v3.0 section 7.3: 24h mixed-load operation, 30% active duty cycle.

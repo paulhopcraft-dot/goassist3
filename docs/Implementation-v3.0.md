@@ -373,6 +373,24 @@ Keep the v2.1 “validator” concept, updated:
 - GPU VRAM usage + allocation failures
 - restart counts / crash loops
 
+**Metrics ownership table:**
+
+| Metric | Responsible Service | Aggregation Point |
+|--------|---------------------|-------------------|
+| ttfa_ms (p50/p95) | Orchestrator | Prometheus /metrics |
+| bargein_latency_ms (p50/p95) | Orchestrator + Gateway | Prometheus /metrics |
+| audio_packet_jitter_ms | Gateway | Prometheus /metrics |
+| audio_packet_loss_ratio | Gateway | Prometheus /metrics |
+| animation_lag_events_total | Facial Animation Service | Prometheus /metrics |
+| animation_yield_count | Facial Animation Service | Prometheus /metrics |
+| session_count | Session Manager | Prometheus /metrics |
+| session_queue_depth | Session Manager | Prometheus /metrics |
+| gpu_vram_used_bytes | LLM Service, Animation Service | Prometheus /metrics |
+| gpu_allocation_failures_total | LLM Service, Animation Service | Prometheus /metrics |
+| service_restarts_total | All services (per-service label) | Prometheus /metrics |
+
+Each service emits its own metrics; the central Prometheus instance aggregates across all services.
+
 ### 9.2 Health checks
 Each service exposes:
 - `/healthz` (liveness)

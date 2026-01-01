@@ -157,6 +157,26 @@ SCOS emits non-emotional control signals:
 - backchannel allowed/blocked
 - clarification needed confidence
 
+**API contract (internal async):**
+```json
+{
+  "type": "SCOSSignal",
+  "session_id": "string (UUID)",
+  "timestamp_ms": "number (monotonic)",
+  "signals": {
+    "verbosity_level": "number (0.0-1.0, where 1.0 = maximum verbosity)",
+    "backchannel_allowed": "boolean",
+    "clarification_confidence": "number (0.0-1.0, where < 0.5 suggests clarification needed)"
+  }
+}
+```
+
+**Transport:** In-process async queue (same node) or Redis pub/sub (distributed).
+**Protocol:** JSON messages, fire-and-forget (non-blocking).
+**Consumer:** Orchestrator applies signals to next LLM prompt construction.
+
+Full contract schema: `docs/api-contracts/scos.schema.json` (if implemented).
+
 ### 7.5 RAG API (T5)
 RAG returns:
 - retrieved snippets/doc IDs
