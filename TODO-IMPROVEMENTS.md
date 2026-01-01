@@ -3,12 +3,15 @@
 ## Phase 1: Security & Reliability
 
 - [x] **Add rate limiting** - Implement slowapi on session creation (5/min), chat (30/min), WebRTC (10/min)
-- [ ] **Create exception hierarchy**:
-  - [ ] SessionError (base)
-  - [ ] ConfigurationError
-  - [ ] ASRError
-  - [ ] TTSError
-  - [ ] AnimationError
+- [x] **Create exception hierarchy**:
+  - [x] GoAssistError (base)
+  - [x] SessionError (SessionNotFoundError, SessionLimitError, SessionStateError)
+  - [x] ConfigurationError (MissingConfigError, InvalidConfigError)
+  - [x] ASRError (ASRConnectionError, ASRProcessingError)
+  - [x] TTSError (TTSConnectionError, TTSInitializationError, TTSSynthesisError)
+  - [x] AnimationError (AnimationConnectionError, AnimationInitializationError, BlendshapeError)
+  - [x] LLMError (LLMConnectionError, LLMGenerationError, ContextOverflowError)
+  - [x] TransportError (WebRTCError, DataChannelError)
 - [ ] **Add async timeouts** - LLM streaming (30s), animation callbacks (5s), context rollover
 - [ ] **Refactor health endpoint registry** - Extract from hardcoded list in auth.py
 - [ ] **Add CSRF protection** - For state-changing operations
@@ -33,6 +36,6 @@
 - [ ] **Document backpressure recovery** - How to go from SESSION_REJECT → NORMAL
 
 ## Metrics to Track
-- Current test count: 1088 tests
-- Current coverage: 85.20%
+- Current test count: 1124 tests
+- Current coverage: 86%
 - Target: ✅ 85%+ coverage achieved, <100ms p95 TTFA
