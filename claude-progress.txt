@@ -960,3 +960,62 @@ Added 79 new tests across 4 test files:
 **Total: 189 → 394 tests (+205 tests added)**
 
 ---
+
+## Session 26 - 2026-01-01: Security & Reliability Phase 1 COMPLETE
+
+### Completed
+
+**Phase 1: Security & Reliability - ALL TASKS DONE**
+
+1. **Rate limiting** - slowapi on session creation (5/min), chat (30/min), WebRTC (10/min) ✅
+2. **Exception hierarchy** - GoAssistError base with 8 domain-specific error types ✅
+3. **Async timeouts** - LLM streaming (30s), animation callbacks (5s) ✅
+4. **CSRF protection** - Double-submit cookie pattern for POST/PUT/DELETE/PATCH ✅
+5. **Input sanitization** - TTS text sanitization (control chars, SSML, Unicode normalization) ✅
+6. **Health endpoint registry** - Centralized public_paths.py for auth/CSRF exemptions ✅
+
+### Files Created This Session
+
+```
+src/audio/tts/sanitize.py           # TTS input sanitization
+src/api/public_paths.py             # Centralized public path registry
+tests/test_tts_sanitize.py          # 54 sanitization tests
+tests/test_public_paths.py          # 32 registry tests
+```
+
+### Files Modified
+
+```
+src/audio/tts/TTSManager.py         # Added _sanitize_request() integration
+src/api/auth.py                     # Use is_public_path() from registry
+src/api/csrf.py                     # Use CSRF_EXEMPT_PATHS from registry
+tests/test_tts_manager.py           # +11 sanitization integration tests
+TODO-IMPROVEMENTS.md                # Phase 1 marked complete
+```
+
+### Commits This Session
+
+- `cf0b6d7` Add TTS input sanitization for security hardening
+- `e24272f` Refactor health endpoint registry to centralized module
+
+### Test Count
+
+**1267 tests passing** (up from 1235)
+
+### Next Steps (Phase 2: Testing & Observability)
+
+1. Integration tests: full session flow, WebRTC, barge-in
+2. Load tests: 100 concurrent sessions
+3. Latency regression tests: TTFA p95 tracking
+4. Pin dependencies (poetry.lock or pip-tools)
+5. OpenTelemetry distributed tracing
+6. Request ID propagation
+
+### Notes
+
+- Phase 1 Security & Reliability is 100% complete
+- All security middleware now uses centralized public_paths.py
+- TTS sanitization prevents SSML injection, control chars, Unicode exploits
+- Ready to begin Phase 2 Testing & Observability
+
+---
