@@ -35,6 +35,14 @@ from src.audio.tts.backends.interface import (
     TTSStreamChunk,
 )
 from src.audio.tts.backends.mock_backend import MockBackend
+from src.audio.tts.sanitize import (
+    SanitizationConfig,
+    sanitize_text,
+    sanitize_prosody,
+    sanitize_voice_id,
+    sanitize_language,
+    TextSanitizationError,
+)
 
 logger = get_logger(__name__)
 
@@ -58,6 +66,11 @@ class TTSManagerConfig:
 
     # Fallback behavior
     fallback_to_mock: bool = True  # If primary fails, use mock
+
+    # Input sanitization
+    sanitize_input: bool = True  # Enable text sanitization
+    max_text_length: int = 4096  # Maximum text length
+    strip_ssml_tags: bool = True  # Remove SSML-like tags
 
 
 class TTSManager:
@@ -85,6 +98,12 @@ class TTSManager:
         self._config = config or TTSManagerConfig()
         self._backend: TTSBackend | None = None
         self._initialized = False
+
+        # Create sanitization config from manager config
+        self._sanitize_config = SanitizationConfig(
+            max_length=self._config.max_text_length,
+            strip_ssml_tags=self._config.strip_ssml_tags,
+        )
 
     @property
     def backend_name(self) -> str:
@@ -194,6 +213,37 @@ class TTSManager:
                 f"Available: xtts-v2, kyutai, mock"
             )
 
+    def _sanitize_request(self, request: TTSRequest) -> TTSRequest:
+        """Sanitize a TTS request if sanitization is enabled.
+
+        Args:
+            request: Original TTS request
+
+        Returns:
+            Sanitized TTS request (or original if sanitization disabled)
+
+        Raises:
+            TextSanitizationError: If text cannot be sanitized
+        """
+        if not self._config.sanitize_input:
+            return request
+
+        # Sanitize text (required field)
+        sanitized_text = sanitize_text(request.text, self._sanitize_config)
+
+        # Sanitize optional fields
+        sanitized_voice_id = sanitize_voice_id(request.voice_id)
+        sanitized_language = sanitize_language(request.language)
+        sanitized_prosody = sanitize_prosody(request.prosody, self._sanitize_config)
+
+        # Create new request with sanitized values
+        return TTSRequest(
+            text=sanitized_text,
+            voice_id=sanitized_voice_id if sanitized_voice_id else request.voice_id,
+            language=sanitized_language if sanitized_language else request.language,
+            prosody=sanitized_prosody if sanitized_prosody else request.prosody,
+        )
+
     async def synthesize(self, request: TTSRequest) -> TTSResult:
         """Synthesize audio from text (one-shot).
 
@@ -202,11 +252,15 @@ class TTSManager:
 
         Returns:
             Complete audio result
+
+        Raises:
+            TextSanitizationError: If text cannot be sanitized
         """
         if not self._initialized or not self._backend:
             await self.init()
 
-        return await self._backend.synthesize(request)
+        sanitized_request = self._sanitize_request(request)
+        return await self._backend.synthesize(sanitized_request)
 
     async def stream(
         self, request: TTSRequest
@@ -218,11 +272,15 @@ class TTSManager:
 
         Yields:
             Audio chunks as they become available
+
+        Raises:
+            TextSanitizationError: If text cannot be sanitized
         """
         if not self._initialized or not self._backend:
             await self.init()
 
-        async for chunk in self._backend.stream(request):
+        sanitized_request = self._sanitize_request(request)
+        async for chunk in self._backend.stream(sanitized_request):
             yield chunk
 
     async def health(self) -> TTSHealthStatus:

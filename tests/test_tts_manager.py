@@ -24,6 +24,7 @@ from src.audio.tts.backends.interface import (
     TTSHealthStatus,
 )
 from src.audio.tts.backends.mock_backend import MockBackend
+from src.audio.tts.sanitize import TextSanitizationError
 
 
 class TestTTSManagerConfig:
@@ -286,3 +287,140 @@ class TestCreateTTSManagerFactory:
 
         assert len(result.audio) > 0
         await manager.shutdown()
+
+
+class TestTTSManagerSanitization:
+    """Tests for TTSManager input sanitization."""
+
+    @pytest.fixture
+    def manager(self):
+        """Create manager with mock backend and sanitization enabled."""
+        config = TTSManagerConfig(
+            primary="mock",
+            sanitize_input=True,
+            max_text_length=100,
+            strip_ssml_tags=True,
+        )
+        return TTSManager(config)
+
+    @pytest.fixture
+    def manager_no_sanitize(self):
+        """Create manager with sanitization disabled."""
+        config = TTSManagerConfig(
+            primary="mock",
+            sanitize_input=False,
+        )
+        return TTSManager(config)
+
+    def test_config_includes_sanitization_fields(self):
+        """Config includes sanitization fields."""
+        config = TTSManagerConfig()
+        assert hasattr(config, "sanitize_input")
+        assert hasattr(config, "max_text_length")
+        assert hasattr(config, "strip_ssml_tags")
+        assert config.sanitize_input is True  # Default enabled
+        assert config.max_text_length == 4096
+        assert config.strip_ssml_tags is True
+
+    def test_sanitize_config_created(self):
+        """Sanitization config is created from manager config."""
+        config = TTSManagerConfig(
+            max_text_length=500,
+            strip_ssml_tags=False,
+        )
+        manager = TTSManager(config)
+        assert manager._sanitize_config.max_length == 500
+        assert manager._sanitize_config.strip_ssml_tags is False
+
+    def test_sanitize_request_strips_ssml(self, manager):
+        """Sanitize request removes SSML tags."""
+        request = TTSRequest(text="Hello <break/> world")
+        sanitized = manager._sanitize_request(request)
+        assert "<break/>" not in sanitized.text
+        assert "Hello" in sanitized.text
+        assert "world" in sanitized.text
+
+    def test_sanitize_request_truncates_long_text(self, manager):
+        """Sanitize request truncates text to max length."""
+        long_text = "A" * 200
+        request = TTSRequest(text=long_text)
+        sanitized = manager._sanitize_request(request)
+        assert len(sanitized.text) == 100
+
+    def test_sanitize_request_strips_control_chars(self, manager):
+        """Sanitize request removes control characters."""
+        request = TTSRequest(text="Hello\x00\x01world")
+        sanitized = manager._sanitize_request(request)
+        assert "\x00" not in sanitized.text
+        assert "\x01" not in sanitized.text
+        assert "Hello" in sanitized.text
+
+    def test_sanitize_request_preserves_voice_id(self, manager):
+        """Sanitize request preserves valid voice ID."""
+        request = TTSRequest(text="Hello", voice_id="speaker_1")
+        sanitized = manager._sanitize_request(request)
+        assert sanitized.voice_id == "speaker_1"
+
+    def test_sanitize_request_cleans_voice_id(self, manager):
+        """Sanitize request cleans invalid voice ID characters."""
+        request = TTSRequest(text="Hello", voice_id="speaker@#$1")
+        sanitized = manager._sanitize_request(request)
+        # Should be cleaned to alphanumeric only
+        assert sanitized.voice_id == "speaker1"
+
+    def test_sanitize_request_preserves_language(self, manager):
+        """Sanitize request preserves valid language code."""
+        request = TTSRequest(text="Hello", language="en-US")
+        sanitized = manager._sanitize_request(request)
+        assert sanitized.language == "en-US"
+
+    def test_sanitize_request_preserves_prosody(self, manager):
+        """Sanitize request preserves valid prosody."""
+        request = TTSRequest(text="Hello", prosody={"speed": 1.5})
+        sanitized = manager._sanitize_request(request)
+        assert sanitized.prosody["speed"] == 1.5
+
+    def test_sanitize_request_clamps_prosody(self, manager):
+        """Sanitize request clamps prosody values."""
+        request = TTSRequest(text="Hello", prosody={"speed": 10.0})
+        sanitized = manager._sanitize_request(request)
+        assert sanitized.prosody["speed"] == 2.0  # Clamped to max
+
+    def test_sanitize_disabled_bypasses(self, manager_no_sanitize):
+        """Disabled sanitization passes request through."""
+        request = TTSRequest(text="Hello <break/> world")
+        sanitized = manager_no_sanitize._sanitize_request(request)
+        # Should be same object when disabled
+        assert sanitized is request
+
+    @pytest.mark.asyncio
+    async def test_synthesize_sanitizes_input(self, manager):
+        """Synthesize sanitizes input before backend call."""
+        await manager.init()
+        request = TTSRequest(text="Hello <break/> world")
+        result = await manager.synthesize(request)
+
+        # Should succeed with sanitized text
+        assert isinstance(result, TTSResult)
+        assert len(result.audio) > 0
+
+    @pytest.mark.asyncio
+    async def test_stream_sanitizes_input(self, manager):
+        """Stream sanitizes input before backend call."""
+        await manager.init()
+        request = TTSRequest(text="Hello <break/> world")
+        chunks = []
+
+        async for chunk in manager.stream(request):
+            chunks.append(chunk)
+
+        assert len(chunks) > 0
+
+    @pytest.mark.asyncio
+    async def test_synthesize_rejects_invalid_text(self, manager):
+        """Synthesize rejects non-string text."""
+        await manager.init()
+        request = TTSRequest(text=123)  # type: ignore
+
+        with pytest.raises(TextSanitizationError):
+            await manager.synthesize(request)
