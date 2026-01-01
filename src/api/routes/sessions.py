@@ -9,7 +9,7 @@ Provides REST endpoints for session management:
 Reference: Implementation-v3.0.md §4.4
 """
 
-from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
@@ -18,6 +18,7 @@ from src.llm import create_llm_client, build_messages
 from src.api.webrtc.gateway import WebRTCGateway, create_webrtc_gateway
 from src.api.websocket.blendshapes import get_blendshape_manager
 from src.api.auth import verify_api_key
+from src.api.ratelimit import limiter, SESSION_CREATE_LIMIT, SESSION_CHAT_LIMIT, WEBRTC_LIMIT
 
 # All session routes require authentication
 router = APIRouter(
@@ -130,10 +131,16 @@ class ChatResponse(BaseModel):
 
 # Endpoints
 @router.post("", response_model=CreateSessionResponse)
-async def create_session(request: CreateSessionRequest) -> CreateSessionResponse:
+@limiter.limit(SESSION_CREATE_LIMIT)
+async def create_session(
+    request: Request,
+    response: Response,
+    body: CreateSessionRequest,
+) -> CreateSessionResponse:
     """Create a new voice session.
 
     Returns session_id and initial state.
+    Rate limited to 5 requests per minute per client.
     """
     manager = get_session_manager()
 
@@ -146,13 +153,13 @@ async def create_session(request: CreateSessionRequest) -> CreateSessionResponse
 
     # Create session config
     config = SessionConfig(
-        system_prompt=request.system_prompt,
-        enable_avatar=request.enable_avatar,
+        system_prompt=body.system_prompt,
+        enable_avatar=body.enable_avatar,
     )
 
     # Create session
     session = await manager.create_session(
-        session_id=request.session_id,
+        session_id=body.session_id,
         config=config,
     )
 
@@ -226,11 +233,18 @@ async def list_sessions() -> dict:
 
 
 @router.post("/{session_id}/chat", response_model=ChatResponse)
-async def chat(session_id: str, request: ChatRequest) -> ChatResponse:
+@limiter.limit(SESSION_CHAT_LIMIT)
+async def chat(
+    request: Request,
+    response: Response,
+    session_id: str,
+    body: ChatRequest,
+) -> ChatResponse:
     """Send a chat message and get LLM response.
 
     This is the main text interaction endpoint.
     For voice, use WebRTC audio streaming instead.
+    Rate limited to 30 requests per minute per client.
     """
     manager = get_session_manager()
     session = manager.get_session(session_id)
@@ -248,14 +262,14 @@ async def chat(session_id: str, request: ChatRequest) -> ChatResponse:
         messages = build_messages(
             system_prompt=session.config.system_prompt,
             conversation=session.conversation_history,
-            user_input=request.message,
+            user_input=body.message,
         )
 
         # Generate response
         response = await llm.generate(messages)
 
         # Update session conversation history
-        session.conversation_history.append({"role": "user", "content": request.message})
+        session.conversation_history.append({"role": "user", "content": body.message})
         session.conversation_history.append({"role": "assistant", "content": response.text})
 
         return ChatResponse(
@@ -272,14 +286,18 @@ async def chat(session_id: str, request: ChatRequest) -> ChatResponse:
 
 # WebRTC signaling endpoints
 @router.post("/{session_id}/offer", response_model=WebRTCAnswerResponse)
+@limiter.limit(WEBRTC_LIMIT)
 async def webrtc_offer(
+    request: Request,
+    response: Response,
     session_id: str,
-    request: WebRTCOfferRequest,
+    body: WebRTCOfferRequest,
 ) -> WebRTCAnswerResponse:
     """Handle WebRTC SDP offer and return answer.
 
     Client sends offer, server returns answer to establish
     WebRTC connection for audio and data channel.
+    Rate limited to 10 requests per minute per client.
     """
     manager = get_session_manager()
     session = manager.get_session(session_id)
@@ -293,7 +311,7 @@ async def webrtc_offer(
     gateway = get_webrtc_gateway()
 
     try:
-        answer_sdp = await gateway.handle_offer(session_id, request.sdp)
+        answer_sdp = await gateway.handle_offer(session_id, body.sdp)
         return WebRTCAnswerResponse(
             sdp=answer_sdp,
             session_id=session_id,
@@ -306,9 +324,12 @@ async def webrtc_offer(
 
 
 @router.post("/{session_id}/ice-candidate")
+@limiter.limit(WEBRTC_LIMIT)
 async def ice_candidate(
+    request: Request,
+    response: Response,
     session_id: str,
-    request: ICECandidateRequest,
+    body: ICECandidateRequest,
 ) -> dict:
     """Add ICE candidate for WebRTC connection."""
     # Verify session exists
@@ -324,7 +345,7 @@ async def ice_candidate(
     gateway = get_webrtc_gateway()
 
     try:
-        await gateway.handle_ice_candidate(session_id, request.candidate)
+        await gateway.handle_ice_candidate(session_id, body.candidate)
         return {"status": "ok"}
     except Exception as e:
         raise HTTPException(

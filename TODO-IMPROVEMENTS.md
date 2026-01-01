@@ -2,7 +2,7 @@
 
 ## Phase 1: Security & Reliability
 
-- [ ] **Add rate limiting** - Implement slowapi or custom middleware on session creation
+- [x] **Add rate limiting** - Implement slowapi on session creation (5/min), chat (30/min), WebRTC (10/min)
 - [ ] **Create exception hierarchy**:
   - [ ] SessionError (base)
   - [ ] ConfigurationError
@@ -33,6 +33,6 @@
 - [ ] **Document backpressure recovery** - How to go from SESSION_REJECT → NORMAL
 
 ## Metrics to Track
-- Current test count: 1073 tests
-- Current coverage: 85.04%
+- Current test count: 1088 tests
+- Current coverage: 85.20%
 - Target: ✅ 85%+ coverage achieved, <100ms p95 TTFA

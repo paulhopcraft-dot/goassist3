@@ -20,10 +20,13 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from src import __version__
 from src.api.routes import health
 from src.api.routes import sessions
+from src.api.ratelimit import get_limiter, rate_limit_exceeded_handler
 from src.config.settings import Settings, get_settings
 from src.observability.logging import init_logging
 
@@ -132,6 +135,12 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Rate limiting
+    if settings.rate_limit_enabled:
+        limiter = get_limiter()
+        app.state.limiter = limiter
+        app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
     # Include routers
     app.include_router(health.router)

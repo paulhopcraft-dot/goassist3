@@ -201,6 +201,17 @@ class Settings(BaseSettings):
     metrics_enabled: bool = Field(default=True, description="Enable Prometheus metrics")
     metrics_port: int = Field(default=9464, description="Prometheus metrics port")
 
+    # Rate Limiting
+    rate_limit_enabled: bool = Field(
+        default=True, description="Enable API rate limiting"
+    )
+    rate_limit_per_minute: int = Field(
+        default=60, ge=1, le=1000, description="Default requests per minute per client"
+    )
+    rate_limit_per_hour: int = Field(
+        default=1000, ge=1, le=10000, description="Default requests per hour per client"
+    )
+
     # Alerting Thresholds (from Ops-Runbook-v3.0.md)
     alert_crash_loop_threshold: int = Field(
         default=3, description="Crash count per hour to trigger alert"

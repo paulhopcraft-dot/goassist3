@@ -15,6 +15,7 @@ os.environ.update({
     "TTS_MODEL_PATH": "/test/models/tts",
     "ENVIRONMENT": "development",
     "ANIMATION_ENABLED": "false",  # Disable animation for unit tests
+    "RATE_LIMIT_ENABLED": "false",  # Disable rate limiting for tests
 })
 
 
