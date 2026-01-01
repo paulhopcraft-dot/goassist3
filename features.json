@@ -909,9 +909,11 @@
         "Tunable parameters listed",
         "Operator can tune without guessing"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Added concurrency tuning guidance: metrics table (TTFA p95, GPU util, queue depth, VRAM), tunable parameters (MAX_CONCURRENT_SESSIONS, LLM_MAX_BATCH_SIZE, LLM_MAX_CONTEXT_TOKENS), 5-step tuning procedure."
     },
     {
       "id": "OPS-07",
@@ -929,9 +931,11 @@
         "Container image composition clarified",
         "Deployment procedure unambiguous"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Added container volume strategy: 3 rules (external mount, no weights in image, init verification), docker-compose example, volume requirements table (models 30-50GB ro, logs 10GB+ rw, cache 5GB rw)."
     },
     {
       "id": "CD-01",

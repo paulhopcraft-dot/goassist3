@@ -12,11 +12,24 @@
 ## Status
 - Total features: 45
 - P0-BLOCKING: 0 remaining (11 complete) ✅ ALL P0 RESOLVED
-- P1: 2 remaining (19 complete)
+- P1: 0 remaining (21 complete) ✅ ALL P1 RESOLVED
 - P2: 10
-- Completed: 30
+- Completed: 32
 - In Progress: 0
 - Blocked: 0
+
+## Session 28 (2026-01-01): Final P1 Completion
+
+### Completed
+- ✅ OPS-05: Add concurrency tuning guidance (metrics table, tunable params, 5-step procedure)
+- ✅ OPS-07: Clarify container volume strategy (mount rules, docker-compose example, volume table)
+- **ALL P1 FEATURES NOW COMPLETE** (21/21)
+
+### Next Steps
+- P2 features (10 remaining) - lower priority documentation cleanup
+- Or move to implementation/testing work
+
+---
 
 ## Session 27 (2026-01-01): P1 Feature Completion + Frontend CSRF Fix
 

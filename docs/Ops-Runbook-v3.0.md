@@ -74,6 +74,27 @@ Runs:
 - Voice sessions scale with shared LLM batching; measure and tune.
 - Server-rendered avatar sessions scale poorly; plan to cap or use client rendering.
 
+**Concurrency tuning guidance:**
+
+| Metric to Measure | Target Value | Action if Exceeded |
+|-------------------|--------------|-------------------|
+| TTFA p95 | ≤ 300ms | Reduce `max_concurrent_sessions` |
+| GPU utilization | < 85% | Safe to increase sessions |
+| LLM queue depth | < 5 | Safe to increase sessions |
+| VRAM usage | < 18GB (of 20GB cap) | Safe to increase sessions |
+
+**Tunable parameters:**
+- `MAX_CONCURRENT_SESSIONS` — start at 5, increase by 2 until TTFA p95 > 300ms
+- `LLM_MAX_BATCH_SIZE` — default 8, reduce if queue depth spikes
+- `LLM_MAX_CONTEXT_TOKENS` — reduce from 8192 to 4096 to fit more sessions
+
+**Tuning procedure:**
+1. Start with conservative settings (5 sessions, 8192 context)
+2. Run 30-minute load test at target concurrency
+3. Check metrics against table above
+4. Adjust one parameter at a time, re-test
+5. Document final values in deployment config
+
 This runbook does not promise a fixed session number without measured load tests.
 
 ---
@@ -281,6 +302,27 @@ Provide a `scripts/download_models.sh` that:
 - downloads animation model assets (if separate)
 
 **Rule:** Never download into ephemeral container layers. Always to the persistent volume.
+
+**Container volume strategy:**
+
+When using containers (Docker, Kubernetes):
+1. **Mount `/workspace/models` as external volume** — models must persist across container restarts
+2. **Container image must NOT include model weights** — keeps image small (~2GB vs 30GB+)
+3. **Use init container or entrypoint script** to verify models exist before starting main process
+
+```yaml
+# Example docker-compose volume mount
+volumes:
+  - /data/goassist/models:/workspace/models:ro
+  - /data/goassist/logs:/workspace/logs:rw
+```
+
+**Volume requirements:**
+| Path | Size | Mode | Purpose |
+|------|------|------|---------|
+| `/workspace/models` | 30-50GB | read-only | LLM, ASR, TTS, animation weights |
+| `/workspace/logs` | 10GB+ | read-write | Application logs |
+| `/workspace/cache` | 5GB | read-write | Prefix cache, temp files |
 
 ---
 
