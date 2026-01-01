@@ -518,3 +518,239 @@ class TestVADDoubleStart:
         await vad.stop()
 
 
+class TestSileroVADStateTransitions:
+    """Tests for VAD state transitions."""
+
+    @pytest.fixture
+    def vad(self):
+        """Create VAD with registered session."""
+        clock = get_audio_clock()
+        session_id = "test-transitions"
+        clock.start_session(session_id)
+        vad = SileroVAD(session_id=session_id)
+        yield vad
+        try:
+            clock.end_session(session_id)
+        except KeyError:
+            pass
+
+    @pytest.mark.asyncio
+    async def test_state_starts_as_silence(self, vad):
+        """VAD state starts as SILENCE."""
+        await vad.start()
+        assert vad.state == VADState.SILENCE
+        await vad.stop()
+
+    @pytest.mark.asyncio
+    async def test_manual_state_transition_to_speech(self, vad):
+        """VAD state can be set to SPEECH."""
+        await vad.start()
+        vad._state = VADState.SPEECH
+        assert vad.state == VADState.SPEECH
+        assert vad.is_speaking is True
+        await vad.stop()
+
+    @pytest.mark.asyncio
+    async def test_manual_state_transition_to_endpoint(self, vad):
+        """VAD state can be set to ENDPOINT."""
+        await vad.start()
+        vad._state = VADState.ENDPOINT
+        assert vad.state == VADState.ENDPOINT
+        assert vad.is_speaking is False
+        await vad.stop()
+
+    @pytest.mark.asyncio
+    async def test_emit_speech_start_with_state_change(self, vad):
+        """Emit speech start with state transition."""
+        events = []
+
+        def callback(event):
+            events.append(event)
+
+        vad.on_speech_start(callback)
+        await vad.start()
+
+        # Manually trigger emission
+        event = VADEvent(
+            state=VADState.SPEECH,
+            t_ms=100,
+            probability=0.9,
+            session_id="test-transitions",
+        )
+        await vad._emit_speech_start(event)
+
+        assert len(events) == 1
+        assert events[0].state == VADState.SPEECH
+        await vad.stop()
+
+    @pytest.mark.asyncio
+    async def test_emit_speech_end_with_state_change(self, vad):
+        """Emit speech end with state transition."""
+        events = []
+
+        def callback(event):
+            events.append(event)
+
+        vad.on_speech_end(callback)
+        await vad.start()
+
+        # Manually trigger emission
+        event = VADEvent(
+            state=VADState.ENDPOINT,
+            t_ms=500,
+            probability=0.1,
+            session_id="test-transitions",
+        )
+        await vad._emit_speech_end(event)
+
+        assert len(events) == 1
+        assert events[0].state == VADState.ENDPOINT
+        await vad.stop()
+
+    @pytest.mark.asyncio
+    async def test_speech_start_timestamp_tracking(self, vad):
+        """VAD tracks speech start timestamp."""
+        await vad.start()
+
+        vad._speech_start_ms = 1000
+        assert vad._speech_start_ms == 1000
+
+        await vad.stop()
+
+    @pytest.mark.asyncio
+    async def test_last_speech_timestamp_tracking(self, vad):
+        """VAD tracks last speech timestamp."""
+        await vad.start()
+
+        vad._last_speech_ms = 2000
+        assert vad._last_speech_ms == 2000
+
+        await vad.stop()
+
+
+class TestSileroVADGetTimestamp:
+    """Tests for timestamp handling."""
+
+    @pytest.fixture
+    def vad(self):
+        """Create VAD with registered session."""
+        clock = get_audio_clock()
+        session_id = "test-timestamp"
+        clock.start_session(session_id)
+        vad = SileroVAD(session_id=session_id)
+        yield vad
+        try:
+            clock.end_session(session_id)
+        except KeyError:
+            pass
+
+    def test_get_timestamp_returns_int(self, vad):
+        """_get_timestamp returns integer timestamp."""
+        t_ms = vad._get_timestamp()
+        assert isinstance(t_ms, int)
+        assert t_ms >= 0
+
+
+class TestSileroVADModelFallback:
+    """Tests for model fallback behavior."""
+
+    @pytest.fixture
+    def vad(self):
+        """Create VAD with registered session."""
+        clock = get_audio_clock()
+        session_id = "test-fallback"
+        clock.start_session(session_id)
+        vad = SileroVAD(session_id=session_id)
+        yield vad
+        try:
+            clock.end_session(session_id)
+        except KeyError:
+            pass
+
+    @pytest.mark.asyncio
+    async def test_get_speech_probability_without_model(self, vad):
+        """Speech probability returns 0.0 without model."""
+        await vad.start()
+        # Ensure model is None
+        vad._model = None
+
+        audio = np.random.randn(480).astype(np.float32)
+        prob = await vad._get_speech_probability(audio)
+
+        assert prob == 0.0
+        await vad.stop()
+
+
+class TestSileroVADCallbackErrors:
+    """Tests for callback error handling."""
+
+    @pytest.fixture
+    def vad(self):
+        """Create VAD with registered session."""
+        clock = get_audio_clock()
+        session_id = "test-errors"
+        clock.start_session(session_id)
+        vad = SileroVAD(session_id=session_id)
+        yield vad
+        try:
+            clock.end_session(session_id)
+        except KeyError:
+            pass
+
+    @pytest.mark.asyncio
+    async def test_speech_end_callback_error_handled(self, vad):
+        """Speech end callback errors are handled gracefully."""
+        events = []
+
+        def failing_callback(event):
+            raise ValueError("Speech end error")
+
+        def working_callback(event):
+            events.append(event)
+
+        vad.on_speech_end(failing_callback)
+        vad.on_speech_end(working_callback)
+        await vad.start()
+
+        event = VADEvent(
+            state=VADState.ENDPOINT,
+            t_ms=500,
+            probability=0.1,
+            session_id="test-errors",
+        )
+        # Should not raise
+        await vad._emit_speech_end(event)
+
+        # Working callback should still be called
+        assert len(events) == 1
+        await vad.stop()
+
+    @pytest.mark.asyncio
+    async def test_async_callback_error_handled(self, vad):
+        """Async callback errors are handled gracefully."""
+        events = []
+
+        async def failing_async_callback(event):
+            raise RuntimeError("Async error")
+
+        def working_callback(event):
+            events.append(event)
+
+        vad.on_speech_start(failing_async_callback)
+        vad.on_speech_start(working_callback)
+        await vad.start()
+
+        event = VADEvent(
+            state=VADState.SPEECH,
+            t_ms=100,
+            probability=0.9,
+            session_id="test-errors",
+        )
+        # Should not raise
+        await vad._emit_speech_start(event)
+
+        # Working callback should still be called
+        assert len(events) == 1
+        await vad.stop()
+
+

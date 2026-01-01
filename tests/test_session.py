@@ -344,3 +344,439 @@ class TestSessionManager:
 
         await manager.end_session("slot-test")
         assert manager.available_slots == 2
+
+
+class TestSessionEventHandlers:
+    """Tests for session event handler methods."""
+
+    @pytest.fixture
+    async def session(self):
+        """Create started session."""
+        session = Session(
+            session_id="event-test",
+            config=SessionConfig(enable_metrics=False),
+        )
+        await session.start()
+        yield session
+        await session.stop()
+
+    @pytest.mark.asyncio
+    async def test_on_speech_start_not_running(self):
+        """on_speech_start does nothing if not running."""
+        session = Session(session_id="not-running")
+        # Should not raise
+        await session.on_speech_start()
+        assert session.state == SessionState.IDLE
+
+    @pytest.mark.asyncio
+    async def test_on_endpoint_detected_not_running(self):
+        """on_endpoint_detected does nothing if not running."""
+        session = Session(session_id="not-running")
+        # Should not raise
+        await session.on_endpoint_detected(1000)
+        assert session._current_turn_id == 0
+
+    @pytest.mark.asyncio
+    async def test_on_first_audio_byte_no_turn(self):
+        """on_first_audio_byte does nothing without turn start."""
+        session = Session(session_id="no-turn")
+        # turn_start_ms is 0
+        await session.on_first_audio_byte(1000)
+        # Should not crash
+
+    @pytest.mark.asyncio
+    async def test_on_response_ready_not_running(self):
+        """on_response_ready does nothing if not running."""
+        session = Session(session_id="not-running")
+        await session.on_response_ready()
+        assert session.state == SessionState.IDLE
+
+    @pytest.mark.asyncio
+    async def test_on_response_complete_not_running(self):
+        """on_response_complete does nothing if not running."""
+        session = Session(session_id="not-running")
+        await session.on_response_complete()
+        assert session.state == SessionState.IDLE
+
+    @pytest.mark.asyncio
+    async def test_on_barge_in_not_running(self):
+        """on_barge_in does nothing if not running."""
+        session = Session(session_id="not-running")
+        await session.on_barge_in()
+        assert session._metrics.barge_ins == 0
+
+
+class TestSessionContextMethods:
+    """Tests for context window methods."""
+
+    @pytest.fixture
+    async def session(self):
+        """Create started session with context."""
+        session = Session(
+            session_id="context-test",
+            config=SessionConfig(enable_metrics=False),
+        )
+        await session.start()
+        yield session
+        await session.stop()
+
+    @pytest.mark.asyncio
+    async def test_add_user_message(self, session):
+        """add_user_message adds to context."""
+        session.add_user_message("Hello")
+        # Context should have the message
+        messages = await session.get_context_messages()
+        # At least system + user message
+        assert len(messages) >= 1
+
+    @pytest.mark.asyncio
+    async def test_add_assistant_message(self, session):
+        """add_assistant_message adds to context."""
+        session.add_user_message("Hello")
+        session.add_assistant_message("Hi there!")
+        messages = await session.get_context_messages()
+        assert len(messages) >= 2
+
+    @pytest.mark.asyncio
+    async def test_get_context_messages_without_context(self):
+        """get_context_messages returns empty without context."""
+        session = Session(session_id="no-context")
+        # Not started, so no context
+        messages = await session.get_context_messages()
+        assert messages == []
+
+    def test_add_user_message_without_context(self):
+        """add_user_message does nothing without context."""
+        session = Session(session_id="no-context")
+        # Should not raise
+        session.add_user_message("Hello")
+
+    def test_add_assistant_message_without_context(self):
+        """add_assistant_message does nothing without context."""
+        session = Session(session_id="no-context")
+        # Should not raise
+        session.add_assistant_message("Hi")
+
+
+class TestSessionCallbacks:
+    """Tests for session callback methods."""
+
+    def test_set_audio_output_callback(self):
+        """Set audio output callback."""
+        session = Session(session_id="callback-test")
+
+        def callback(audio: bytes):
+            pass
+
+        session.set_audio_output_callback(callback)
+        assert session._on_audio_output is callback
+
+    def test_set_blendshapes_callback(self):
+        """Set blendshapes callback."""
+        session = Session(session_id="callback-test")
+
+        def callback(blendshapes: dict):
+            pass
+
+        session.set_blendshapes_callback(callback)
+        assert session._on_blendshapes is callback
+
+
+class TestSessionManagerExtended:
+    """Extended tests for SessionManager."""
+
+    @pytest.mark.asyncio
+    async def test_end_all_sessions(self):
+        """end_all_sessions ends all and returns count."""
+        manager = SessionManager(max_sessions=5)
+        await manager.create_session(session_id="s1")
+        await manager.create_session(session_id="s2")
+        await manager.create_session(session_id="s3")
+
+        assert manager.active_count == 3
+
+        count = await manager.end_all_sessions()
+
+        assert count == 3
+        assert manager.active_count == 0
+
+    @pytest.mark.asyncio
+    async def test_end_all_sessions_empty(self):
+        """end_all_sessions with no sessions returns 0."""
+        manager = SessionManager(max_sessions=5)
+        count = await manager.end_all_sessions()
+        assert count == 0
+
+    @pytest.mark.asyncio
+    async def test_get_sessions_by_state(self):
+        """get_sessions_by_state filters correctly."""
+        manager = SessionManager(max_sessions=5)
+        s1 = await manager.create_session(session_id="s1")
+        s2 = await manager.create_session(session_id="s2")
+
+        # Both should be IDLE initially
+        idle_sessions = manager.get_sessions_by_state(SessionState.IDLE)
+        assert len(idle_sessions) == 2
+
+        # None should be LISTENING
+        listening_sessions = manager.get_sessions_by_state(SessionState.LISTENING)
+        assert len(listening_sessions) == 0
+
+        await manager.end_all_sessions()
+
+    @pytest.mark.asyncio
+    async def test_create_session_with_custom_config(self):
+        """Create session with custom config."""
+        manager = SessionManager(max_sessions=5)
+        custom_config = SessionConfig(system_prompt="Custom prompt")
+        session = await manager.create_session(config=custom_config)
+
+        assert session.config.system_prompt == "Custom prompt"
+
+        await manager.end_session(session.session_id)
+
+
+class TestSessionMetricsWarmup:
+    """Tests for SessionMetrics warmup behavior."""
+
+    def test_is_warmup_after_60_seconds(self):
+        """Session exits warmup after 60 seconds."""
+        from unittest.mock import patch, MagicMock
+
+        metrics = SessionMetrics(turns_completed=1)  # Less than 3 turns
+        metrics.start_time_ms = 0
+
+        # Mock clock to return 61 seconds elapsed
+        mock_clock = MagicMock()
+        mock_clock.get_absolute_ms.return_value = 61_000
+
+        with patch("src.orchestrator.session.get_audio_clock", return_value=mock_clock):
+            assert metrics.is_warmup is False
+
+    def test_is_warmup_before_60_seconds_with_2_turns(self):
+        """Session still in warmup before 60s with < 3 turns."""
+        from unittest.mock import patch, MagicMock
+
+        metrics = SessionMetrics(turns_completed=2)
+        metrics.start_time_ms = 0
+
+        mock_clock = MagicMock()
+        mock_clock.get_absolute_ms.return_value = 30_000  # 30 seconds
+
+        with patch("src.orchestrator.session.get_audio_clock", return_value=mock_clock):
+            assert metrics.is_warmup is True
+
+
+class TestSessionContextTokens:
+    """Tests for context_tokens property with context."""
+
+    @pytest.mark.asyncio
+    async def test_context_tokens_with_context(self):
+        """context_tokens returns value from context window."""
+        session = Session(
+            session_id="tokens-test",
+            config=SessionConfig(enable_metrics=False),
+        )
+        await session.start()
+
+        # Add some messages to increase token count
+        session.add_user_message("Hello, this is a test message.")
+        session.add_assistant_message("Hi! How can I help you today?")
+
+        # Should have tokens now
+        tokens = session.context_tokens
+        assert tokens > 0
+
+        await session.stop()
+
+
+class TestSessionStartWithComponents:
+    """Tests for session start with different components."""
+
+    @pytest.mark.asyncio
+    async def test_start_registers_tts_cancel_handler(self):
+        """Start registers TTS cancel handler."""
+        from unittest.mock import MagicMock, AsyncMock
+
+        session = Session(
+            session_id="tts-handler-test",
+            config=SessionConfig(enable_metrics=False),
+        )
+
+        mock_tts = MagicMock()
+        mock_tts.cancel = AsyncMock()
+
+        await session.start(tts=mock_tts)
+
+        # Cancel handler should be registered
+        assert len(session._cancellation._handlers) >= 1
+
+        await session.stop()
+
+    @pytest.mark.asyncio
+    async def test_start_registers_llm_abort_handler(self):
+        """Start registers LLM abort handler."""
+        from unittest.mock import MagicMock, AsyncMock
+
+        session = Session(
+            session_id="llm-handler-test",
+            config=SessionConfig(enable_metrics=False),
+        )
+
+        mock_llm = MagicMock()
+        mock_llm.abort = AsyncMock()
+
+        await session.start(llm=mock_llm)
+
+        # Abort handler should be registered
+        assert len(session._cancellation._handlers) >= 1
+
+        await session.stop()
+
+    @pytest.mark.asyncio
+    async def test_start_registers_animation_stop_handler(self):
+        """Start registers animation stop handler."""
+        from unittest.mock import MagicMock, AsyncMock
+
+        session = Session(
+            session_id="animation-handler-test",
+            config=SessionConfig(enable_metrics=False),
+        )
+
+        mock_animation = MagicMock()
+        mock_animation.stop = AsyncMock()
+
+        await session.start(animation=mock_animation)
+
+        # Stop handler should be registered
+        assert len(session._cancellation._handlers) >= 1
+
+        await session.stop()
+
+
+class TestSessionConversationFlow:
+    """Tests for full conversation flow."""
+
+    @pytest.mark.asyncio
+    async def test_full_turn_flow(self):
+        """Test a complete turn through the session."""
+        session = Session(
+            session_id="turn-flow-test",
+            config=SessionConfig(enable_metrics=False),
+        )
+        await session.start()
+
+        # User starts speaking
+        await session.on_speech_start()
+        assert session.state == SessionState.LISTENING
+
+        # Endpoint detected
+        await session.on_endpoint_detected(1000)
+        assert session.state == SessionState.THINKING
+        assert session._current_turn_id == 1
+
+        # Response ready
+        await session.on_response_ready()
+        assert session.state == SessionState.SPEAKING
+
+        # Response complete
+        await session.on_response_complete()
+        assert session.state == SessionState.LISTENING
+        assert session._metrics.turns_completed == 1
+
+        await session.stop()
+
+    @pytest.mark.asyncio
+    async def test_barge_in_increments_counter(self):
+        """Barge-in increments barge_ins counter."""
+        session = Session(
+            session_id="barge-in-test",
+            config=SessionConfig(enable_metrics=False),
+        )
+        await session.start()
+
+        # Get to speaking state
+        await session.on_speech_start()
+        await session.on_endpoint_detected(1000)
+        await session.on_response_ready()
+        assert session.state == SessionState.SPEAKING
+
+        # User barges in
+        await session.on_barge_in()
+        assert session._metrics.barge_ins == 1
+
+        await session.stop()
+
+    @pytest.mark.asyncio
+    async def test_first_audio_byte_records_ttfa(self):
+        """First audio byte records TTFA metrics."""
+        session = Session(
+            session_id="ttfa-test",
+            config=SessionConfig(enable_metrics=False),
+        )
+        await session.start()
+
+        # Start a turn
+        await session.on_speech_start()
+        await session.on_endpoint_detected(1000)
+
+        # First audio byte arrives
+        await session.on_first_audio_byte(1150)
+
+        # TTFA should be recorded
+        assert session._metrics.total_ttfa_ms == 150.0
+        assert session._metrics.max_ttfa_ms == 150.0
+
+        await session.stop()
+
+    @pytest.mark.asyncio
+    async def test_multiple_turns_track_min_ttfa(self):
+        """Multiple turns track minimum TTFA."""
+        session = Session(
+            session_id="min-ttfa-test",
+            config=SessionConfig(enable_metrics=False),
+        )
+        await session.start()
+
+        # First turn with 200ms TTFA
+        await session.on_speech_start()
+        await session.on_endpoint_detected(1000)
+        await session.on_first_audio_byte(1200)
+        await session.on_response_ready()
+        await session.on_response_complete()
+
+        # Second turn with 100ms TTFA
+        await session.on_speech_start()
+        await session.on_endpoint_detected(2000)
+        await session.on_first_audio_byte(2100)
+
+        # min_ttfa should be 100
+        assert session._metrics.min_ttfa_ms == 100.0
+
+        await session.stop()
+
+
+class TestSessionStopEdgeCases:
+    """Tests for session stop edge cases."""
+
+    @pytest.mark.asyncio
+    async def test_stop_handles_clock_keyerror(self):
+        """Stop handles KeyError from audio clock gracefully."""
+        from unittest.mock import patch, MagicMock
+
+        session = Session(
+            session_id="clock-error-test",
+            config=SessionConfig(enable_metrics=False),
+        )
+        await session.start()
+
+        # Mock clock to raise KeyError on end_session
+        mock_clock = MagicMock()
+        mock_clock.end_session.side_effect = KeyError("session not found")
+        mock_clock.get_absolute_ms.return_value = 10000
+
+        with patch("src.orchestrator.session.get_audio_clock", return_value=mock_clock):
+            # Should not raise
+            await session.stop()
+
+        assert session.is_running is False

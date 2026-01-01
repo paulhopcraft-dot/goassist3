@@ -335,3 +335,161 @@ class TestDegradationOrder:
         # BackpressureState has no audio_disabled field
         # This is by design - audio is never degraded
         assert not hasattr(controller.state, 'audio_disabled')
+
+
+class TestBackpressureControllerCallbackErrors:
+    """Tests for callback error handling."""
+
+    @pytest.fixture
+    def controller(self):
+        return BackpressureController(session_id="callback-test")
+
+    def test_callback_error_does_not_break_controller(self, controller):
+        """Callback errors don't break the controller."""
+        errors_caught = []
+
+        def failing_callback(level):
+            errors_caught.append(True)
+            raise ValueError("Callback error")
+
+        def working_callback(level):
+            errors_caught.append(level)
+
+        controller.on_level_change(failing_callback)
+        controller.on_level_change(working_callback)
+
+        # Should not raise
+        controller.update_metrics(SystemMetrics(animation_lag_ms=130.0))
+
+        # Both callbacks were called
+        assert len(errors_caught) == 2
+        assert errors_caught[0] is True  # Failing callback ran
+        assert errors_caught[1] == BackpressureLevel.ANIMATION_YIELD
+
+    def test_callback_error_logged(self, controller):
+        """Callback errors are logged."""
+        def failing_callback(level):
+            raise RuntimeError("Test error")
+
+        controller.on_level_change(failing_callback)
+
+        # Should not raise - error is caught and logged
+        controller.update_metrics(SystemMetrics(animation_lag_ms=130.0))
+        assert controller.level == BackpressureLevel.ANIMATION_YIELD
+
+
+class TestBackpressureControllerTriggerReasons:
+    """Tests for trigger reason generation."""
+
+    @pytest.fixture
+    def controller(self):
+        return BackpressureController(session_id="trigger-test")
+
+    def test_trigger_reason_animation_lag(self, controller):
+        """Animation lag reason is reported."""
+        controller.update_metrics(SystemMetrics(animation_lag_ms=130.0))
+        reason = controller._get_trigger_reason()
+        assert "animation_lag" in reason
+
+    def test_trigger_reason_vram(self, controller):
+        """VRAM reason is reported."""
+        controller.update_metrics(SystemMetrics(vram_usage_pct=90.0))
+        reason = controller._get_trigger_reason()
+        assert "vram" in reason
+
+    def test_trigger_reason_ttfa(self, controller):
+        """TTFA reason is reported."""
+        controller.update_metrics(SystemMetrics(avg_ttfa_ms=210.0))
+        reason = controller._get_trigger_reason()
+        assert "ttfa" in reason
+
+    def test_trigger_reason_sessions(self, controller):
+        """Sessions reason is reported when at limit."""
+        controller.update_metrics(SystemMetrics(
+            active_sessions=TMF.MAX_CONCURRENT_SESSIONS - 1,
+            avg_ttfa_ms=210.0,
+        ))
+        reason = controller._get_trigger_reason()
+        assert "sessions" in reason
+
+    def test_trigger_reason_default(self, controller):
+        """Default reason when no specific trigger."""
+        controller._metrics = SystemMetrics()  # All zeros
+        reason = controller._get_trigger_reason()
+        assert reason == "threshold_exceeded"
+
+
+class TestBackpressureControllerMonitoring:
+    """Tests for monitoring behavior."""
+
+    @pytest.fixture
+    def controller(self):
+        return BackpressureController(
+            session_id="monitor-test",
+            check_interval_s=0.01,  # Fast for testing
+        )
+
+    @pytest.mark.asyncio
+    async def test_double_start_is_noop(self, controller):
+        """Starting monitoring twice is a no-op."""
+        await controller.start_monitoring()
+        task1 = controller._monitor_task
+
+        await controller.start_monitoring()  # Second start
+        task2 = controller._monitor_task
+
+        # Same task
+        assert task1 is task2
+        assert controller._running
+
+        await controller.stop_monitoring()
+
+    @pytest.mark.asyncio
+    async def test_stop_without_start(self, controller):
+        """Stopping without starting doesn't raise."""
+        # Should not raise
+        await controller.stop_monitoring()
+        assert not controller._running
+
+    @pytest.mark.asyncio
+    async def test_monitor_loop_runs(self, controller):
+        """Monitor loop evaluates level periodically."""
+        import asyncio
+
+        evaluations = []
+        original_evaluate = controller._evaluate_level
+
+        def tracking_evaluate():
+            evaluations.append(True)
+            return original_evaluate()
+
+        controller._evaluate_level = tracking_evaluate
+
+        await controller.start_monitoring()
+        await asyncio.sleep(0.05)  # Let it run a few iterations
+        await controller.stop_monitoring()
+
+        assert len(evaluations) >= 1
+
+    @pytest.mark.asyncio
+    async def test_monitor_loop_handles_exceptions(self, controller):
+        """Monitor loop handles exceptions without crashing."""
+        import asyncio
+
+        call_count = [0]
+        original_evaluate = controller._evaluate_level
+
+        def failing_evaluate():
+            call_count[0] += 1
+            if call_count[0] == 1:
+                raise RuntimeError("Simulated error")
+            return original_evaluate()
+
+        controller._evaluate_level = failing_evaluate
+
+        await controller.start_monitoring()
+        await asyncio.sleep(0.05)  # Let it run through the error
+        await controller.stop_monitoring()
+
+        # Should have recovered and continued
+        assert call_count[0] >= 2

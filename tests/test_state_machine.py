@@ -375,3 +375,144 @@ class TestHandlerGuards:
         # From IDLE
         result = await fsm.handle_response_complete()
         assert result is None
+
+
+class TestStateMachineCallbackErrors:
+    """Tests for callback error handling."""
+
+    @pytest.fixture
+    def fsm(self):
+        clock = get_audio_clock()
+        session_id = "test-callback-errors"
+        clock.start_session(session_id)
+        fsm = SessionStateMachine(session_id)
+        yield fsm
+        try:
+            clock.end_session(session_id)
+        except KeyError:
+            pass
+
+    @pytest.mark.asyncio
+    async def test_callback_error_does_not_break_fsm(self, fsm):
+        """Callback errors don't break state machine."""
+        errors_caught = []
+
+        def failing_callback(transition):
+            errors_caught.append(True)
+            raise ValueError("Callback error")
+
+        fsm.on_state_change(failing_callback)
+
+        # Should not raise
+        await fsm.transition_to(SessionState.LISTENING, "test")
+
+        assert fsm.state == SessionState.LISTENING
+        assert len(errors_caught) == 1
+
+    @pytest.mark.asyncio
+    async def test_enter_callback_error_handled(self, fsm):
+        """Enter callback errors are handled."""
+        def failing_callback(transition):
+            raise RuntimeError("Enter callback failed")
+
+        fsm.on_enter(SessionState.LISTENING, failing_callback)
+
+        # Should not raise
+        await fsm.transition_to(SessionState.LISTENING, "test")
+        assert fsm.state == SessionState.LISTENING
+
+    @pytest.mark.asyncio
+    async def test_exit_callback_error_handled(self, fsm):
+        """Exit callback errors are handled."""
+        def failing_callback(transition):
+            raise RuntimeError("Exit callback failed")
+
+        fsm.on_exit(SessionState.IDLE, failing_callback)
+
+        # Should not raise
+        await fsm.transition_to(SessionState.LISTENING, "test")
+        assert fsm.state == SessionState.LISTENING
+
+
+class TestStateMachineUserSpeechFromThinking:
+    """Tests for user speech from thinking state."""
+
+    @pytest.fixture
+    def fsm(self):
+        clock = get_audio_clock()
+        session_id = "test-thinking"
+        clock.start_session(session_id)
+        fsm = SessionStateMachine(session_id)
+        yield fsm
+        try:
+            clock.end_session(session_id)
+        except KeyError:
+            pass
+
+    @pytest.mark.asyncio
+    async def test_user_speech_start_from_thinking(self, fsm):
+        """User speech start from THINKING returns None."""
+        await fsm.transition_to(SessionState.LISTENING, "start")
+        await fsm.transition_to(SessionState.THINKING, "endpoint")
+
+        result = await fsm.handle_user_speech_start()
+
+        assert result is None
+
+
+class TestStateMachineDuration:
+    """Tests for state duration tracking."""
+
+    @pytest.fixture
+    def fsm(self):
+        clock = get_audio_clock()
+        session_id = "test-duration"
+        clock.start_session(session_id)
+        fsm = SessionStateMachine(session_id)
+        yield fsm
+        try:
+            clock.end_session(session_id)
+        except KeyError:
+            pass
+
+    @pytest.mark.asyncio
+    async def test_get_state_duration_initial(self, fsm):
+        """get_state_duration_ms returns 0 with no history."""
+        duration = fsm.get_state_duration_ms()
+        assert duration == 0
+
+    @pytest.mark.asyncio
+    async def test_get_state_duration_after_transition(self, fsm):
+        """get_state_duration_ms returns time since last transition."""
+        await fsm.transition_to(SessionState.LISTENING, "test")
+
+        # Duration should be >= 0
+        duration = fsm.get_state_duration_ms()
+        assert duration >= 0
+
+
+class TestStateMachineTimestamp:
+    """Tests for timestamp handling."""
+
+    @pytest.fixture
+    def fsm_no_clock(self):
+        """Create FSM without registering session in clock."""
+        session_id = "test-no-clock"
+        fsm = SessionStateMachine(session_id)
+        return fsm
+
+    @pytest.mark.asyncio
+    async def test_transition_without_session_in_clock(self, fsm_no_clock):
+        """Transition works even if session not in clock."""
+        # Should use absolute ms as fallback
+        await fsm_no_clock.transition_to(SessionState.LISTENING, "test")
+        assert fsm_no_clock.state == SessionState.LISTENING
+
+    @pytest.mark.asyncio
+    async def test_duration_without_session_in_clock(self, fsm_no_clock):
+        """Duration works even if session not in clock."""
+        await fsm_no_clock.transition_to(SessionState.LISTENING, "test")
+
+        # Should not raise
+        duration = fsm_no_clock.get_state_duration_ms()
+        assert duration >= 0
