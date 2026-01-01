@@ -15,6 +15,7 @@ from fastapi.security import APIKeyHeader
 
 from src.config.settings import get_settings
 from src.observability.logging import get_logger
+from src.api.public_paths import is_public_path
 
 logger = get_logger(__name__)
 
@@ -37,14 +38,14 @@ async def verify_api_key(
         HTTPException: 401 if authentication fails
 
     Note:
-        - Skips auth for health endpoints (/health, /healthz, /readyz)
+        - Skips auth for public endpoints (health probes, metrics)
         - Skips auth in development if no API key is configured
         - Uses constant-time comparison to prevent timing attacks
     """
     settings = get_settings()
 
-    # Skip auth for health endpoints
-    if request.url.path in ["/health", "/healthz", "/readyz"]:
+    # Skip auth for public endpoints (health, metrics, etc.)
+    if is_public_path(request.url.path):
         return
 
     # Skip if auth is disabled

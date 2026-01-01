@@ -16,6 +16,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 
 from src.config.settings import get_settings
 from src.observability.logging import get_logger
+from src.api.public_paths import CSRF_EXEMPT_PATHS, is_csrf_exempt
 
 logger = get_logger(__name__)
 
@@ -80,7 +81,7 @@ class CSRFMiddleware(BaseHTTPMiddleware):
         cookie_secure: bool = True,
         cookie_httponly: bool = False,  # Must be False for JS to read
         cookie_samesite: str = "strict",
-        exempt_paths: list[str] | None = None,
+        exempt_paths: set[str] | None = None,
     ) -> None:
         super().__init__(app)
         self.cookie_name = cookie_name
@@ -88,7 +89,8 @@ class CSRFMiddleware(BaseHTTPMiddleware):
         self.cookie_secure = cookie_secure
         self.cookie_httponly = cookie_httponly
         self.cookie_samesite = cookie_samesite
-        self.exempt_paths = exempt_paths or ["/health", "/healthz", "/readyz", "/docs", "/redoc", "/openapi.json"]
+        # Use centralized registry, allow override for testing
+        self.exempt_paths = exempt_paths if exempt_paths is not None else CSRF_EXEMPT_PATHS
 
     async def dispatch(
         self,

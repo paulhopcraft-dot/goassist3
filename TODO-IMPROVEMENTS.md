@@ -13,7 +13,7 @@
   - [x] LLMError (LLMConnectionError, LLMGenerationError, ContextOverflowError)
   - [x] TransportError (WebRTCError, DataChannelError)
 - [x] **Add async timeouts** - LLM streaming (30s), animation callbacks (500ms per frame), context rollover (5s)
-- [ ] **Refactor health endpoint registry** - Extract from hardcoded list in auth.py
+- [x] **Refactor health endpoint registry** - Centralized public_paths.py for auth/CSRF exemptions
 - [x] **Add CSRF protection** - Double-submit cookie pattern for POST/PUT/DELETE/PATCH
 - [x] **Add input sanitization** - Sanitize TTS text input (control chars, SSML, Unicode normalization)
 
@@ -36,6 +36,6 @@
 - [ ] **Document backpressure recovery** - How to go from SESSION_REJECT → NORMAL
 
 ## Metrics to Track
-- Current test count: 1235 tests
+- Current test count: 1267 tests
 - Current coverage: 85%
 - Target: ✅ 85%+ coverage achieved, <100ms p95 TTFA
