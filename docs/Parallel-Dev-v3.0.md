@@ -43,7 +43,12 @@ If a lower doc conflicts with a higher doc, the lower doc is wrong.
 | **T6 Infra/Observability** | Infra/SRE | Metrics, logging, soak tooling | 24h survivability (TMF 7.3) |
 | **T7 Admin/UI** | Full-stack | Admin config + diagnostics | Operator control plane |
 
-**Hard rule:** No track may introduce emotion modeling, identity training, or “persuasion systems.”
+**Hard rule:** No track may introduce emotion modeling, identity training, or "persuasion systems."
+
+**Definitions for enforcement:**
+- **Emotion modeling** = any classification of user emotional state OR any system output influenced by detected user emotion. Excludes: sentiment logging for QA (internal only, not affecting behavior), SCOS signals (non-emotional conversation adaptation per Implementation v3.0 section 6).
+- **Identity training** = training on customer voice, face, or personality data to create personalized models.
+- **Persuasion systems** = systems designed to manipulate user decisions or emotional state.
 
 ---
 
@@ -110,7 +115,7 @@ goassist-t6-infra/     # T6 branch
 **Goal:** lock interfaces and contracts before building features.
 
 Deliverables:
-- agree on audio packet schema, cancel schema, blendshape schema
+- validate team understanding of TMF-defined schemas (audio packet, cancel, blendshape) — no negotiation, TMF is source of truth
 - skeleton services that compile and expose health endpoints
 - basic “echo” pipeline (ASR mocked, LLM mocked, TTS mocked)
 
@@ -210,6 +215,7 @@ RAG returns:
 - Interface changes require an RFC and a versioned schema update.
 - If latency contracts are threatened, T3 has veto power.
 - If deploy stability is threatened, T6 has veto power.
+- **If T3 and T6 veto powers conflict:** Escalate to engineering lead. Priority order: (1) safety/stability first, (2) then latency contracts. Engineering lead decides within 2 business days.
 
 ---
 

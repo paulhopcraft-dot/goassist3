@@ -59,7 +59,8 @@ It is intentionally conservative:
 
 7) **Render / Avatar Runtime (optional)**
 - Unreal + avatar ingest (UDP/Live Link)
-- May run separately from inference services
+- **Optionally** runs separately from inference services (on dedicated render node or client-side)
+  - Decision criteria: If server-side rendering needed → separate node recommended for scale. If client-side rendering → no separate render service needed.
 - Must degrade gracefully and never block audio
 
 ### 1.2 Single-node GPU allocation (reference)
@@ -323,6 +324,8 @@ SCOS outputs are used only to adjust:
 - Production metrics may aggregate SCOS-derived statistics (e.g., "avg clarification rate") but not individual session signals
 
 SCOS must not label emotions ("angry", "sad", etc.) and must not attempt persuasion.
+
+**Scope clarification:** SCOS is an internal-only system that does not affect the product surface. Users do not see or interact with SCOS signals directly. PRD does not need to specify SCOS as it is an implementation optimization detail.
 
 ---
 

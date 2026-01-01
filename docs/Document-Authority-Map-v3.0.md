@@ -57,10 +57,20 @@ As of v3.0, documentation is split into **clear authorities** so teams do not fi
 - TMF beats everything.
 - PRD beats implementation details.
 - Implementation beats runbook for behavior; runbook beats implementation for how it is operated.
+  - **Behavior** = code-level concerns: error handling, state transitions, API responses, retry logic
+  - **Operation** = human/infra concerns: deployment steps, monitoring setup, manual recovery, scaling procedures
+  - **Decision rule:** If it requires code changes → Implementation owns it. If it requires operator action → Runbook owns it.
 - Any conflict triggers:
-  1) create an RFC
+  1) create an RFC in `docs/rfcs/` using `TEMPLATE.md`
   2) resolve conflict at the highest relevant authority
   3) update downstream documents
+
+**RFC process details:**
+- **Owner assignment:** Discoverer creates RFC, assigns to lowest common authority owner
+- **Template:** Use `docs/rfcs/TEMPLATE.md` (created in PAR-03 resolution)
+- **Authority determination:** Follow hierarchy in section 2 (TMF → PRD → Implementation → Runbook)
+- **Approval timeout:** 3 business days; escalate to engineering lead if no response
+- **Dispute escalation:** Engineering lead decides within 2 business days
 
 ---
 
@@ -82,4 +92,19 @@ As of v3.0, documentation is split into **clear authorities** so teams do not fi
 - `Parallel-Dev-v3.0.md`
 - `Ops-Runbook-v3.0.md`
 - `Document-Authority-Map-v3.0.md`
+
+---
+
+## 6. Cross-Reference Format (standard)
+
+When referencing other documents, use this format:
+
+**Standard:** `[Document] v[Version] section [Number].[Number] ([Name])`
+
+**Examples:**
+- TMF v3.0 section 7.3 (Extended Soak)
+- PRD v3.0 section 4.1 (Voice Mode)
+- Implementation v3.0 section 9 (Observability)
+
+This format is robust against section renumbering (includes both number and name) and clearly identifies version.
 

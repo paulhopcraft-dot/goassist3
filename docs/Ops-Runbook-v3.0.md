@@ -20,6 +20,10 @@ This runbook describes how to deploy, operate, and recover GoAssist in productio
 
 GoAssist supports three operational profiles. Pick one intentionally.
 
+**PRD mode mapping:**
+- **Profile A** → PRD Voice Mode (section 4.1)
+- **Profile B, C** → PRD Avatar Mode (section 4.2)
+
 ### Profile A — Voice-Only (Inference Only)
 - Best for scale (many concurrent voice sessions)
 - No server-side rendering
@@ -102,10 +106,12 @@ This runbook does not promise a fixed session number without measured load tests
 ## 4. Ports & Networking
 
 ### 4.1 Inference Pod
-Typical ports (adjust as needed):
+Default ports (document actual values in deployment config if changed):
 - `8081` — HTTP API (health, metrics, admin backplane)
 - `9000-9200/udp` — WebRTC media (depends on your gateway/SFU)
 - `9464` — Prometheus metrics (optional)
+
+**Source of truth:** If ports differ from defaults, document in `deploy/config.yaml` or equivalent deployment manifest.
 
 ### 4.2 Render Pod (Profile C)
 - `8080` — Pixel Streaming / WebRTC video

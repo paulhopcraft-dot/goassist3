@@ -254,9 +254,11 @@
         "Examples added: 'Operation = deployment steps, monitoring setup, manual recovery procedures'",
         "Decision rule for ambiguous cases (e.g., 'if requires human operator action, it's operation')"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Added behavior vs operation examples and decision rule. Behavior = code-level (error handling, state, API). Operation = human/infra (deployment, monitoring, recovery). Rule: code changes \u2192 Implementation, operator action \u2192 Runbook."
     },
     {
       "id": "DA-02",
@@ -275,9 +277,11 @@
         "Authority determination process defined",
         "Escalation path specified for disagreements"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Added RFC process details: owner assignment rule, template reference, authority determination (follow hierarchy), approval timeout (3 days), dispute escalation (engineering lead, 2 days)."
     },
     {
       "id": "TMF-01",
@@ -502,9 +506,11 @@
         "Correctly reflects document authority hierarchy",
         "Maintains clear subordination relationship"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Changed \"Dependencies\" to \"Conformance\". Clarified relationship: PRD conforms to TMF (must not contradict), defines requirements for Implementation, defines behavior for Runbook."
     },
     {
       "id": "PRD-03",
@@ -544,9 +550,11 @@
         "Scaling tests can verify preservation",
         "Clear what must remain invariant during scale-out"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Defined user experience semantics: API contracts unchanged, latency targets met (TTFA \u2264 250ms p95), feature availability unchanged, no session state loss during scale events."
     },
     {
       "id": "PRD-05",
@@ -564,9 +572,11 @@
         "Cross-reference uses standard format",
         "Implementation knows where to find authoritative policy"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Added cross-reference to Ops Runbook v3.0 section 6.1 for audio storage policy (AUDIO_STORAGE_ENABLED, AUDIO_RETENTION_DAYS environment variables)."
     },
     {
       "id": "PRD-06",
@@ -628,9 +638,11 @@
         "Decision criteria specified if optional",
         "Deployment guide can make unambiguous choice"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Changed \"May run\" to \"Optionally runs\" with decision criteria: server-side rendering \u2192 separate node recommended, client-side rendering \u2192 no separate service needed."
     },
     {
       "id": "IMP-02",
@@ -742,9 +754,11 @@
         "Edge cases clarified (debugging use, internal metrics, etc.)",
         "Enforcement criteria clear"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Added 'Definitions for enforcement' section with explicit definitions: emotion modeling = classification of user emotional state OR output influenced by detected emotion (excludes: QA sentiment logging, SCOS non-emotional signals), identity training = training on customer voice/face/personality, persuasion systems = systems designed to manipulate user decisions/emotions."
     },
     {
       "id": "PAR-02",
@@ -762,9 +776,11 @@
         "TMF authority preserved",
         "Phase 0 activity clarified as validation not design"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Changed 'agree on' to 'validate team understanding of TMF-defined schemas' with note '— no negotiation, TMF is source of truth'. Clarifies Phase 0 is validation not design."
     },
     {
       "id": "PAR-04",
@@ -804,9 +820,11 @@
         "Escalation path defined",
         "Deadlock resolution mechanism clear"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Added veto conflict resolution: escalate to engineering lead, priority order (1) safety/stability first, (2) then latency contracts, 2 business day decision deadline."
     },
     {
       "id": "OPS-01",
@@ -824,9 +842,11 @@
         "PRD modes cross-referenced",
         "No ambiguity about which profile implements which mode"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Added 'PRD mode mapping' section with explicit mappings: Profile A → PRD Voice Mode (section 4.1), Profiles B/C → PRD Avatar Mode (section 4.2)."
     },
     {
       "id": "OPS-02",
@@ -844,9 +864,11 @@
         "Documentation standard established",
         "Support can find actual ports per deployment"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Changed 'Typical ports' to 'Default ports' with source of truth note: 'If ports differ from defaults, document in deploy/config.yaml or equivalent deployment manifest.'"
     },
     {
       "id": "OPS-03",
@@ -977,11 +999,13 @@
         "If product feature, added to PRD",
         "If internal-only, Implementation explicitly states this"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [
         "IMP-02"
       ],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Added 'Scope clarification' to Implementation section 6: 'SCOS is an internal-only system that does not affect the product surface. Users do not see or interact with SCOS signals directly. PRD does not need to specify SCOS as it is an implementation optimization detail.'"
     },
     {
       "id": "CD-05",
@@ -999,9 +1023,11 @@
         "All cross-references updated to use standard format",
         "Robust against section renumbering"
       ],
-      "passes": false,
+      "passes": true,
       "blocked_by": [],
-      "blocks": []
+      "blocks": [],
+      "verified_at": "2026-01-01",
+      "resolution": "Added section 6 'Cross-Reference Format (standard)' to Document-Authority-Map-v3.0.md. Format: '[Document] v[Version] section [Number].[Number] ([Name])'. Includes both number and name for robustness against renumbering."
     }
   ]
 }

@@ -156,9 +156,11 @@ Everything in Voice Mode, plus:
 ### 7.3 Multi-session capability
 - The platform must support multiple concurrent sessions per deployment.
 - Capacity must scale horizontally without changing user experience semantics.
+  - **User experience semantics** = API contracts unchanged, latency targets met (TTFA ≤ 250ms p95), feature availability unchanged, no session state loss during scale events
 
 ### 7.4 Privacy & data handling (baseline)
 - Clear policy for audio storage (off by default unless enabled)
+  - Audio storage policy defined in Ops Runbook v3.0 section 6.1 (environment variables: `AUDIO_STORAGE_ENABLED`, `AUDIO_RETENTION_DAYS`)
 - Tenant data isolation
 - Ability to redact or disable transcript logging
 
@@ -223,11 +225,13 @@ The product must expose:
 
 ---
 
-## 12. Dependencies
+## 12. Conformance
 
-- TMF v3.0 (architecture truth)
-- Implementation v3.0 (build plan)
-- Ops/Runbook v3.0 (deployment + monitoring)
+PRD v3.0 conforms to the following documents (per Document Authority Map v3.0):
+
+- **TMF v3.0** — PRD must not contradict TMF architectural constraints
+- **Implementation v3.0** — PRD defines requirements; Implementation defines how to build them
+- **Ops/Runbook v3.0** — PRD defines product behavior; Runbook defines how to operate it
 
 ---
 
