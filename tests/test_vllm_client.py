@@ -6,6 +6,7 @@ Note: Tests that require an actual vLLM server are marked with requires_vllm.
 
 import pytest
 
+from src.exceptions import LLMGenerationError
 from src.llm.vllm_client import (
     LLMConfig,
     LLMResponse,
@@ -185,7 +186,7 @@ class TestVLLMClient:
         """Generate fails if client not started."""
         client = VLLMClient(LLMConfig())
 
-        with pytest.raises(RuntimeError, match="Client not started"):
+        with pytest.raises(LLMGenerationError, match="Client not started"):
             await client.generate([{"role": "user", "content": "Hello"}])
 
     @pytest.mark.asyncio
@@ -193,7 +194,7 @@ class TestVLLMClient:
         """Generate stream fails if client not started."""
         client = VLLMClient(LLMConfig())
 
-        with pytest.raises(RuntimeError, match="Client not started"):
+        with pytest.raises(LLMGenerationError, match="Client not started"):
             async for _ in client.generate_stream([{"role": "user", "content": "Hello"}]):
                 pass
 
@@ -460,7 +461,7 @@ class TestVLLMClientErrorHandling:
             )
             client._running = True
 
-            with pytest.raises(RuntimeError, match="LLM generation failed"):
+            with pytest.raises(LLMGenerationError, match="API error"):
                 async for _ in client.generate_stream([{"role": "user", "content": "Hi"}]):
                     pass
 

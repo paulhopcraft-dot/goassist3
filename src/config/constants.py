@@ -32,6 +32,8 @@ class TMFConstants:
     LLM_MAX_CONTEXT_TOKENS: Final[int] = 8192  # Hard context cap
     CONTEXT_ROLLOVER_THRESHOLD: Final[int] = 7500  # Trigger rollover at 93.75%
     CONTEXT_SUMMARIZATION_TIMEOUT_S: Final[float] = 5.0  # Summarization timeout
+    LLM_STREAMING_TIMEOUT_S: Final[float] = 30.0  # Max time for LLM streaming response
+    ANIMATION_CALLBACK_TIMEOUT_S: Final[float] = 5.0  # Max time for animation callbacks
 
     # Section 4.2: Animation Thresholds
     ANIMATION_YIELD_LAG_MS: Final[int] = 120  # Yield animation if lag exceeds

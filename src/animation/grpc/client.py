@@ -8,6 +8,7 @@ Key Features:
 - Automatic reconnection with backoff
 - Graceful degradation when service unavailable
 - TMF-compliant NEUTRAL configuration
+- Per-frame timeout for animation callbacks
 
 Reference: TMF v3.0 Addendum A §A3
 """
@@ -19,7 +20,9 @@ from typing import AsyncIterator, Callable
 
 from src.animation.base import ARKIT_52_BLENDSHAPES, get_neutral_blendshapes
 from src.config.constants import TMF
+from src.exceptions import AnimationError
 from src.observability.logging import get_logger
+from src.utils.async_timeout import AsyncTimeoutError, timeout_async_iterator_per_item
 
 logger = get_logger(__name__)
 
@@ -47,6 +50,7 @@ class Audio2FaceClientConfig:
     blendshape_format: str = "arkit52"
     connect_timeout_s: float = 5.0
     request_timeout_s: float = 1.0
+    frame_timeout_s: float = 0.5  # Per-frame timeout (500ms, allows for network jitter)
     max_retries: int = 3
     retry_backoff_s: float = 1.0
     keepalive_interval_s: float = 10.0
@@ -396,7 +400,11 @@ class Audio2FaceClient:
         audio_stream: AsyncIterator[bytes],
         timestamp_fn: Callable[[], int] | None,
     ) -> AsyncIterator[BlendshapeFrame]:
-        """Process audio via gRPC streaming."""
+        """Process audio via gRPC streaming.
+
+        Per-frame timeout ensures animation callbacks complete within bounds.
+        TMF §4.2: Animation callbacks should not block indefinitely.
+        """
         try:
             from src.animation.grpc import audio2face_pb2
 
@@ -424,16 +432,22 @@ class Audio2FaceClient:
             # Create bidirectional stream
             response_stream = self._stub.ProcessAudioStream(request_generator())
 
-            async for response in response_stream:
-                frame = BlendshapeFrame(
-                    session_id=response.session_id,
-                    sequence=response.sequence,
-                    timestamp_ms=response.timestamp_ms,
-                    blendshapes=dict(response.blendshapes),
-                    fps=response.fps,
-                    heartbeat=response.heartbeat,
-                    latency_ms=response.latency_ms,
-                )
+            # Wrap with per-frame timeout to prevent hanging
+            async for response in timeout_async_iterator_per_item(
+                self._iterate_grpc_responses(response_stream),
+                timeout_s=self._config.frame_timeout_s,
+                operation="animation frame",
+            ):
+                yield response
+
+        except AsyncTimeoutError as e:
+            logger.warning(
+                "audio2face_frame_timeout",
+                session_id=self._session_id,
+                timeout_s=self._config.frame_timeout_s,
+            )
+            # Fall back to mock on timeout
+            async for frame in self._process_stream_mock(audio_stream, timestamp_fn):
                 yield frame
 
         except ImportError:
@@ -453,6 +467,30 @@ class Audio2FaceClient:
                 # Retry with mock for remaining audio
                 async for frame in self._process_stream_mock(audio_stream, timestamp_fn):
                     yield frame
+
+    async def _iterate_grpc_responses(
+        self,
+        response_stream,
+    ) -> AsyncIterator[BlendshapeFrame]:
+        """Iterate over gRPC response stream, converting to BlendshapeFrame.
+
+        Args:
+            response_stream: gRPC bidirectional stream
+
+        Yields:
+            BlendshapeFrame objects
+        """
+        async for response in response_stream:
+            frame = BlendshapeFrame(
+                session_id=response.session_id,
+                sequence=response.sequence,
+                timestamp_ms=response.timestamp_ms,
+                blendshapes=dict(response.blendshapes),
+                fps=response.fps,
+                heartbeat=response.heartbeat,
+                latency_ms=response.latency_ms,
+            )
+            yield frame
 
     async def _process_stream_mock(
         self,

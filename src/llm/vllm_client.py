@@ -15,7 +15,10 @@ from typing import AsyncIterator
 import httpx
 from openai import AsyncOpenAI
 
+from src.config.constants import TMF
 from src.config.settings import get_settings
+from src.exceptions import LLMGenerationError
+from src.utils.async_timeout import AsyncTimeoutError, timeout_async_iterator
 
 
 @dataclass
@@ -110,10 +113,13 @@ class VLLMClient:
             Token strings as they become available
 
         Raises:
-            RuntimeError: If client not started or generation aborted
+            LLMGenerationError: If client not started, generation fails, or times out
+
+        Note:
+            Streaming is subject to timeout_s (default 30s) per TMF §3.2.
         """
         if not self._running or not self._client:
-            raise RuntimeError("Client not started")
+            raise LLMGenerationError("Client not started", model=self._config.model)
 
         self._abort_event.clear()
 
@@ -131,20 +137,43 @@ class VLLMClient:
             # Create streaming request
             response = await self._client.chat.completions.create(**params)
 
-            async for chunk in response:
+            # Wrap streaming iteration with timeout
+            async for chunk in timeout_async_iterator(
+                self._iterate_response(response),
+                timeout_s=self._config.timeout_s,
+                operation="LLM streaming",
+            ):
                 # Check for abort
                 if self._abort_event.is_set():
                     break
 
-                # Extract token from chunk
-                if chunk.choices and chunk.choices[0].delta.content:
-                    yield chunk.choices[0].delta.content
+                yield chunk
 
+        except AsyncTimeoutError as e:
+            raise LLMGenerationError(
+                f"Streaming timed out after {self._config.timeout_s}s",
+                model=self._config.model,
+            )
         except asyncio.CancelledError:
+            raise
+        except LLMGenerationError:
             raise
         except Exception as e:
             if not self._abort_event.is_set():
-                raise RuntimeError(f"LLM generation failed: {e}")
+                raise LLMGenerationError(str(e), model=self._config.model)
+
+    async def _iterate_response(self, response) -> AsyncIterator[str]:
+        """Iterate over response chunks, extracting content.
+
+        Args:
+            response: OpenAI streaming response object
+
+        Yields:
+            Token strings from response chunks
+        """
+        async for chunk in response:
+            if chunk.choices and chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content
 
     async def generate(
         self,
@@ -159,9 +188,12 @@ class VLLMClient:
 
         Returns:
             LLMResponse with complete text
+
+        Raises:
+            LLMGenerationError: If client not started or generation fails
         """
         if not self._running or not self._client:
-            raise RuntimeError("Client not started")
+            raise LLMGenerationError("Client not started", model=self._config.model)
 
         text_parts: list[str] = []
 
