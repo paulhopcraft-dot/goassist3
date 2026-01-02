@@ -109,14 +109,29 @@ class WebRTCOfferRequest(BaseModel):
 class WebRTCAnswerResponse(BaseModel):
     """WebRTC SDP answer for client."""
 
+    type: str = Field(default="answer", description="SDP type (always 'answer')")
     sdp: str = Field(..., description="SDP answer string")
     session_id: str
 
 
 class ICECandidateRequest(BaseModel):
-    """ICE candidate from client."""
+    """ICE candidate from client.
 
-    candidate: dict
+    Matches standard WebRTC RTCIceCandidateInit structure.
+    """
+
+    candidate: str = Field(..., description="ICE candidate string")
+    sdpMLineIndex: int | None = Field(None, description="SDP m-line index")
+    sdpMid: str | None = Field(None, description="SDP media ID")
+
+    def to_dict(self) -> dict:
+        """Convert to dict for aiortc."""
+        result = {"candidate": self.candidate}
+        if self.sdpMLineIndex is not None:
+            result["sdpMLineIndex"] = self.sdpMLineIndex
+        if self.sdpMid is not None:
+            result["sdpMid"] = self.sdpMid
+        return result
 
 
 class ChatRequest(BaseModel):
@@ -361,7 +376,7 @@ async def ice_candidate(
     gateway = get_webrtc_gateway()
 
     try:
-        await gateway.handle_ice_candidate(session_id, body.candidate)
+        await gateway.handle_ice_candidate(session_id, body.to_dict())
         return {"status": "ok"}
     except Exception as e:
         raise HTTPException(
