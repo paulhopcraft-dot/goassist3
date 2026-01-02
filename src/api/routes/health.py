@@ -6,6 +6,8 @@ Reference: Ops-Runbook-v3.0.md Section 9.2
 - /metrics: Prometheus metrics endpoint
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from fastapi import APIRouter, Response, status

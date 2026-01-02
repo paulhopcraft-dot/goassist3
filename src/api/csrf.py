@@ -8,6 +8,8 @@ Implements the double-submit cookie pattern:
 Reference: OWASP CSRF Prevention Cheat Sheet
 """
 
+from __future__ import annotations
+
 import secrets
 from typing import Callable
 

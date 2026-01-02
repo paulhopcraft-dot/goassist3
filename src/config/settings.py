@@ -7,6 +7,8 @@ Required variables fail startup if missing.
 Conditional variables are required only when their parent feature is enabled.
 """
 
+from __future__ import annotations
+
 from functools import lru_cache
 from typing import Literal
 

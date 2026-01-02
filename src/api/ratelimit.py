@@ -5,6 +5,8 @@ Uses slowapi for FastAPI-compatible rate limiting.
 Reference: TODO-IMPROVEMENTS.md Phase 1
 """
 
+from __future__ import annotations
+
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded

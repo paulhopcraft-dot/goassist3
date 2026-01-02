@@ -8,6 +8,8 @@ Provides authentication for the GoAssist API:
 Reference: Implementation-v3.0.md §4.4
 """
 
+from __future__ import annotations
+
 import hashlib
 import secrets
 from fastapi import Depends, HTTPException, Request, status

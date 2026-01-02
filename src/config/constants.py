@@ -6,6 +6,8 @@ They define the behavioral contracts that must be met.
 Reference: TMF-v3.0.md, Implementation-v3.0.md
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Final
 

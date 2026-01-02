@@ -11,6 +11,8 @@ All logs include session_id for correlation.
 Reference: Ops-Runbook-v3.0.md §3.2
 """
 
+from __future__ import annotations
+
 import logging
 import sys
 from typing import Any

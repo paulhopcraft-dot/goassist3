@@ -10,6 +10,8 @@ Exports:
 Reference: Implementation-v3.0.md §7, Ops-Runbook-v3.0.md §3
 """
 
+from __future__ import annotations
+
 from prometheus_client import Counter, Gauge, Histogram, Info
 
 # -----------------------------------------------------------------------------

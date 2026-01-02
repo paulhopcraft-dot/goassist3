@@ -8,6 +8,8 @@ Reference:
 - Ops-Runbook v3.0: Deployment configuration
 """
 
+from __future__ import annotations
+
 import asyncio
 import logging
 from contextlib import asynccontextmanager

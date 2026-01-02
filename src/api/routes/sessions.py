@@ -9,6 +9,8 @@ Provides REST endpoints for session management:
 Reference: Implementation-v3.0.md §4.4
 """
 
+from __future__ import annotations
+
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
