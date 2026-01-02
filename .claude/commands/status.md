@@ -118,4 +118,26 @@ IN PROGRESS (1)
 
 ---
 
-**Show project status in the requested format.**
+## Next Actions Menu
+
+**ALWAYS display this at the end of status output:**
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NEXT ACTIONS:
+  [C] Continue - focused work on next task
+  [A] Autonomous - batch execution mode
+  [H] Handoff - save state and end session
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Type C, A, or H (or describe your task):
+```
+
+**Recommendation Logic:**
+- If failing tests → suggest "C to fix tests"
+- If many features pending → suggest "A for batch progress"
+- If session running long → suggest "H to preserve context"
+- If complex next task → suggest "C for careful work"
+
+---
+
+**Show project status in the requested format, ending with the Next Actions menu.**
