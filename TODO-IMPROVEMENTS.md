@@ -17,16 +17,16 @@
 - [x] **Add CSRF protection** - Double-submit cookie pattern for POST/PUT/DELETE/PATCH
 - [x] **Add input sanitization** - Sanitize TTS text input (control chars, SSML, Unicode normalization)
 
-## Phase 2: Testing & Observability
+## Phase 2: Testing & Observability ✅ COMPLETE
 
-- [ ] **Add integration test: full session flow** - Audio in → response out
-- [ ] **Add integration test: WebRTC pipeline** - Connection establishment
-- [ ] **Add integration test: barge-in handling** - Interruption flow
-- [ ] **Add load tests** - 100 concurrent sessions
-- [ ] **Add latency regression tests** - Track TTFA p95
-- [ ] **Pin dependencies** - Create poetry.lock or use pip-tools
-- [ ] **Add OpenTelemetry** - Distributed tracing for multi-service calls
-- [ ] **Add request ID propagation** - For debugging across components
+- [x] **Add integration test: full session flow** - 12 tests covering E2E conversation
+- [x] **Add integration test: WebRTC pipeline** - 20 tests for signaling & media transport
+- [x] **Add integration test: barge-in handling** - 18 tests for TMF ≤150ms validation
+- [x] **Add load tests** - 100 concurrent sessions (25+ test cases)
+- [x] **Add latency regression tests** - TTFA p95 tracking (12+ test cases)
+- [x] **Pin dependencies** - requirements-locked.txt with pip freeze
+- [x] **Add OpenTelemetry** - src/observability/tracing.py with OTLP export
+- [x] **Add request ID propagation** - src/api/middleware/request_id.py
 
 ## Code Quality
 

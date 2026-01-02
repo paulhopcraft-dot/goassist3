@@ -50,6 +50,12 @@ class Settings(BaseSettings):
         description="Enable API authentication (auto-disabled in development if no key)",
     )
 
+    # Observability
+    otel_endpoint: str | None = Field(
+        default=None,
+        description="OpenTelemetry OTLP endpoint (e.g., http://localhost:4317 for Jaeger)",
+    )
+
     # Session Configuration
     max_concurrent_sessions: int = Field(
         default=10, ge=1, le=100, description="Maximum concurrent sessions (GPU-dependent)"
