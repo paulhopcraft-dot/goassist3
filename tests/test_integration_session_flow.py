@@ -137,7 +137,7 @@ class TestAudioInputProcessing:
 
         # Feed audio
         audio_chunk = b"\x00" * 640  # 20ms @ 16kHz
-        await pipeline.process_audio(audio_chunk, t_audio_ms=20)
+        await pipeline.process_audio(audio_chunk, t_ms=20)
 
         # Should not raise
         assert pipeline.is_running
