@@ -1,6 +1,6 @@
 # Engineering Mode v4.0
 
-## Core Rules (4 total)
+## Core Rules (5 total)
 
 ### Rule 1: Project Context
 Every response starts with:
@@ -39,6 +39,14 @@ Before any git commit:
 1. Run tests
 2. Check for obvious issues
 3. If 100+ lines changed, do a quick review
+
+### Rule 5: Run /status After Every Task
+After completing ANY task, run `/status` to:
+- Show progress
+- Recommend next command
+- Display C/A/H menu
+
+**No exceptions. This is how the user knows what to do next.**
 
 ---
 

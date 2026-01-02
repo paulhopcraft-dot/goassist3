@@ -11,6 +11,7 @@ Reference: Implementation-v3.0.md §4.4
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
@@ -85,6 +86,7 @@ class CreateSessionResponse(BaseModel):
     session_id: str
     state: str
     message: str
+    created_at: str  # ISO 8601 timestamp
 
 
 class SessionStatusResponse(BaseModel):
@@ -175,6 +177,7 @@ async def create_session(
         session_id=session.session_id,
         state=session.state.value,
         message="Session created successfully",
+        created_at=datetime.now(timezone.utc).isoformat(),
     )
 
 
@@ -227,10 +230,21 @@ async def delete_session(session_id: str) -> dict:
 async def list_sessions() -> dict:
     """List all active sessions."""
     manager = get_session_manager()
+    session_ids = manager.list_sessions()
+
+    # Return sessions with minimal info
+    sessions = [
+        {
+            "session_id": sid,
+            "state": manager.get_session(sid).state.value if manager.get_session(sid) else "unknown",
+        }
+        for sid in session_ids
+    ]
+
     return {
         "active_count": manager.active_count,
         "available_slots": manager.available_slots,
-        "sessions": manager.list_sessions(),
+        "sessions": sessions,
     }
 
 

@@ -37,7 +37,7 @@ class TestFullSessionLifecycle:
 
     def test_create_session_via_api(self, client):
         """Test session creation through API."""
-        response = client.post("/sessions")
+        response = client.post("/sessions", json={})
 
         assert response.status_code == 200
         data = response.json()
@@ -48,7 +48,7 @@ class TestFullSessionLifecycle:
     def test_session_lifecycle_complete(self, client):
         """Test complete session lifecycle: create → status → delete."""
         # Create
-        create_resp = client.post("/sessions")
+        create_resp = client.post("/sessions", json={})
         assert create_resp.status_code == 200
         session_id = create_resp.json()["session_id"]
 
@@ -77,7 +77,7 @@ class TestFullSessionLifecycle:
 
         # Create 3 sessions
         for _ in range(3):
-            resp = client.post("/sessions")
+            resp = client.post("/sessions", json={})
             assert resp.status_code == 200
             session_ids.append(resp.json()["session_id"])
 
@@ -96,7 +96,7 @@ class TestFullSessionLifecycle:
     def test_session_state_transitions(self, client):
         """Test session state transitions through API."""
         # Create session
-        create_resp = client.post("/sessions")
+        create_resp = client.post("/sessions", json={})
         session_id = create_resp.json()["session_id"]
 
         # Initial state should be IDLE

@@ -30,7 +30,7 @@ class TestWebRTCOfferAnswer:
 
     def test_create_session_for_webrtc(self, client):
         """Test session creation returns valid session ID."""
-        response = client.post("/sessions")
+        response = client.post("/sessions", json={})
 
         assert response.status_code == 200
         data = response.json()
@@ -40,7 +40,7 @@ class TestWebRTCOfferAnswer:
     def test_send_webrtc_offer(self, client):
         """Test sending WebRTC offer to session."""
         # Create session first
-        create_resp = client.post("/sessions")
+        create_resp = client.post("/sessions", json={})
         session_id = create_resp.json()["session_id"]
 
         # Send offer
@@ -77,7 +77,7 @@ class TestWebRTCOfferAnswer:
 
     def test_invalid_sdp_format(self, client):
         """Test invalid SDP format is rejected."""
-        create_resp = client.post("/sessions")
+        create_resp = client.post("/sessions", json={})
         session_id = create_resp.json()["session_id"]
 
         # Send malformed offer
@@ -110,7 +110,7 @@ class TestICECandidates:
     def test_add_ice_candidate(self, client):
         """Test adding ICE candidate to session."""
         # Create session
-        create_resp = client.post("/sessions")
+        create_resp = client.post("/sessions", json={})
         session_id = create_resp.json()["session_id"]
 
         # Add ICE candidate
@@ -145,7 +145,7 @@ class TestICECandidates:
 
     def test_multiple_ice_candidates(self, client):
         """Test adding multiple ICE candidates."""
-        create_resp = client.post("/sessions")
+        create_resp = client.post("/sessions", json={})
         session_id = create_resp.json()["session_id"]
 
         # Add multiple candidates
@@ -284,7 +284,7 @@ class TestBlendshapeWebSocket:
     def test_websocket_endpoint_exists(self, client):
         """Test blendshape WebSocket endpoint is available."""
         # Create session first
-        create_resp = client.post("/sessions")
+        create_resp = client.post("/sessions", json={})
         session_id = create_resp.json()["session_id"]
 
         # Attempt WebSocket connection
@@ -308,7 +308,7 @@ class TestWebRTCConnectionLifecycle:
     def test_complete_webrtc_setup(self, client):
         """Test complete WebRTC setup: session → offer → answer → ICE."""
         # 1. Create session
-        create_resp = client.post("/sessions")
+        create_resp = client.post("/sessions", json={})
         assert create_resp.status_code == 200
         session_id = create_resp.json()["session_id"]
 
@@ -338,7 +338,7 @@ class TestWebRTCConnectionLifecycle:
     def test_session_cleanup_closes_webrtc(self, client):
         """Test deleting session closes WebRTC connection."""
         # Create session and establish WebRTC
-        create_resp = client.post("/sessions")
+        create_resp = client.post("/sessions", json={})
         session_id = create_resp.json()["session_id"]
 
         offer = {
@@ -368,7 +368,7 @@ class TestWebRTCError:
 
     def test_concurrent_offers_handled(self, client):
         """Test handling concurrent offers to same session."""
-        create_resp = client.post("/sessions")
+        create_resp = client.post("/sessions", json={})
         session_id = create_resp.json()["session_id"]
 
         offer = {

@@ -617,7 +617,7 @@ class TestBargeInMetrics:
         await session.on_response_ready()
 
         # Trigger barge-in
-        with patch("src.observability.metrics.BARGE_IN_LATENCY") as mock_metric:
+        with patch("src.observability.metrics.BARGE_IN_HISTOGRAM") as mock_metric:
             await pipeline.handle_barge_in()
             # Metric should be observed (if implemented)
             # mock_metric.observe.assert_called()

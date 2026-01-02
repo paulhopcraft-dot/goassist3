@@ -166,6 +166,26 @@ class WebRTCGateway:
 
         return RTCConfiguration(iceServers=ice_servers)
 
+    async def create_peer_connection(self, session_id: str) -> RTCPeerConnection:
+        """Create a new peer connection for testing purposes.
+
+        Args:
+            session_id: Session identifier
+
+        Returns:
+            RTCPeerConnection instance
+
+        Note:
+            This is primarily for testing. In production, use handle_offer()
+            which creates the peer connection as part of the SDP negotiation.
+        """
+        pc = RTCPeerConnection(self._create_rtc_config())
+        self._connections[session_id] = PeerConnectionState(
+            session_id=session_id,
+            pc=pc,
+        )
+        return pc
+
     async def handle_offer(
         self,
         session_id: str,
