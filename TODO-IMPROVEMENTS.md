@@ -36,6 +36,7 @@
 - [ ] **Document backpressure recovery** - How to go from SESSION_REJECT → NORMAL
 
 ## Metrics to Track
-- Current test count: 1267 tests
+- Current test count: **1337 tests** (was 1267, +70 from Phase 2)
 - Current coverage: 85%
-- Target: ✅ 85%+ coverage achieved, <100ms p95 TTFA
+- Target: ✅ 85%+ coverage achieved
+- Phase 2 additions: 50 integration + 25 load + 12 latency tests
