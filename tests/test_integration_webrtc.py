@@ -305,22 +305,38 @@ class TestWebRTCConnectionLifecycle:
         with TestClient(app) as c:
             yield c
 
-    def test_complete_webrtc_setup(self, client):
+    @pytest.mark.asyncio
+    async def test_complete_webrtc_setup(self, client):
         """Test complete WebRTC setup: session → offer → answer → ICE."""
+        from aiortc import RTCPeerConnection
+
         # 1. Create session
         create_resp = client.post("/sessions", json={})
         assert create_resp.status_code == 200
         session_id = create_resp.json()["session_id"]
 
-        # 2. Send offer
-        offer = {
-            "type": "offer",
-            "sdp": "v=0\r\no=- 123 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111\r\n"
-        }
+        # 2. Create a real aiortc client peer connection to generate valid SDP
+        client_pc = RTCPeerConnection()
+
+        # Add audio transceiver to generate audio offer
+        client_pc.addTransceiver("audio", direction="sendrecv")
+
+        # Create offer
+        offer_description = await client_pc.createOffer()
+        await client_pc.setLocalDescription(offer_description)
+
+        # Send offer to server
+        offer = {"sdp": client_pc.localDescription.sdp}
         offer_resp = client.post(f"/sessions/{session_id}/offer", json=offer)
+
+        # Check response
         assert offer_resp.status_code == 200
         answer = offer_resp.json()
         assert answer["type"] == "answer"
+        assert "sdp" in answer
+
+        # Close client PC
+        await client_pc.close()
 
         # 3. Add ICE candidates
         candidate = {
@@ -329,6 +345,8 @@ class TestWebRTCConnectionLifecycle:
             "sdpMid": "0"
         }
         ice_resp = client.post(f"/sessions/{session_id}/ice-candidate", json=candidate)
+        if ice_resp.status_code != 200:
+            print(f"ICE error: {ice_resp.json()}")
         assert ice_resp.status_code == 200
 
         # 4. Cleanup

@@ -339,6 +339,20 @@ async def webrtc_offer(
             detail=f"Session {session_id} not found",
         )
 
+    # Validate SDP
+    if not body.sdp or not body.sdp.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="SDP offer cannot be empty",
+        )
+
+    # Basic SDP validation
+    if not body.sdp.startswith("v="):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid SDP format (must start with 'v=')",
+        )
+
     gateway = get_webrtc_gateway()
 
     try:

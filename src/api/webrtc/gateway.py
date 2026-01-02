@@ -20,11 +20,13 @@ from aiortc import (
     MediaStreamTrack,
     RTCConfiguration,
     RTCDataChannel,
+    RTCIceCandidate,
     RTCIceServer,
     RTCPeerConnection,
     RTCSessionDescription,
 )
 from aiortc.contrib.media import MediaBlackhole, MediaRecorder, MediaRelay
+from aiortc.sdp import candidate_from_sdp
 
 from src.config.settings import get_settings
 from src.observability.logging import get_logger
@@ -277,13 +279,22 @@ class WebRTCGateway:
 
         Args:
             session_id: Session identifier
-            candidate: ICE candidate dict
+            candidate: ICE candidate dict with keys: candidate, sdpMLineIndex, sdpMid
         """
         state = self._connections.get(session_id)
         if not state:
             return
 
-        await state.pc.addIceCandidate(candidate)
+        # Parse candidate string to RTCIceCandidate object
+        candidate_str = candidate.get("candidate", "")
+        if candidate_str:
+            ice_candidate = candidate_from_sdp(candidate_str.split(":", 1)[1])
+            ice_candidate.sdpMid = candidate.get("sdpMid")
+            ice_candidate.sdpMLineIndex = candidate.get("sdpMLineIndex")
+            await state.pc.addIceCandidate(ice_candidate)
+        else:
+            # End-of-candidates signal (None)
+            await state.pc.addIceCandidate(None)
 
     def on_audio(
         self,

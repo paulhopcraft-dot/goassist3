@@ -113,9 +113,13 @@ class TestAudioInputProcessing:
     @pytest.fixture
     async def session(self):
         """Create session for testing."""
-        session = Session(session_id="audio-test-session")
+        import uuid
+        session_id = f"audio-test-{uuid.uuid4().hex[:8]}"
+        session = Session(session_id=session_id)
         yield session
-        # Cleanup handled by pipeline.stop() in each test
+        # Cleanup
+        if session.is_running:
+            await session.stop()
 
     @pytest.fixture
     def minimal_pipeline_config(self):

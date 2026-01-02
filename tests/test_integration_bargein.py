@@ -105,10 +105,13 @@ class TestCancellationPropagation:
     @pytest.fixture
     async def session(self):
         """Create session for testing."""
-        session = Session(session_id="cancel-propagation-session")
+        import uuid
+        session_id = f"cancel-test-{uuid.uuid4().hex[:8]}"
+        session = Session(session_id=session_id)
         yield session
-        # Cleanup handled by pipeline.stop() in each test
-        pass
+        # Cleanup
+        if session.is_running:
+            await session.stop()
 
     @pytest.mark.asyncio
     async def test_bargein_cancels_llm(self, session):
