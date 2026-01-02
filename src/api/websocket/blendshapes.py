@@ -7,6 +7,8 @@ per TMF §3.7 to avoid TCP head-of-line blocking.
 Reference: Implementation-v3.0.md §4.4
 """
 
+from __future__ import annotations
+
 import asyncio
 import json
 from typing import Any

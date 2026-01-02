@@ -31,6 +31,8 @@ Usage (legacy - for existing code compatibility):
         send_audio(audio)
 """
 
+from __future__ import annotations
+
 from src.audio.tts.base import (
     BaseTTSEngine,
     MockTTSEngine,

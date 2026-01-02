@@ -12,6 +12,8 @@ Key Points:
 Reference: Addendum A §A3, Implementation §4.3
 """
 
+from __future__ import annotations
+
 import asyncio
 from dataclasses import dataclass
 from typing import AsyncIterator

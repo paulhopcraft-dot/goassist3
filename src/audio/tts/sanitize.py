@@ -9,6 +9,8 @@ Provides sanitization for TTS text input to prevent:
 Reference: TODO-IMPROVEMENTS.md Phase 1
 """
 
+from __future__ import annotations
+
 import re
 import unicodedata
 from dataclasses import dataclass

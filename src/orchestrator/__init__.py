@@ -7,6 +7,8 @@ Provides:
 - ConversationPipeline: End-to-end voice+avatar pipeline
 """
 
+from __future__ import annotations
+
 from src.orchestrator.session import Session, SessionConfig, SessionManager
 from src.orchestrator.state_machine import SessionState, SessionStateMachine
 from src.orchestrator.pipeline import ConversationPipeline, PipelineConfig, create_pipeline

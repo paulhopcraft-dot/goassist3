@@ -13,6 +13,8 @@ Key Features:
 Reference: TMF v3.0 Addendum A §A3
 """
 
+from __future__ import annotations
+
 import asyncio
 from dataclasses import dataclass, field
 from enum import Enum

@@ -6,6 +6,8 @@ Higher-level code is blind to which backend is used.
 Reference: Pluggable TTS Architecture spec
 """
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import AsyncIterator, Any

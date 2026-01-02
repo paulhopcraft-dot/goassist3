@@ -4,6 +4,8 @@ Generates silence with configurable timing.
 Does not require any external services.
 """
 
+from __future__ import annotations
+
 import asyncio
 from typing import AsyncIterator
 

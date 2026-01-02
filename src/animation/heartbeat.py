@@ -11,6 +11,8 @@ Behavior:
 Reference: Implementation-v3.0.md §4.3
 """
 
+from __future__ import annotations
+
 import asyncio
 from dataclasses import dataclass
 from typing import Callable

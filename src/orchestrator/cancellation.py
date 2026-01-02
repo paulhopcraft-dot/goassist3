@@ -11,6 +11,8 @@ CANCEL must stop:
 Reference: Implementation-v3.0.md §3.2 CANCEL Schema
 """
 
+from __future__ import annotations
+
 import asyncio
 import inspect
 from dataclasses import dataclass

@@ -12,6 +12,8 @@ Animation engines must support:
 - Heartbeat frames when audio pauses
 """
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import AsyncIterator, Protocol

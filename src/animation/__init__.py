@@ -10,6 +10,8 @@ Provides:
 Reference: TMF v3.0 §3.1, §4.3, Addendum A §A3
 """
 
+from __future__ import annotations
+
 from src.animation.base import (
     ARKIT_52_BLENDSHAPES,
     AnimationEngine,

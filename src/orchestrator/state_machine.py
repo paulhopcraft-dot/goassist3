@@ -13,6 +13,8 @@ States:
 Reference: Implementation-v3.0.md §5 Orchestrator
 """
 
+from __future__ import annotations
+
 import asyncio
 import inspect
 from dataclasses import dataclass, field

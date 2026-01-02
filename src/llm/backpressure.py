@@ -12,6 +12,8 @@ Backpressure Order (MUST be followed in sequence):
 Reference: Implementation-v3.0.md §5.3
 """
 
+from __future__ import annotations
+
 import asyncio
 from dataclasses import dataclass
 from enum import IntEnum

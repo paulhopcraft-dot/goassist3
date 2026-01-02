@@ -10,6 +10,8 @@ This is the default ASR engine for production use.
 Reference: TMF v3.0 §6 Turn Detection
 """
 
+from __future__ import annotations
+
 import asyncio
 import json
 from dataclasses import dataclass, field

@@ -14,6 +14,8 @@ This module handles:
 Reference: Implementation-v3.0.md §3.1 Audio Packet Schema
 """
 
+from __future__ import annotations
+
 import struct
 from dataclasses import dataclass, field
 from typing import Iterator

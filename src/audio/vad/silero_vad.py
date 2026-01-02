@@ -12,6 +12,8 @@ Key responsibilities:
 Reference: TMF v3.0 §6 Turn Detection
 """
 
+from __future__ import annotations
+
 import asyncio
 import inspect
 from dataclasses import dataclass, field

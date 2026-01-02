@@ -8,6 +8,8 @@ Provides robust WebSocket connections with automatic retry for:
 Reference: Implementation-v3.0.md §4.3
 """
 
+from __future__ import annotations
+
 import asyncio
 import inspect
 from dataclasses import dataclass

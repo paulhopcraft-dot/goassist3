@@ -18,6 +18,8 @@ Categories:
 Reference: TODO-IMPROVEMENTS.md Phase 1
 """
 
+from __future__ import annotations
+
 from typing import Final
 
 # Health probe endpoints - bypass ALL security (auth, CSRF, rate limiting)

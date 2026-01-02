@@ -11,6 +11,8 @@ Key Points:
 Reference: Implementation-v3.0.md §4.4
 """
 
+from __future__ import annotations
+
 import asyncio
 import json
 from dataclasses import dataclass

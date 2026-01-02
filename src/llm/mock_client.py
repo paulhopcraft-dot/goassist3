@@ -7,6 +7,8 @@ Usage:
     Set LLM_ENGINE=mock in .env to use this client.
 """
 
+from __future__ import annotations
+
 import asyncio
 import random
 from dataclasses import dataclass

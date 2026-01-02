@@ -9,6 +9,8 @@ Provides:
 Reference: TMF v3.0 §3.7, Implementation §4.4
 """
 
+from __future__ import annotations
+
 import asyncio
 import json
 from dataclasses import dataclass, field

@@ -8,6 +8,8 @@ To generate Python stubs from proto:
 Reference: TMF v3.0 Addendum A §A3
 """
 
+from __future__ import annotations
+
 from src.animation.grpc.client import (
     Audio2FaceClient,
     Audio2FaceClientConfig,

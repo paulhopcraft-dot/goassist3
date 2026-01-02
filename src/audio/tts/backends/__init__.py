@@ -9,6 +9,8 @@ Available backends:
 - MockBackend: For testing (generates silence)
 """
 
+from __future__ import annotations
+
 from src.audio.tts.backends.interface import (
     TTSBackend,
     TTSRequest,

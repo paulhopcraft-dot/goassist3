@@ -12,6 +12,8 @@ Requirements:
 Reference: https://github.com/coqui-ai/TTS
 """
 
+from __future__ import annotations
+
 import asyncio
 from dataclasses import dataclass, field
 from typing import AsyncIterator

@@ -5,6 +5,8 @@ Supports multiple backends:
 - mock: Testing backend with canned responses
 """
 
+from __future__ import annotations
+
 from src.llm.vllm_client import (
     VLLMClient,
     LLMConfig,

@@ -18,6 +18,8 @@ Platform notes:
 - Both provide nanosecond resolution, converted to milliseconds
 """
 
+from __future__ import annotations
+
 import threading
 import time
 from dataclasses import dataclass

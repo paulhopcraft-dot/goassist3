@@ -24,6 +24,8 @@ Usage:
     await sender.stop()
 """
 
+from __future__ import annotations
+
 from src.animation.livelink.sender import (
     LiveLinkBridge,
     LiveLinkConfig,

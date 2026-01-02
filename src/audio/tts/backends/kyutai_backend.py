@@ -15,6 +15,8 @@ Requirements:
 Reference: https://github.com/kyutai-labs/delayed-streams-modeling
 """
 
+from __future__ import annotations
+
 import asyncio
 from dataclasses import dataclass
 from typing import AsyncIterator

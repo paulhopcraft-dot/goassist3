@@ -8,6 +8,8 @@ Provides interface to vLLM serving runtime for:
 Reference: TMF v3.0 §3.2, Addendum A §A5
 """
 
+from __future__ import annotations
+
 import asyncio
 from dataclasses import dataclass, field
 from typing import AsyncIterator

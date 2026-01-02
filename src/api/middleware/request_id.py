@@ -10,6 +10,8 @@ Usage in logs:
     logger.info("processing request", request_id=get_request_id())
 """
 
+from __future__ import annotations
+
 import uuid
 from contextvars import ContextVar
 from typing import Optional

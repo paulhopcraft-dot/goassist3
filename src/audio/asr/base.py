@@ -9,6 +9,8 @@ ASR must emit:
 - Endpoint events (to trigger LISTENING → THINKING transition)
 """
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum

@@ -9,6 +9,8 @@ Reference: Implementation-v3.0.md §5 Orchestrator
 TMF v3.0: TTFA ≤ 250ms p95, barge-in ≤ 150ms
 """
 
+from __future__ import annotations
+
 import asyncio
 from dataclasses import dataclass, field
 from typing import AsyncIterator, Callable

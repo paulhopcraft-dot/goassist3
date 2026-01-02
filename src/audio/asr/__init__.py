@@ -20,6 +20,8 @@ Usage:
         await asr.push_audio(audio, t_ms)
 """
 
+from __future__ import annotations
+
 from src.audio.asr.base import (
     ASREngine,
     ASREventType,

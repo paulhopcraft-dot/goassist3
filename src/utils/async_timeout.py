@@ -8,6 +8,8 @@ Provides timeout wrappers for async operations including:
 Reference: TODO-IMPROVEMENTS.md Phase 1
 """
 
+from __future__ import annotations
+
 import asyncio
 from typing import AsyncIterator, TypeVar
 
