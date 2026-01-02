@@ -133,10 +133,25 @@ Type C, A, or H (or describe your task):
 ```
 
 **Recommendation Logic:**
-- If failing tests → suggest "C to fix tests"
-- If many features pending → suggest "A for batch progress"
-- If session running long → suggest "H to preserve context"
-- If complex next task → suggest "C for careful work"
+
+Based on project state, recommend a specific command:
+
+| Condition | Recommend |
+|-----------|-----------|
+| Tests failing | `/recover` - diagnose and fix |
+| Feature just completed | `/verify` - confirm it works |
+| Merge conflicts | `/resolve` - fix conflicts |
+| 3+ similar pending tasks | `/autonomous` - batch mode |
+| Complex next task | `/think` - plan approach |
+| Architecture decision needed | `/decide` - structured analysis |
+| Auth/security code next | `/anticipate` - risk check |
+| Clean state, ready to work | `/continue` - start next task |
+
+**MUST always display a recommendation:**
+```
+💡 Recommended: /command - reason
+```
+Never skip this. Default to `/continue` if nothing else applies.
 
 ---
 

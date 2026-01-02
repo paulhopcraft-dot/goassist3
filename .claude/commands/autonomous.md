@@ -1,8 +1,22 @@
 ---
 name: autonomous
 aliases: [auto, continue-work, next]
-version: 3.1.0
+version: 3.2.0
 description: Autonomous workflow orchestrator - analyzes state, decides next action, executes, evaluates, repeats
+---
+
+**GOVERNANCE: Load `.claude/skills/autonomous-governance.md` before starting.**
+
+This skill defines:
+- Go/no-go decision tree
+- Restricted paths (never touch autonomously)
+- Iteration limits by task size
+- Pre-flight checklist
+- Stop conditions
+- Reporting formats
+
+**If governance skill not loaded: DO NOT proceed autonomously.**
+
 ---
 
 <command_role>
