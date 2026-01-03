@@ -940,3 +940,147 @@ python -c "from src.audio.tts.backends.elevenlabs_backend import ElevenLabsBacke
 - **12x faster path to validation** ✅
 
 **READY FOR USER VOICE TESTING** ✅
+
+---
+
+## Session 32 (continued) - 2026-01-03: Cloud API Factory Integration
+
+### Task
+Continue improving cloud API integration by integrating backends into factory system.
+
+### Problem Found
+Cloud API backends (Anthropic, ElevenLabs) created but not integrated into factory pattern:
+- `src/llm/__init__.py` didn't support "anthropic" engine
+- `src/audio/tts/TTSManager.py` didn't support "elevenlabs" backend
+- Users would need to import backends directly (not using config)
+
+### Changes Made
+
+**1. LLM Factory Integration** ✅
+- Updated `src/llm/__init__.py`:
+  - Added "anthropic" engine to `create_llm_client()`
+  - Updated docstring to list all 3 backends (vllm, anthropic, mock)
+  - Added proper error handling for unknown engines
+
+**2. Anthropic Client Factory** ✅
+- Added `create_anthropic_client()` factory function
+- Reads ANTHROPIC_API_KEY and ANTHROPIC_MODEL from settings
+- Raises clear error if API key missing
+- Follows same pattern as existing vllm/mock factories
+
+**3. TTS Manager Integration** ✅
+- Updated `src/audio/tts/TTSManager.py`:
+  - Added `elevenlabs_api_key`, `elevenlabs_voice_id`, `elevenlabs_model` to config
+  - Added "elevenlabs" backend to `_create_backend()`
+  - Validates API key is set before creating backend
+  - Added ElevenLabs example to factory docstring
+
+**4. Module Documentation** ✅
+- Updated `src/audio/tts/__init__.py` module docstring
+- Lists all backends including "elevenlabs: ElevenLabs cloud API"
+- Clarifies local vs cloud backends
+
+### Testing
+
+**Import Verification:**
+```bash
+# LLM factory
+python -c "from src.llm import create_llm_client; print('OK')"
+# Result: OK ✅
+
+# Anthropic client
+python -c "from src.llm.anthropic_client import create_anthropic_client; print('OK')"
+# Result: OK ✅
+
+# TTS factory
+python -c "from src.audio.tts import create_tts_manager; print('OK')"
+# Result: OK ✅
+
+# ElevenLabs backend
+python -c "from src.audio.tts.backends.elevenlabs_backend import ElevenLabsBackend; print('OK')"
+# Result: OK ✅
+```
+
+**Factory Error Handling:**
+```python
+# Verify unknown engine raises ValueError
+await create_llm_client('unknown')
+# Result: ValueError: Unknown LLM engine: unknown. Available: mock, vllm, anthropic ✅
+```
+
+**Full Test Suite:**
+```
+pytest tests/ -q --tb=no
+Result: 1335 passed, 2 skipped in 129.31s (0:02:09) ✅
+```
+
+**No regressions** - all 1335/1337 tests still passing (99.85%)
+
+### Usage Examples
+
+**Now users can select cloud APIs via config:**
+
+```python
+# LLM: Anthropic Claude
+from src.llm import create_llm_client
+
+# Via config (reads ANTHROPIC_API_KEY from env)
+client = await create_llm_client(engine="anthropic")
+
+# Or explicit override
+client = await create_llm_client("anthropic")
+```
+
+```python
+# TTS: ElevenLabs
+from src.audio.tts import create_tts_manager
+
+# Via config
+manager = create_tts_manager(
+    primary="elevenlabs",
+    elevenlabs_api_key="your-key",
+    elevenlabs_voice_id="EXAVITQu4vr4xnSDxMaL",
+)
+await manager.init()
+```
+
+### Architecture Benefits
+
+**Before (Session 32 initial):**
+- Backends existed but required direct imports
+- No factory pattern support
+- Config-based selection didn't work
+- Users had to modify code to switch backends
+
+**After (Session 32 continued):**
+- ✅ Factory pattern fully supports all backends
+- ✅ Config-based selection works (LLM_ENGINE, TTS_ENGINE)
+- ✅ Consistent with existing vllm/xtts pattern
+- ✅ Users change backends via .env, not code
+
+### Commits This Session
+- `4510944` feat: integrate Anthropic and ElevenLabs into factory system
+
+### Files Modified
+- `src/llm/__init__.py` (added anthropic engine support)
+- `src/llm/anthropic_client.py` (added create_anthropic_client factory)
+- `src/audio/tts/TTSManager.py` (added elevenlabs backend support)
+- `src/audio/tts/__init__.py` (updated module docstring)
+
+### Impact
+**Cloud API integration now production-ready:**
+- ✅ Backends created (Session 32 initial)
+- ✅ Configuration system updated (Session 32 initial)
+- ✅ Factory pattern integrated (Session 32 continued) ← **NEW**
+- ✅ Documentation complete (Session 32 initial)
+
+**Users can now:**
+1. Set `LLM_ENGINE=anthropic` in .env
+2. Set `TTS_ENGINE=elevenlabs` in .env
+3. Start server with `docker-compose up`
+4. Test voice with cloud APIs (no code changes)
+
+### Session Time
+- ~20 minutes (factory integration + testing)
+
+**CLOUD API INTEGRATION COMPLETE** ✅
