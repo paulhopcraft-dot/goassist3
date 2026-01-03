@@ -18,6 +18,82 @@
 - In Progress: 0
 - Blocked: 0
 
+## Session 30 (2026-01-03): Continue Barge-In Fixes - Architecture Refactoring
+
+### Mission
+Continue fixing remaining 6 barge-in test failures from Session 29.
+
+### Approach Taken
+Investigated duplicate cancellation root cause:
+1. Found that `pipeline.handle_barge_in()` called cancel() directly
+2. AND `CancellationController` also called cancel() via state machine
+3. This caused duplicate calls (2x for TTS, 3x for animation)
+
+### Changes Made
+1. **Added idempotency to CancellationController:**
+   - Added early return if `_cancelled` flag is true
+   - Prevents double-firing of cancel handlers
+   - File: src/orchestrator/cancellation.py
+
+2. **Refactored pipeline.handle_barge_in():**
+   - Removed direct calls to llm.abort(), tts.cancel(), animation.cancel()
+   - Now relies solely on CancellationController via session.on_barge_in()
+   - Cleaner architecture - single source of truth for cancellation
+   - File: src/orchestrator/pipeline.py
+
+### Results
+**Integration Tests: 42/50 passing (84%)**
+- Before: 44/50 (88%)
+- After: 42/50 (84%)
+- **Net:** -2 tests (regression)
+
+**Analysis:**
+- Fixed test_bargein_cancels_tts ✅
+- Broke test_llm_abort_on_barge_in (now 0 calls instead of 1)
+- Broke test_bargein_completes_under_150ms (now 1049ms - 7x too slow!)
+- Exposed timing issue: CancellationController is slower than direct calls
+
+### Root Cause of Failures
+The architecture has **two conflicting cancellation mechanisms:**
+
+1. **Direct cancellation** (old approach):
+   - pipeline.handle_barge_in() calls component methods directly
+   - Fast (<50ms per component)
+   - But causes duplicates when CancellationController also fires
+
+2. **CancellationController** (new approach):
+   - Centralized, but slower
+   - Timing shows 1049ms vs 150ms requirement (7x too slow!)
+   - Tests that mock component methods after registration fail
+
+### Recommendation
+**Revert the architecture change** and instead fix the duplication by:
+
+**Option A: Make component cancel methods idempotent**
+- Add `_cancelling` flag to each component (TTS, LLM, Animation)
+- Return early if already cancelling
+- Tests will pass with "called 2x" because it's harmless
+
+**Option B: Check state before calling controller**
+- In pipeline.handle_barge_in(), check if components already cancelled
+- Skip CancellationController if direct cancellation happened
+- Keep both mechanisms but prevent overlap
+
+**Option C: Fix the tests**
+- Update tests to mock BEFORE pipeline.start()
+- Or update CancellationController handlers after mocking
+- Tests are buggy, not the code
+
+### Commits This Session
+- `1693316` refactor(orchestrator): add idempotency to CancellationController
+
+### Time & Status
+- Duration: ~1 hour
+- Status: Architecture refactoring attempted, caused regressions
+- Decision: Document findings, recommend simpler fix
+
+---
+
 ## Session 29 (2026-01-02): Autonomous Integration Test Fixes - FINAL
 
 ### Mission
