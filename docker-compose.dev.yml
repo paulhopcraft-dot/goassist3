@@ -1,0 +1,51 @@
+# Development docker-compose override
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+version: '3.8'
+
+services:
+  goassist:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder  # Use builder stage for dev dependencies
+    volumes:
+      # Mount source code for live reload
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+    environment:
+      # Development settings
+      ENVIRONMENT: development
+      MAX_CONCURRENT_SESSIONS: 5
+      CSRF_ENABLED: "false"
+      LOG_LEVEL: DEBUG
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Mock LLM for testing without API costs
+  mock-llm:
+    image: python:3.11-slim
+    container_name: goassist-mock-llm
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./examples/mock-llm:/app
+    working_dir: /app
+    command: python -m http.server 8001
+    networks:
+      - goassist-net
+    restart: unless-stopped
+
+  # Redis for session state (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: goassist-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - goassist-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3

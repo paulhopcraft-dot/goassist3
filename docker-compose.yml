@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # GoAssist API Server
+  goassist:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: goassist-api
+    ports:
+      - "8000:8000"
+    environment:
+      # Core Configuration
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      MAX_CONCURRENT_SESSIONS: ${MAX_CONCURRENT_SESSIONS:-10}
+
+      # LLM Configuration
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
+      LLM_MODEL_NAME: ${LLM_MODEL_NAME:-gpt-4}
+
+      # ASR Configuration
+      ASR_MODEL_PATH: ${ASR_MODEL_PATH:-/models/whisper}
+
+      # TTS Configuration
+      TTS_ENGINE: ${TTS_ENGINE:-mock}
+
+      # Avatar Configuration (optional)
+      ENABLE_AVATAR: ${ENABLE_AVATAR:-false}
+      AUDIO2FACE_GRPC_URL: ${AUDIO2FACE_GRPC_URL:-audio2face:50051}
+
+      # Security
+      CSRF_ENABLED: ${CSRF_ENABLED:-true}
+
+      # Observability
+      OTLP_ENDPOINT: ${OTLP_ENDPOINT:-http://jaeger:4318}
+    volumes:
+      # Mount model directory (if using local models)
+      - ${MODEL_DIR:-./models}:/models:ro
+      # Mount logs
+      - ./logs:/app/logs
+    depends_on:
+      - jaeger
+    networks:
+      - goassist-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Jaeger for distributed tracing
+  jaeger:
+    image: jaegertracing/all-in-one:1.50
+    container_name: goassist-jaeger
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "4318:4318"    # OTLP HTTP
+      - "4317:4317"    # OTLP gRPC
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    networks:
+      - goassist-net
+    restart: unless-stopped
+
+  # Test client (simple HTTP server for web client)
+  test-client:
+    image: nginx:alpine
+    container_name: goassist-test-client
+    ports:
+      - "8080:80"
+    volumes:
+      - ./examples/web-client:/usr/share/nginx/html:ro
+    networks:
+      - goassist-net
+    restart: unless-stopped
+
+networks:
+  goassist-net:
+    driver: bridge
+
+volumes:
+  logs:
