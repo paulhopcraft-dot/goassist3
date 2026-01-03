@@ -77,9 +77,11 @@ class TestSessionMetrics:
 
     def test_is_warmup_initial(self):
         """Session starts in warmup period."""
+        from src.audio.transport.audio_clock import get_audio_clock
+
         metrics = SessionMetrics()
-        metrics.start_time_ms = 0
-        # With 0 turns, should be in warmup
+        metrics.start_time_ms = get_audio_clock().get_absolute_ms()  # Use current time
+        # With 0 turns and just started, should be in warmup
         assert metrics.is_warmup is True
 
     def test_is_warmup_after_3_turns(self):
