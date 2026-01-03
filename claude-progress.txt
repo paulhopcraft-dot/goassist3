@@ -1084,3 +1084,70 @@ await manager.init()
 - ~20 minutes (factory integration + testing)
 
 **CLOUD API INTEGRATION COMPLETE** ✅
+
+---
+
+## Session 32 (continued) - 2026-01-03: Documentation Polish
+
+### Task
+Continue improving user experience by making cloud API path more discoverable.
+
+### Problem Found
+README Quick Start section didn't prominently feature the **fastest path** to test voice:
+- CLOUD-API-QUICKSTART.md existed but wasn't highlighted
+- Configuration examples showed outdated syntax
+- Users might miss the 10-minute testing path and try 2-hour GPU setup first
+
+### Changes Made
+
+**1. README Quick Start Section** ✅
+- Added prominent "🚀 NEW: Test voice in 10 minutes with cloud APIs!"
+- Created **two clear paths**:
+  - **Path 1: Cloud APIs** (10 min, testing/demos) ⭐ RECOMMENDED
+  - **Path 2: Self-Hosted** (production, cost optimization)
+- Direct link to CLOUD-API-QUICKSTART.md guide
+- Summary of 4-step quick start
+
+**2. Configuration Examples** ✅
+- **Option A: Cloud APIs** - Shows Anthropic + Deepgram + ElevenLabs
+- **Option B: Self-Hosted** - Shows vLLM + Faster-Whisper + XTTS-v2
+- Clear labeling of when to use each option
+- Correct environment variable names (matches current codebase)
+
+**3. User Guidance** ✅
+- Clarifies cloud APIs best for: testing, demos, validation
+- Clarifies self-hosted best for: production, cost optimization at scale
+- Cost transparency: ~$0.83 per 10 conversation turns
+
+### Impact
+
+**Before:**
+- Cloud API path buried in documentation
+- Users might waste 2 hours setting up GPU/models for testing
+- Configuration examples outdated
+
+**After:**
+- ✅ Cloud API path prominently featured at top of README
+- ✅ Users see fastest path first (10 min vs 2 hours)
+- ✅ Two clear options with guidance on when to use each
+- ✅ Configuration examples match current codebase (LLM_ENGINE, TTS_ENGINE, etc.)
+
+### Testing
+```bash
+# Settings tests still pass
+pytest tests/ -k "settings"
+Result: 33 passed ✅
+```
+
+### Commits This Session
+- `d767dbe` docs: improve README with prominent cloud API quick start
+
+### Files Modified
+- `README.md` (58 insertions, 12 deletions)
+
+### Session Time
+- ~5 minutes (documentation polish)
+
+**USER EXPERIENCE IMPROVED** ✅
+
+Users now have a **clear, fast path** to test voice conversation without infrastructure complexity.
