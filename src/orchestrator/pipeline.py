@@ -364,9 +364,6 @@ class ConversationPipeline:
         """Handle user interruption (barge-in).
 
         Must complete within 150ms per TMF v3.0.
-
-        Component cancellation (TTS, LLM, Animation) is handled by the
-        CancellationController via state_machine.handle_barge_in().
         """
         logger.info("barge_in", session_id=self._session.session_id)
 
@@ -374,7 +371,17 @@ class ConversationPipeline:
         if self._generation_task and not self._generation_task.done():
             self._generation_task.cancel()
 
-        # Session handles state transition AND component cancellation
+        # Cancel all components
+        if self._llm:
+            await self._llm.abort()
+
+        if self._tts:
+            await self._tts.cancel()
+
+        if self._animation:
+            await self._animation.cancel()
+
+        # Session handles state transition
         await self._session.on_barge_in()
 
     def set_audio_output_callback(self, callback: Callable[[bytes], None]) -> None:

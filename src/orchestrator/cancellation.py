@@ -129,12 +129,7 @@ class CancellationController:
         Note:
             All handlers are called concurrently to minimize latency.
             Handlers that don't complete within timeout are abandoned.
-            Idempotent - subsequent calls with same session are ignored.
         """
-        # Idempotency check - don't cancel twice
-        if self._cancelled:
-            return True
-
         if timeout_ms is None:
             timeout_ms = TMF.BARGE_IN_MS
 
