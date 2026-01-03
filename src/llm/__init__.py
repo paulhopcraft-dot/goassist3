@@ -1,7 +1,8 @@
 """LLM module - LLM clients and prompt building.
 
 Supports multiple backends:
-- vllm: Production backend using vLLM serving
+- vllm: Production backend using vLLM serving (self-hosted)
+- anthropic: Cloud backend using Anthropic Claude API
 - mock: Testing backend with canned responses
 """
 
@@ -21,11 +22,15 @@ async def create_llm_client(engine: str | None = None):
     """Factory function to create LLM client based on configuration.
 
     Args:
-        engine: Override engine selection ("mock" or "vllm").
+        engine: Override engine selection ("mock", "vllm", or "anthropic").
                 If None, uses LLM_ENGINE from settings.
 
     Returns:
-        Started LLM client (MockLLMClient or VLLMClient)
+        Started LLM client (MockLLMClient, VLLMClient, or AnthropicClient)
+
+    Raises:
+        ValueError: If engine is unknown
+        RuntimeError: If required configuration missing (e.g., ANTHROPIC_API_KEY)
     """
     if engine is None:
         from src.config.settings import get_settings
@@ -34,18 +39,33 @@ async def create_llm_client(engine: str | None = None):
 
     if engine == "mock":
         return await create_mock_llm_client()
-    else:
+    elif engine == "vllm":
         return await create_vllm_client()
+    elif engine == "anthropic":
+        from src.llm.anthropic_client import create_anthropic_client
+        return await create_anthropic_client()
+    else:
+        raise ValueError(
+            f"Unknown LLM engine: {engine}. "
+            f"Available: mock, vllm, anthropic"
+        )
 
 
 __all__ = [
+    # Clients
     "VLLMClient",
     "MockLLMClient",
+    # AnthropicClient - lazy import via create_anthropic_client()
+    # Configuration
     "LLMConfig",
-    "LLMResponse",
     "MockLLMConfig",
+    # Response types
+    "LLMResponse",
+    # Utilities
     "build_messages",
+    # Factories
     "create_llm_client",
     "create_vllm_client",
     "create_mock_llm_client",
+    # create_anthropic_client - imported when needed
 ]

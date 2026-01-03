@@ -57,7 +57,7 @@ class TTSManagerConfig:
     """
 
     # Primary backend selection
-    primary: str = "xtts-v2"  # "xtts-v2", "kyutai", "mock"
+    primary: str = "xtts-v2"  # "xtts-v2", "kyutai", "elevenlabs", "mock"
 
     # Optional backends (disabled by default)
     kyutai_enabled: bool = False
@@ -65,6 +65,11 @@ class TTSManagerConfig:
 
     # XTTS configuration
     xtts_server_url: str = "http://localhost:8020"
+
+    # ElevenLabs configuration (cloud API)
+    elevenlabs_api_key: str | None = None
+    elevenlabs_voice_id: str = "EXAVITQu4vr4xnSDxMaL"  # Sarah (default)
+    elevenlabs_model: str = "eleven_turbo_v2"  # Fastest model
 
     # Fallback behavior
     fallback_to_mock: bool = True  # If primary fails, use mock
@@ -209,10 +214,30 @@ class TTSManager:
             )
             return KyutaiBackend(config)
 
+        elif backend_name == "elevenlabs":
+            # ElevenLabs cloud API backend
+            if not self._config.elevenlabs_api_key:
+                raise ValueError(
+                    "ElevenLabs API key required. "
+                    "Set ELEVENLABS_API_KEY in environment or config."
+                )
+
+            from src.audio.tts.backends.elevenlabs_backend import (
+                ElevenLabsBackend,
+                ElevenLabsConfig,
+            )
+
+            config = ElevenLabsConfig(
+                api_key=self._config.elevenlabs_api_key,
+                voice_id=self._config.elevenlabs_voice_id,
+                model_id=self._config.elevenlabs_model,
+            )
+            return ElevenLabsBackend(config)
+
         else:
             raise ValueError(
                 f"Unknown TTS backend: {backend_name}. "
-                f"Available: xtts-v2, kyutai, mock"
+                f"Available: xtts-v2, kyutai, elevenlabs, mock"
             )
 
     def _sanitize_request(self, request: TTSRequest) -> TTSRequest:
@@ -318,7 +343,7 @@ def create_tts_manager(
     """Factory function to create TTS manager.
 
     Args:
-        primary: Primary backend ("xtts-v2", "kyutai", "mock")
+        primary: Primary backend ("xtts-v2", "kyutai", "elevenlabs", "mock")
         kyutai_enabled: Whether Kyutai is available
         **kwargs: Additional config options
 
@@ -337,6 +362,13 @@ def create_tts_manager(
             primary="kyutai",
             kyutai_enabled=True,
             kyutai_server_url="ws://localhost:8080/tts",
+        )
+
+        # Cloud API with ElevenLabs
+        manager = create_tts_manager(
+            primary="elevenlabs",
+            elevenlabs_api_key="your-key",
+            elevenlabs_voice_id="EXAVITQu4vr4xnSDxMaL",
         )
     """
     config = TTSManagerConfig(

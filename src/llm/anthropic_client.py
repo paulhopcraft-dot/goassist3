@@ -252,3 +252,41 @@ class AnthropicClient:
     def model_name(self) -> str:
         """Get current model name."""
         return self._config.model
+
+
+async def create_anthropic_client() -> AnthropicClient:
+    """Factory function to create and start Anthropic client.
+
+    Uses settings from environment (ANTHROPIC_API_KEY, ANTHROPIC_MODEL).
+
+    Returns:
+        Started Anthropic client
+
+    Raises:
+        RuntimeError: If ANTHROPIC_API_KEY not set in environment
+    """
+    from src.config.settings import get_settings
+
+    settings = get_settings()
+
+    if not settings.anthropic_api_key:
+        raise RuntimeError(
+            "ANTHROPIC_API_KEY not set. "
+            "Required for anthropic LLM engine. "
+            "Set in .env or environment."
+        )
+
+    config = AnthropicConfig(
+        api_key=settings.anthropic_api_key,
+        model=settings.anthropic_model,
+    )
+
+    client = AnthropicClient(config)
+    await client.start()
+
+    logger.info(
+        "anthropic_client_created",
+        model=config.model,
+    )
+
+    return client

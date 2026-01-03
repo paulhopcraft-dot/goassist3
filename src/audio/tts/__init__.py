@@ -8,8 +8,9 @@ ARCHITECTURE:
 - Legacy TTSEngine: Original interface (maintained for compatibility)
 
 Available backends:
-- xtts-v2: Coqui XTTS-v2 (PRIMARY production backend)
-- kyutai: Streaming TTS (OPTIONAL, disabled by default)
+- xtts-v2: Coqui XTTS-v2 (PRIMARY production backend, local)
+- kyutai: Streaming TTS (OPTIONAL, disabled by default, local)
+- elevenlabs: ElevenLabs cloud API (CLOUD, high-quality, low-latency)
 - mock: For testing (generates silence)
 
 Usage (recommended - new backend architecture):
