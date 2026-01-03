@@ -70,8 +70,8 @@ class Settings(BaseSettings):
     )
 
     # LLM Configuration
-    llm_engine: Literal["mock", "vllm"] = Field(
-        default="vllm", description="LLM backend (mock for testing, vllm for production)"
+    llm_engine: Literal["mock", "vllm", "anthropic"] = Field(
+        default="vllm", description="LLM backend (mock/vllm/anthropic)"
     )
     llm_model_path: str = Field(
         default="models/llm", description="Path to LLM model weights"
@@ -90,6 +90,15 @@ class Settings(BaseSettings):
         default="http://localhost:8000/v1", description="vLLM API base URL"
     )
 
+    # Anthropic Configuration (when llm_engine="anthropic")
+    anthropic_api_key: str | None = Field(
+        default=None, description="Anthropic API key for Claude models"
+    )
+    anthropic_model: str = Field(
+        default="claude-sonnet-3-5-20241022",
+        description="Anthropic model name (claude-sonnet-3-5-20241022, claude-opus-4-20250514, etc.)"
+    )
+
     # ASR Configuration
     asr_model_path: str = Field(
         default="models/asr", description="Path to ASR model"
@@ -104,8 +113,8 @@ class Settings(BaseSettings):
     )
 
     # TTS Configuration
-    tts_engine: Literal["mock", "xtts-v2", "kyutai"] = Field(
-        default="xtts-v2", description="Primary TTS backend (xtts-v2, kyutai, mock)"
+    tts_engine: Literal["mock", "xtts-v2", "kyutai", "elevenlabs"] = Field(
+        default="xtts-v2", description="Primary TTS backend (xtts-v2, kyutai, elevenlabs, mock)"
     )
     tts_model_path: str = Field(
         default="models/tts", description="Path to TTS model"
@@ -151,6 +160,19 @@ class Settings(BaseSettings):
         ge=16000,
         le=48000,
         description="Kyutai TTS sample rate (24kHz default)",
+    )
+
+    # ElevenLabs TTS Configuration (when tts_engine="elevenlabs")
+    elevenlabs_api_key: str | None = Field(
+        default=None, description="ElevenLabs API key for cloud TTS"
+    )
+    elevenlabs_voice_id: str = Field(
+        default="EXAVITQu4vr4xnSDxMaL",
+        description="ElevenLabs voice ID (default: Sarah - conversational)"
+    )
+    elevenlabs_model: str = Field(
+        default="eleven_turbo_v2",
+        description="ElevenLabs model (eleven_turbo_v2 for lowest latency)"
     )
 
     # Animation Configuration
