@@ -177,11 +177,9 @@ class TestWebRTCSignaling:
         response = client.post(
             f"/sessions/{fake_id}/ice-candidate",
             json={
-                "candidate": {
-                    "candidate": "candidate:...",
-                    "sdpMid": "0",
-                    "sdpMLineIndex": 0
-                }
+                "candidate": "candidate:0 1 UDP 2122252543 192.168.1.1 59999 typ host",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0
             }
         )
 
@@ -370,11 +368,9 @@ class TestWebRTCSignalingExtended:
         response = client.post(
             f"/sessions/{session_id}/ice-candidate",
             json={
-                "candidate": {
-                    "candidate": "candidate:0 1 UDP 2122252543 192.168.1.1 59999 typ host",
-                    "sdpMid": "0",
-                    "sdpMLineIndex": 0
-                }
+                "candidate": "candidate:0 1 UDP 2122252543 192.168.1.1 59999 typ host",
+                "sdpMid": "0",
+                "sdpMLineIndex": 0
             }
         )
 
