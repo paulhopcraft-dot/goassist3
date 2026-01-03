@@ -1,0 +1,63 @@
+name: Tests
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+
+    - name: Lint with ruff (if available)
+      run: |
+        pip install ruff || true
+        ruff check src/ tests/ || true
+      continue-on-error: true
+
+    - name: Run tests with pytest
+      run: |
+        pytest --tb=short -v --cov=src --cov-report=term --cov-report=xml
+      env:
+        # Test environment configuration
+        ENVIRONMENT: development
+        MAX_CONCURRENT_SESSIONS: "5"
+        LLM_MODEL_PATH: /test/models/llm
+        ASR_MODEL_PATH: /test/models/asr
+        TTS_ENGINE: mock
+        CSRF_ENABLED: "false"
+        ENABLE_AVATAR: "false"
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
+      continue-on-error: true
+
+    - name: Test Summary
+      run: |
+        echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "✅ Tests completed successfully" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Python version: ${{ matrix.python-version }}" >> $GITHUB_STEP_SUMMARY
