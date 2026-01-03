@@ -47,9 +47,10 @@ class TestValidTransitions:
         }
 
     def test_thinking_transitions(self):
-        """THINKING can go to SPEAKING, LISTENING, or IDLE."""
+        """THINKING can go to SPEAKING, INTERRUPTED (barge-in), LISTENING, or IDLE."""
         assert VALID_TRANSITIONS[SessionState.THINKING] == {
             SessionState.SPEAKING,
+            SessionState.INTERRUPTED,
             SessionState.LISTENING,
             SessionState.IDLE,
         }
