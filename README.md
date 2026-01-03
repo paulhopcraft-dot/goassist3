@@ -28,29 +28,9 @@
 
 ## Quick Start
 
-**🚀 NEW: Test voice conversation in 10 minutes with cloud APIs!**
-
-We provide **two deployment paths**:
-
-### Path 1: Cloud APIs (Fastest - 10 minutes) ⭐ RECOMMENDED FOR TESTING
-
-**Best for:** Quick testing, demos, validation
-**Cost:** ~$0.83 per 10 conversation turns (pay-per-use)
-
-See **[CLOUD-API-QUICKSTART.md](CLOUD-API-QUICKSTART.md)** for the fastest way to test voice conversation without GPU setup.
-
-**Summary:**
-1. Get API keys (Anthropic, Deepgram, ElevenLabs)
-2. Configure `.env`
-3. Run `docker-compose up`
-4. Test voice at `examples/web-client/index.html`
-
-### Path 2: Self-Hosted (Production)
-
-**Best for:** Production deployment, cost optimization at scale
-**Prerequisites:**
+### Prerequisites
 - Python 3.11+
-- GPU for local LLM/TTS (RunPod, local NVIDIA)
+- GPU for LLM/TTS (RunPod recommended, or local NVIDIA)
 - NVIDIA Audio2Face (optional, for avatar)
 
 ### Installation
@@ -71,38 +51,19 @@ cp .env.example .env
 
 ### Configuration
 
-**Option A: Cloud APIs (Testing/Development)**
+Required environment variables (see `.env.example` for complete list):
 
 ```bash
-# LLM: Anthropic Claude
-LLM_ENGINE=anthropic
-ANTHROPIC_API_KEY=sk-ant-your-key
-ANTHROPIC_MODEL=claude-sonnet-3-5-20241022
-
-# ASR: Deepgram (streaming)
-DEEPGRAM_API_KEY=your-deepgram-key
-
-# TTS: ElevenLabs (high-quality)
-TTS_ENGINE=elevenlabs
-ELEVENLABS_API_KEY=your-elevenlabs-key
-ELEVENLABS_VOICE_ID=EXAVITQu4vr4xnSDxMaL  # Sarah (default)
-
-# Optional: Disable avatar for faster testing
-ANIMATION_ENABLED=false
-```
-
-**Option B: Self-Hosted (Production)**
-
-```bash
-# LLM: vLLM (local GPU)
+# LLM: vLLM serving open-source model (e.g., Qwen)
 LLM_ENGINE=vllm
 LLM_BASE_URL=http://localhost:8000/v1
-LLM_MODEL_PATH=/workspace/models/llm/mistral-7b-awq
+LLM_MODEL_PATH=/workspace/models/llm/Qwen2.5-7B-Instruct
 
-# ASR: Faster-Whisper (local)
+# ASR: Faster-Whisper (local) or Deepgram (cloud)
 ASR_MODEL_PATH=/workspace/models/asr/faster-whisper-base
+# DEEPGRAM_API_KEY=your-key  # Optional: for cloud ASR
 
-# TTS: XTTS-v2 (local)
+# TTS: XTTS-v2 (local, open-source)
 TTS_ENGINE=xtts-v2
 TTS_MODEL_PATH=/workspace/models/tts/xtts-v2
 
@@ -111,12 +72,17 @@ ANIMATION_ENABLED=true
 AUDIO2FACE_GRPC_HOST=localhost
 AUDIO2FACE_GRPC_PORT=50051
 
-# Production Settings
-MAX_CONCURRENT_SESSIONS=100
-ENVIRONMENT=production
+# Session Configuration
+MAX_CONCURRENT_SESSIONS=25
+ENVIRONMENT=development
 ```
 
-See `.env.example` or `docs/Ops-Runbook-v3.0.md` for complete list of environment variables.
+**Recommended Setup:**
+- **LLM:** Qwen/Qwen2.5-7B-Instruct via vLLM on RunPod
+- **ASR:** Deepgram (cloud) or Faster-Whisper (local)
+- **TTS:** XTTS-v2 (local, open-source)
+
+See `docs/Ops-Runbook-v3.0.md` for detailed configuration guide.
 
 ### Running
 
