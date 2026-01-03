@@ -245,7 +245,12 @@ class BaseAnimationEngine(ABC):
 
         Default implementation sets cancel flag.
         Subclasses should override to add cleanup.
+        Idempotent - safe to call multiple times.
         """
+        # Idempotency check - don't cancel twice
+        if self._cancelled:
+            return
+
         self._cancelled = True
         self._generating = False
 

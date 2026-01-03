@@ -81,6 +81,7 @@ class VLLMClient:
         self._current_task: asyncio.Task | None = None
         self._abort_event: asyncio.Event = asyncio.Event()
         self._running: bool = False
+        self._aborted: bool = False
 
     async def start(self) -> None:
         """Initialize vLLM client connection."""
@@ -91,6 +92,7 @@ class VLLMClient:
         )
         self._running = True
         self._abort_event.clear()
+        self._aborted = False
 
     async def stop(self) -> None:
         """Stop client and cleanup."""
@@ -212,7 +214,13 @@ class VLLMClient:
 
         Called on barge-in to stop LLM generation.
         Must complete quickly to meet 150ms barge-in contract.
+        Idempotent - safe to call multiple times.
         """
+        # Idempotency check - don't abort twice
+        if self._aborted:
+            return
+
+        self._aborted = True
         self._abort_event.set()
 
         if self._current_task and not self._current_task.done():

@@ -39,7 +39,7 @@ class SessionState(Enum):
 VALID_TRANSITIONS: dict[SessionState, set[SessionState]] = {
     SessionState.IDLE: {SessionState.LISTENING},
     SessionState.LISTENING: {SessionState.THINKING, SessionState.IDLE},
-    SessionState.THINKING: {SessionState.SPEAKING, SessionState.LISTENING, SessionState.IDLE},
+    SessionState.THINKING: {SessionState.SPEAKING, SessionState.INTERRUPTED, SessionState.LISTENING, SessionState.IDLE},
     SessionState.SPEAKING: {SessionState.LISTENING, SessionState.INTERRUPTED, SessionState.IDLE},
     SessionState.INTERRUPTED: {SessionState.LISTENING, SessionState.IDLE},
 }
@@ -194,8 +194,9 @@ class SessionStateMachine:
         """Handle user barge-in (interruption).
 
         Triggers CANCEL propagation and transitions to LISTENING.
+        Can interrupt from THINKING (before TTS starts) or SPEAKING (during TTS).
         """
-        if self._state != SessionState.SPEAKING:
+        if self._state not in (SessionState.THINKING, SessionState.SPEAKING):
             return None
 
         # Propagate CANCEL to all components

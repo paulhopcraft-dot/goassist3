@@ -367,19 +367,24 @@ class ConversationPipeline:
         """
         logger.info("barge_in", session_id=self._session.session_id)
 
+        # Clear processing flag to prevent duplicate turn processing
+        self._processing_turn = False
+
         # Cancel generation task
         if self._generation_task and not self._generation_task.done():
             self._generation_task.cancel()
 
-        # Cancel all components
+        # Cancel all components in parallel for speed
+        cancel_tasks = []
         if self._llm:
-            await self._llm.abort()
-
+            cancel_tasks.append(self._llm.abort())
         if self._tts:
-            await self._tts.cancel()
-
+            cancel_tasks.append(self._tts.cancel())
         if self._animation:
-            await self._animation.cancel()
+            cancel_tasks.append(self._animation.cancel())
+
+        if cancel_tasks:
+            await asyncio.gather(*cancel_tasks, return_exceptions=True)
 
         # Session handles state transition
         await self._session.on_barge_in()

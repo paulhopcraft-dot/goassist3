@@ -77,11 +77,13 @@ class MockLLMClient:
         self._config = config or MockLLMConfig()
         self._abort_event: asyncio.Event = asyncio.Event()
         self._running: bool = False
+        self._aborted: bool = False
 
     async def start(self) -> None:
         """Initialize mock client."""
         self._running = True
         self._abort_event.clear()
+        self._aborted = False
 
     async def stop(self) -> None:
         """Stop mock client."""
@@ -181,7 +183,13 @@ class MockLLMClient:
         """Abort current generation immediately.
 
         Called on barge-in to stop generation.
+        Idempotent - safe to call multiple times.
         """
+        # Idempotency check - don't abort twice
+        if self._aborted:
+            return
+
+        self._aborted = True
         self._abort_event.set()
 
     @property
