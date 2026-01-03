@@ -362,6 +362,10 @@ class TestBargeInLatency:
             await pipeline.handle_barge_in()
             total_time = time.perf_counter() - start
 
+            # Debug: print cancel times to see if they overlapped
+            print(f"Cancel times: {cancel_times}")
+            print(f"Total time: {total_time*1000:.1f}ms")
+
             # Total time should be ~50ms (parallel), not ~150ms (sequential)
             # Allow margin for test environment overhead
             assert total_time < 0.1, f"Took {total_time*1000:.1f}ms, appears sequential not parallel"
