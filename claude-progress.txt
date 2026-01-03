@@ -803,3 +803,140 @@ After achieving 99.85% test pass rate, realized we hadn't tested actual voice co
 - ~40 minutes (voice client + Docker setup)
 
 **PROJECT STATUS: COMPLETE & READY FOR VOICE TESTING** ✅
+
+---
+
+## Session 32 (continued) - 2026-01-03: Cloud API Integration
+
+### Context
+User identified critical gap: "we didnt test the voice yet"
+- 1335/1337 tests pass but use MOCKS
+- Need to validate actual voice conversation works
+- User has RunPod access but wants fastest path to test first
+
+### Problem
+Project uses sophisticated local stack:
+- ASR: Deepgram (cloud) / Faster-Whisper (local)
+- LLM: vLLM (self-hosted on RunPod)
+- TTS: XTTS-v2 / Kyutai (local GPU models)
+
+**Challenge:** Testing requires either:
+1. Full RunPod setup (~2 hours: instance + model downloads ~15GB)
+2. Cloud APIs (~10 minutes: just API keys)
+
+### Solution: Cloud API Quick Start Path
+
+**Added cloud API support for rapid testing:**
+
+**Anthropic Claude LLM Client** ✅
+- Created `src/llm/anthropic_client.py` (250 lines)
+- Streaming chat completions
+- OpenAI-compatible message format conversion
+- Configurable model (claude-sonnet-3-5-20241022 default)
+- Async/await API
+
+**ElevenLabs TTS Backend** ✅
+- Created `src/audio/tts/backends/elevenlabs_backend.py` (220 lines)
+- Streaming low-latency synthesis
+- Professional voice quality (Sarah default)
+- 24kHz PCM output format
+- eleven_turbo_v2 model (fastest)
+
+**Configuration Updates** ✅
+- Updated `src/config/settings.py`:
+  - Added `llm_engine: "anthropic"` option
+  - Added `anthropic_api_key` and `anthropic_model` settings
+  - Added `tts_engine: "elevenlabs"` option
+  - Added `elevenlabs_api_key`, `elevenlabs_voice_id`, `elevenlabs_model` settings
+- Updated `.env.example` with cloud API configuration examples
+- Updated `requirements.txt` with `anthropic>=0.18.0` and `elevenlabs>=1.0.0`
+
+**Quick Start Guide** ✅
+- Created `CLOUD-API-QUICKSTART.md` (200 lines)
+  - 10-minute setup instructions
+  - Prerequisites: API keys needed
+  - Cost breakdown (~$0.83 for 10 test turns)
+  - Alternative stacks comparison
+  - Troubleshooting guide
+  - Migration path to RunPod for production
+
+### Testing
+
+**Import Verification:**
+```bash
+# Anthropic client test
+python -c "from src.llm.anthropic_client import AnthropicClient; print('Success')"
+# Result: Success ✅
+
+# ElevenLabs backend test
+python -c "from src.audio.tts.backends.elevenlabs_backend import ElevenLabsBackend; print('Success')"
+# Result: Success ✅
+```
+
+### Architecture Decision
+
+**Hybrid Approach:**
+- **Testing/Development:** Cloud APIs (Anthropic + Deepgram + ElevenLabs)
+  - Pros: Fast setup, no infrastructure, pay-per-use
+  - Cons: ~$8.30 per 100 conversation turns
+  - Best for: Initial validation, iteration, demos
+
+- **Production (if needed):** RunPod + local models
+  - Pros: Lower cost at scale, no per-token fees
+  - Cons: Infrastructure complexity, model downloads, GPU management
+  - Best for: High traffic (>1000 sessions/day)
+
+### Commits This Session
+- `dc63f3b` feat: add cloud API support (Anthropic + ElevenLabs) for quick voice testing
+
+### Files Created/Modified
+- `src/llm/anthropic_client.py` (new, 250 lines)
+- `src/audio/tts/backends/elevenlabs_backend.py` (new, 220 lines)
+- `src/config/settings.py` (modified: +cloud API settings)
+- `.env.example` (modified: +cloud API examples)
+- `requirements.txt` (modified: +anthropic, elevenlabs)
+- `CLOUD-API-QUICKSTART.md` (new, 200 lines)
+
+### Next Steps (User Action Required)
+
+**Immediate - Test Voice with Cloud APIs:**
+1. Get API keys:
+   - Anthropic: https://console.anthropic.com/
+   - Deepgram: https://console.deepgram.com/
+   - ElevenLabs: https://elevenlabs.io/
+2. Configure `.env`:
+   ```bash
+   LLM_ENGINE=anthropic
+   ANTHROPIC_API_KEY=sk-ant-your-key
+   TTS_ENGINE=elevenlabs
+   ELEVENLABS_API_KEY=your-key
+   DEEPGRAM_API_KEY=your-key
+   ```
+3. Start server: `docker-compose up`
+4. Test voice: Open `examples/web-client/index.html`
+5. Validate:
+   - TTFA < 2000ms
+   - Barge-in feels responsive
+   - Audio quality acceptable
+
+**If Voice Works:**
+- Deploy to staging
+- Monitor real-world performance
+- Decide: keep cloud APIs vs migrate to RunPod
+
+**If Voice Needs Work:**
+- Iterate on prompts/settings
+- Tune LLM temperature
+- Adjust TTS voice/speed
+- Fix any latency issues
+
+### Session Time
+- ~25 minutes (cloud API integration)
+
+### Impact
+**Time to test voice conversation:**
+- Before: ~2 hours (RunPod setup + model downloads)
+- After: ~10 minutes (API keys + config)
+- **12x faster path to validation** ✅
+
+**READY FOR USER VOICE TESTING** ✅
